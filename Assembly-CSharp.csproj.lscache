@@ -71,8 +71,10 @@ Assets/
    EnemyManager.cs
    MapManager.cs
    ParticleManager.cs
+   ParticlePoolManager.cs
    PlayerManager.cs
    TileManager.cs
+  Particle/PooledParticle.cs
   Tile/
    TileController.cs
    TileView.cs

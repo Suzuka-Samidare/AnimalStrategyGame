@@ -11,7 +11,7 @@ public class UnitController : MonoBehaviour
     private UnitAnimation _animation;
     private AttackManager _attackManager;
     private MapManager _mapManager;
-    private ParticleManager _particleMnager;
+    private ParticlePoolManager _particlePoolMnager;
     private CameraMovement _cameraMovement;
     private FloatingTextPresenter _floatingTextPresenter;
 
@@ -23,7 +23,7 @@ public class UnitController : MonoBehaviour
         _animation = GetComponent<UnitAnimation>();
         _attackManager = AttackManager.Instance;
         _mapManager = MapManager.Instance;
-        _particleMnager = ParticleManager.Instance;
+        _particlePoolMnager = ParticlePoolManager.Instance;
         _cameraMovement = CameraMovement.Instance;
         _floatingTextPresenter = FloatingTextPresenter.Instance;
     }
@@ -66,19 +66,16 @@ public class UnitController : MonoBehaviour
         UpdateHp(-power);
         // 攻撃対象へカメラ移動
         _cameraMovement.SetDestination(new Vector3(tileTransform.position.x, 1, tileTransform.position.z));
+        // Explosionパーティクル演出
+        _particlePoolMnager.SpawnParticle(tileTransform.position + Vector3.up, Quaternion.identity);
         // HP変化に応じてダメージ表現
         if (Mathf.Approximately(previousHp, _stats.hp))
         {
-            // DEBUG ==========================================================
-            _particleMnager.PlayExplosion(tileTransform.position + Vector3.up);
-            _animation.PlayOnce(AnimationName.Hit);
-            // DEBUG ==========================================================
             await _floatingTextPresenter.SpawnDamageAsync(tileTransform, 0);
         }
         else
         {
-            _particleMnager.PlayExplosion(tileTransform.position + Vector3.up);
-            _animation.PlayOnce(AnimationName.Hit);
+            _animation?.PlayOnce(AnimationName.Hit);
             await _floatingTextPresenter.SpawnDamageAsync(tileTransform, power);
         }
         // HPが0の場合、気絶処理を実行

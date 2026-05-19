@@ -3969,7 +3969,7 @@ GameObject:
   - component: {fileID: 729539455}
   - component: {fileID: 729539456}
   m_Layer: 0
-  m_Name: ParticleManager
+  m_Name: ParticlePoolManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3999,11 +3999,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 729539454}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1db0dd1d1b3f8554984f1f2278d0e98f, type: 3}
+  m_Script: {fileID: 11500000, guid: b52959a9132164b458955b3a08c5d0e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _explosionPrefab: {fileID: 8465415318575082616, guid: 7d3fe8a1536920c4eb050869d5603df2,
-    type: 3}
+  _prefab: {fileID: 3668539132742385933, guid: 7d3fe8a1536920c4eb050869d5603df2, type: 3}
+  _collectionCheck: 1
+  _defaultCapacity: 12
+  _maxSize: 12
 --- !u!1 &732880339
 GameObject:
   m_ObjectHideFlags: 0
@@ -7230,6 +7232,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1069207091}
   m_CullTransparentMesh: 1
+--- !u!1 &1104423495
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1104423496}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1104423496
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1104423495}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1556905234}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1151936931
 GameObject:
   m_ObjectHideFlags: 0
@@ -9971,7 +10004,7 @@ MonoBehaviour:
   isDirty: 0
   PlayerHqCount: 0
   EnemyHqCount: 0
-  maxHqCount: 2
+  maxHqCount: 18
 --- !u!1 &1556905233
 GameObject:
   m_ObjectHideFlags: 0
@@ -10013,6 +10046,7 @@ Transform:
   - {fileID: 2084827200}
   - {fileID: 66366370}
   - {fileID: 729539455}
+  - {fileID: 1104423496}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1580047836
