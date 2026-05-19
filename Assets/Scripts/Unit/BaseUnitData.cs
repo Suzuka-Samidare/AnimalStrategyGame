@@ -2,6 +2,20 @@ using System;
 using UnityEngine;
 using MapId = MapManager.MapId;
 
+public enum UnitType
+{
+    Calling = 0,
+    Headquarter = 1,
+    Colobus = 2,
+    Gecko = 3,
+    Herring = 4,
+    Muskrat = 5,
+    Pudu = 6,
+    Sparrow = 7,
+    Squid = 8,
+    Taipan = 9,
+}
+
 public enum AttackType
 {
     Single,     // 単体
@@ -20,7 +34,8 @@ public struct AttackRange
 [Serializable]
 public struct UnitProfile
 {
-    [Tooltip("ID")] public MapId id;
+    [Tooltip("マップID")] public MapId id;
+    [Tooltip("ユニットID")] public UnitType unitType;
     [Tooltip("ユニット名")] public string unitName;
     [Tooltip("最大耐久値")] public float maxHp;
     [Tooltip("攻撃の可否")] public bool canAttack;
@@ -30,7 +45,6 @@ public struct UnitProfile
     [Tooltip("攻撃の種類")] public AttackType atkType;
     [Tooltip("範囲攻撃の距離")] public AttackRange atkRange;
     // [Tooltip("範囲攻撃の距離")] public int areaAttackRange;
-
 }
 
 // 右クリックメニューからアセットを作成するための属性
@@ -43,6 +57,7 @@ public class BaseUnitData : ScriptableObject
     public UnitProfile callingProfile = new UnitProfile
     {
         id = MapId.Calling,
+        unitType = UnitType.Calling,
         unitName = "",
         maxHp = 10.0f,
         canAttack = false,

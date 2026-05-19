@@ -1,8 +1,8 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool; // これを使う！
+using Cysharp.Threading.Tasks;
 
-public class ParticlePoolManager : MonoBehaviour
+public class ParticlePoolManager : MonoBehaviour, IInitializable
 {
     public static ParticlePoolManager Instance { get; private set; }
 
@@ -12,7 +12,7 @@ public class ParticlePoolManager : MonoBehaviour
     [Header("プール設定")]
     [SerializeField] private PooledParticle _prefab;
     [SerializeField] private bool _collectionCheck = true;
-    [SerializeField] private int _defaultCapacity = 12;
+    [SerializeField] private int _defaultCapacity = 10;
     [SerializeField] private int _maxSize = 12;
 
     private void Awake()
@@ -25,10 +25,33 @@ public class ParticlePoolManager : MonoBehaviour
             OnTakeFromPool, //第2関数：プールに使用していないオブジェクトがある場合はプールから出す。SetActive(true)する
             OnReturnedToPool, //第3関数：プールに返却する
             OnDestroyPoolObject, //第4関数：プールの許容量を超えた時にオブジェクトを削除する
-            _collectionCheck, //既にプールにあるオブジェトを追加した場合に例外とするか。エディタでのみ実行される
-            _defaultCapacity, //初期のプールサイズ
-            _maxSize //最大プールサイズ
+            collectionCheck: _collectionCheck, //既にプールにあるオブジェトを追加した場合に例外とするか。エディタでのみ実行される
+            defaultCapacity: _defaultCapacity, //初期のプールサイズ
+            maxSize: _maxSize //最大プールサイズ
         );
+    }
+  
+    public async UniTask Initialize()
+    {
+        PreWarmPool();
+        await UniTask.CompletedTask;
+    }
+
+    private void PreWarmPool()
+    {
+        PooledParticle[] tempArray = new PooledParticle[_defaultCapacity];
+
+        // いったん全部Getして生成させる
+        for (int i = 0; i < _defaultCapacity; i++)
+        {
+            tempArray[i] = _pool.Get();
+        }
+
+        // すぐにプールに戻すことで「未使用のストック」にする！
+        for (int i = 0; i < _defaultCapacity; i++)
+        {
+            _pool.Release(tempArray[i]);
+        }
     }
 
     // 1. 新しくインスタンスを作る

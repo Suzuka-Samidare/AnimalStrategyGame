@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   profile:
     id: 3
+    unitType: 3
     unitName: Gecko
     maxHp: 50
     canAttack: 1
@@ -25,7 +26,8 @@ MonoBehaviour:
       min: 0
       max: 0
   callingProfile:
-    id: 0
+    id: 99
+    unitType: 0
     unitName: Gecko
     maxHp: 10
     canAttack: 0

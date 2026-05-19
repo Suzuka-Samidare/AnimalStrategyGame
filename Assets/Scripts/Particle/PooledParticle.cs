@@ -12,8 +12,8 @@ public class PooledParticle : MonoBehaviour
         // パーティクルオブジェクトにあるコンポーネントを取得
         _particleSystem = GetComponent<ParticleSystem>();
         
-        // インスペクターで「Stop Action」を「None」にしておくのがポイント！
-        // スクリプト側で終了を検知してプールに戻すよ
+        // 「Stop Action」を「None」にしておく
+        // スクリプト側のOnParticleSystemStoppedで終了を検知してプールに戻す
         var main = _particleSystem.main;
         main.stopAction = ParticleSystemStopAction.None;
     }
