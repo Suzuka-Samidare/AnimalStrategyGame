@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   profile:
     id: 8
+    unitType: 8
     unitName: Squid
     maxHp: 100
     canAttack: 1
@@ -26,6 +27,7 @@ MonoBehaviour:
       max: 2
   callingProfile:
     id: 99
+    unitType: 0
     unitName: Squid
     maxHp: 10
     canAttack: 0

@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   profile:
     id: 1
+    unitType: 1
     unitName: HQ
     maxHp: 1
     canAttack: 0
@@ -26,6 +27,7 @@ MonoBehaviour:
       max: 0
   callingProfile:
     id: 99
+    unitType: 0
     unitName: HQ
     maxHp: 10
     canAttack: 0

@@ -27,11 +27,17 @@ public class CallingUnitController : MonoBehaviour
 
     public void StartTimer(float callTime, Action onCompleteCallback)
     {
-        _timer.OnTimerComplete += () =>
+        // ローカル変数で宣言して、ラムダ式内でイベント解除するActionを参照できるようにする
+        Action wrapperHandler = null;
+        // 本来の処理及びイベント解除を合わせたラッパー
+        wrapperHandler = () =>
         {
-            // Debug.Log("アラーム");
             onCompleteCallback?.Invoke();
+            _timer.OnTimerComplete -= wrapperHandler;
+            _timer.Reset();
         };
+        // イベントの登録
+        _timer.OnTimerComplete += wrapperHandler;
         _timer.Start(callTime);
     }
 }

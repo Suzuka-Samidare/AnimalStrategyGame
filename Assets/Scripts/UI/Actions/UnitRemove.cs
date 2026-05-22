@@ -1,15 +1,26 @@
 using System;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class UnitRemove : MonoBehaviour, IButtonAction
 {
+    [Header("Refs")]
+    private TileManager _tileManager;
+    private UnitSpawnManager _unitSpawnManager;
+
+    private void Start()
+    {
+        _tileManager = TileManager.Instance;
+        _unitSpawnManager = UnitSpawnManager.Instance;
+    }
+
     public void Execute() {
         try
         {
             GameManager.Instance.IsLoading = true;
             Debug.Log($"タイル更新開始");
 
-            TileManager.Instance.ClearSelectedTileOnUnit();
+            _unitSpawnManager.DespawnUnit(_tileManager.selectedTileController);
 
             Debug.Log("タイル更新成功");
         }

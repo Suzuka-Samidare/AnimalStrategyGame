@@ -10119,7 +10119,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerPool: {fileID: 1219966929}
-  enemyPool: {fileID: 0}
+  enemyPool: {fileID: 888479909}
 --- !u!1 &1533495490
 GameObject:
   m_ObjectHideFlags: 0
@@ -10174,7 +10174,7 @@ MonoBehaviour:
   isDirty: 0
   PlayerHqCount: 0
   EnemyHqCount: 0
-  maxHqCount: 3
+  maxHqCount: 2
 --- !u!1 &1556905233
 GameObject:
   m_ObjectHideFlags: 0
