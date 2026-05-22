@@ -60,7 +60,7 @@ public class EnemyManager : MonoBehaviour, IInitializable
         
         foreach (TileController tile in targetTiles)
         {
-            tile.SpawnUnit(_hqData);
+            UnitSpawnManager.Instance.SpawnUnit(tile, _hqData);
         }
     }
 }
