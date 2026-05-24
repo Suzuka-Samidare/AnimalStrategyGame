@@ -123,4 +123,19 @@ public class UnitSpawnManager : MonoBehaviour
         // マップデータの更新を促す
         _mapManager.isDirty = true;
     }
+
+    public void DespawnAllUnit()
+    {
+        for (int y = 0; y < _mapManager.mapHeight; y++)
+        {
+            for (int x = 0; x < _mapManager.mapWidth; x++)
+            {
+                TileController tile = _mapManager.playerMapData[x, y];
+                if (tile.unitObject)
+                {
+                    DespawnUnit(tile);
+                }
+            }
+        }
+    }
 }

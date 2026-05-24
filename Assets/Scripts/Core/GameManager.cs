@@ -112,25 +112,10 @@ public class GameManager : MonoBehaviour, IInitializable
                 },
                 onCancel: () =>
                 {
-                    DestroyAllUnit();
+                    UnitSpawnManager.Instance.DespawnAllUnit();
                     _infomationController.Open(initMessage);
                 }
             ); 
-        }
-    } 
-
-    // TODO: MapManagerに置くべきか検討する
-    private void DestroyAllUnit()
-    {
-        for (int y = 0; y < _mapManager.mapHeight; y++)
-        {
-            for (int x = 0; x < _mapManager.mapWidth; x++)
-            {
-                if (_mapManager.playerMapData[x, y].unitObject)
-                {
-                    _mapManager.playerMapData[x, y].DestroyUnit();
-                }
-            }
         }
     }
 
