@@ -143,9 +143,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7346bc9ba0a90e843979f431ba353e30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseColor: {r: 0.61320746, g: 0.64655167, b: 1, a: 1}
+  mainColor: {r: 0.6117647, g: 0.64705884, b: 1, a: 1}
   blinkAllyColor: {r: 0, g: 1, b: 0.13680005, a: 1}
   blinkEnemyColor: {r: 1, g: 0, b: 0, a: 1}
   invisibleColor: {r: 0.6117647, g: 0.64705884, b: 1, a: 1}
+  stripedColor: {r: -29.388235, g: -29.352942, b: -29, a: 1}
   currentBaseColor: {r: 0, g: 0, b: 0, a: 0}
   currentTopColor: {r: 0, g: 0, b: 0, a: 0}

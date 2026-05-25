@@ -1,18 +1,24 @@
 using System;
+using System.ComponentModel;
 using UnityEngine;
 using Phase = GameManager.Phase;
 
 public class TileView : MonoBehaviour
 {
-    [Header("ビジュアル関連")]
-    [Tooltip("ベース色")]
-    public Color baseColor;
+    [Header("タイル色設定")]
+    [Tooltip("タイルベース色")]
+    public Color mainColor;
     [Tooltip("明滅色（自マップ用）")]
     public Color blinkAllyColor;
     [Tooltip("明滅色（敵マップ用）")]
     public Color blinkEnemyColor;
     [Tooltip("不可視状態時の色")]
     public Color invisibleColor;
+
+    [Tooltip("ストライプ色"), SerializeField]
+    private Color stripedColor;
+    [Tooltip("最終タイル色")]
+    private Color baseColor;
 
     [Header("状態管理")]
     [SerializeField, Tooltip("現在のベースカラー")]
@@ -27,8 +33,6 @@ public class TileView : MonoBehaviour
     // シェーダーのプロパティ名（Shader GraphのReferenceで設定したもの）
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
     private static readonly int TopColorId = Shader.PropertyToID("_TopColor");
-
-    [Header("Refs")]
     private GameManager _gameManager;
     private TileController _tileController;
 
@@ -36,21 +40,17 @@ public class TileView : MonoBehaviour
     {
         objectRenderer = GetComponent<Renderer>();
         propBlock = new MaterialPropertyBlock();
+        _tileController = GetComponent<TileController>();
 
-        // 初期状態のセット
-        currentBaseColor = baseColor;
-        currentTopColor = baseColor;
+        if (_tileController == null) throw new Exception("TileControllerがありません。");
     }
 
     private void Start()
     {
         _gameManager = GameManager.Instance;
-        _tileController = GetComponent<TileController>();
-
         if (_gameManager == null) throw new Exception("GameManagerがありません。");
-        if (_tileController == null) throw new Exception("TileControllerがありません。");
 
-        RefreshVisual();
+        InitializeTileColor();
     }
 
     private void Update()
@@ -72,6 +72,32 @@ public class TileView : MonoBehaviour
             Blink(blinkEnemyColor);
             return;
         }
+    }
+
+    private void OnValidate()
+    {
+        // ストライプ色の計算
+        stripedColor = mainColor * 0.9f;
+        stripedColor.a = 1f;
+    }
+
+    private void InitializeTileColor()
+    {
+        Debug.Log((_tileController.gridPos.x + _tileController.gridPos.y) % 2);
+
+        if ((_tileController.gridPos.x + _tileController.gridPos.y) % 2 == 0)
+        {
+            baseColor = mainColor;
+        }
+        else
+        {
+            baseColor = stripedColor;
+        }
+
+        // 初期状態のセット
+        currentBaseColor = baseColor;
+        currentTopColor = baseColor;
+        ApplyColors();
     }
 
     public void RefreshVisual()
