@@ -8,6 +8,7 @@ public class UnitController : MonoBehaviour
     [Header("Refs")]
     private UnitStats _stats;
     private UnitProfile _profile;
+    private AttackUnitController _attackUnitController;
     private UnitAnimation _animation;
     private AttackManager _attackManager;
     private MapManager _mapManager;
@@ -19,44 +20,18 @@ public class UnitController : MonoBehaviour
     private void Start()
     {
         _stats = GetComponent<UnitStats>();
-        _profile = GetComponent<UnitStats>().profile;
+        _profile = _stats.profile;
         _animation = GetComponent<UnitAnimation>();
         _attackManager = AttackManager.Instance;
         _mapManager = MapManager.Instance;
         _particlePoolMnager = ParticlePoolManager.Instance;
         _cameraMovement = CameraMovement.Instance;
         _floatingTextPresenter = FloatingTextPresenter.Instance;
-    }
-    
-    // TODO: 攻撃出来ないユニットをどうするか
-    public List<Vector2Int> GetTargetTilePositions(Vector2Int targetPos)
-    {
-        List<Vector2Int> tilePositions = new List<Vector2Int>();
 
-        // 単体攻撃ならそのマスだけ
-        if (_profile.atkType == AttackType.Single)
+        if (TryGetComponent<AttackUnitController>(out var attackUnitController))
         {
-            tilePositions.Add(targetPos);
-            return tilePositions;
+            _attackUnitController = attackUnitController;
         }
-
-        // 範囲攻撃ならTileRangeUtilを使ってリストを埋める
-        switch (_profile.atkType)
-        {
-            case AttackType.Square:
-                TileRangeUtil.ForEachSquareRange(targetPos, _profile.atkRange.max, 
-                    (pos) => tilePositions.Add(pos));
-                break;
-            case AttackType.Manhattan:
-                TileRangeUtil.ForEachManhattanRange(targetPos, _profile.atkRange.max, 
-                    (pos) => tilePositions.Add(pos));
-                break;
-            case AttackType.Cross:
-                // 十字範囲が必要ならここにUtilを追加して呼ぶ感じ！
-                break;
-        }
-
-        return tilePositions;
     }
 
     public async Task ApplyDamageAsync(float power, Transform tileTransform) {
