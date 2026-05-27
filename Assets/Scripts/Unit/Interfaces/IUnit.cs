@@ -1,28 +1,28 @@
 // 共通
 public interface IUnit
 {
-    UnitStats BaseStats { get; }
-    UnitController BaseController { get; }
+    UnitStats Stats { get; }
+    UnitController Controller { get; }
 }
 
 // 攻撃系ロール
 public interface IAttackable
 {
-    AttackUnitStats AttackStats { get; }
-    AttackUnitController AttackController { get; }
+    AttackUnitStats Stats { get; }
+    AttackUnitController Controller { get; }
 }
 
 // 防衛系ロール
 public interface IDefendable
 {
-    DefenceUnitStats DefenceStats { get; }
+    DefenceUnitStats Stats { get; }
     // DefenceUnitController DefenceController { get; }
 }
 
 // サポート系ロール
 public interface ISupportable
 {
-    SupportUnitStats SupportStats { get; }
+    SupportUnitStats Stats { get; }
     // SupportUnitController SupportController { get; }
 }
 

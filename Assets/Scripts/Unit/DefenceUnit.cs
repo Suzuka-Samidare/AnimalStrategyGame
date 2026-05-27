@@ -8,8 +8,13 @@ public class DefenceUnit : MonoBehaviour, IUnit, IDefendable
     [SerializeField] private DefenceUnitStats defenceStats;
     // [SerializeField] private DefenceUnitController defenceController;
 
-    public UnitStats BaseStats => baseStats;
-    public UnitController BaseController => baseController;
-    public DefenceUnitStats DefenceStats => defenceStats;
+    // public UnitStats BaseStats => baseStats;
+    // public UnitController BaseController => baseController;
+    // public DefenceUnitStats DefenceStats => defenceStats;
     // public DefenceUnitController DefenceController => defenceController;
+
+    UnitStats IUnit.Stats => baseStats;
+    UnitController IUnit.Controller => baseController;
+    DefenceUnitStats IDefendable.Stats => defenceStats;
+    // DefenceUnitController IDefendable.Controller => defenceController;
 }

@@ -8,8 +8,13 @@ public class SupportUnit : MonoBehaviour, IUnit, ISupportable
     [SerializeField] private SupportUnitStats supportStats;
     // [SerializeField] private SupportUnitController supportController;
 
-    public UnitStats BaseStats => baseStats;
-    public UnitController BaseController => baseController;
-    public SupportUnitStats SupportStats => supportStats;
+    // public UnitStats BaseStats => baseStats;
+    // public UnitController BaseController => baseController;
+    // public SupportUnitStats SupportStats => supportStats;
     // public SupportUnitController SupportController => supportController;
+
+    UnitStats IUnit.Stats => baseStats;
+    UnitController IUnit.Controller => baseController;
+    SupportUnitStats ISupportable.Stats => supportStats;
+    // SupportUnitController ISupportable.Controller => supportController;
 }
