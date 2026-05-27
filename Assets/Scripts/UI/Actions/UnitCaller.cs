@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class UnitCaller : MonoBehaviour, IButtonAction {
     [SerializeField, Tooltip("ユニットデータ")]
-    private BaseUnitData unitData;
+    private UnitData unitData;
 
     [Header("Refs")]
     private TileManager _tileManager;

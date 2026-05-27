@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class UnitUpdateButton : BaseButton
 {
-    // public BaseUnitData unitData;
+    // public UnitData unitData;
 
     // private DialogController _dialogController;
     // private TileManager _tileManager;

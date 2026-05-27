@@ -27,7 +27,7 @@ public class UnitSpawnManager : MonoBehaviour
     /// <summary>
     /// プールからユニットの呼び出し
     /// </summary>
-    public void SpawnUnit(TileController tile, BaseUnitData unitData)
+    public void SpawnUnit(TileController tile, UnitData unitData)
     {
         // DEBUG ============================================================
         Debug.Log("SpawnUnit");
@@ -54,7 +54,7 @@ public class UnitSpawnManager : MonoBehaviour
         _mapManager.isDirty = true;
     }
 
-    public void SpawnUnitDelayed(TileController tile, BaseUnitData unitData)
+    public void SpawnUnitDelayed(TileController tile, UnitData unitData)
     {
         // DEBUG ============================================================
         Debug.Log("SpawnUnitDelayed");

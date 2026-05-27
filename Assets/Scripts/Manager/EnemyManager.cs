@@ -8,7 +8,7 @@ public class EnemyManager : MonoBehaviour, IInitializable
     public static EnemyManager Instance;
 
     [SerializeField, Tooltip("本部データ")]
-    private BaseUnitData _hqData;
+    private UnitData _hqData;
 
     [Header("Refs")]
     private MapManager _mapManager;

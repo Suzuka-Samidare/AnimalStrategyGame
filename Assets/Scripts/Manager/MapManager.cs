@@ -175,7 +175,7 @@ public class MapManager : MonoBehaviour, IInitializable
     //             GameObject currentUnit =  playerMapData[x, y].currentUnit;
     //             if (currentUnit != null)
     //             {
-    //                 id = currentUnit.GetComponent<BaseUnitData>().id;
+    //                 id = currentUnit.GetComponent<UnitData>().id;
     //             }
     //             else
     //             {

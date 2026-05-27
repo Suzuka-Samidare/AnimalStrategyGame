@@ -38,37 +38,43 @@ public struct UnitProfile
     [Tooltip("ユニットID")] public UnitType unitType;
     [Tooltip("ユニット名")] public string unitName;
     [Tooltip("最大耐久値")] public float maxHp;
-    [Tooltip("攻撃の可否")] public bool canAttack;
+
+    // TODO: 後で消す
     [Tooltip("攻撃力")] public float power;
     [Tooltip("攻撃消費エネルギー")] public int energy;
-    [Tooltip("攻撃までの時間")] public float atkDelay;
+    [Tooltip("タイムラインへの影響速度")] public float atkDelay;
     [Tooltip("攻撃の種類")] public AttackType atkType;
     [Tooltip("範囲攻撃の距離")] public AttackRange atkRange;
-    // [Tooltip("範囲攻撃の距離")] public int areaAttackRange;
 }
 
-// 右クリックメニューからアセットを作成するための属性
-[CreateAssetMenu(fileName = "BaseUnitData", menuName = "ScriptableObjects/BaseUnitData")]
-public class BaseUnitData : ScriptableObject
-{
-    [Header("本体関連")]
-    [Tooltip("本体ステータス")] public UnitProfile profile;
-    [Tooltip("呼出待ちステータス")]
-    public UnitProfile callingProfile = new UnitProfile
-    {
-        id = MapId.Calling,
-        unitType = UnitType.Calling,
-        unitName = "",
-        maxHp = 10.0f,
-        canAttack = false,
-    };
-    [Tooltip("コスト")] public int cost;
-    [Tooltip("呼出所要時間（秒）")] public float callTime;
 
+// 右クリックメニューからアセットを作成するための属性
+[CreateAssetMenu(fileName = "UnitData", menuName = "ScriptableObjects/UnitData")]
+public class UnitData : ScriptableObject
+{
     [Header("外見設定")]
     [Tooltip("本体オブジェクト")] public GameObject prefab;
     [Tooltip("本体オブジェクトの位置設定")] public Vector3 initPos;
     [Tooltip("呼出待ちオブジェクト")] public GameObject callingPrefab;
+
+    [Header("呼出設定")]
+    [Tooltip("コスト")] public int cost;
+    [Tooltip("呼出所要時間（秒）")] public float callTime;
+
+    [Header("ステータス関連")]
+    [Tooltip("基本ステータス")] public UnitProfile profile;
+    [Tooltip("呼出中ステータス")] public UnitProfile callingProfile;
+
+    protected virtual void Reset()
+    {
+        callingProfile = new UnitProfile
+        {
+            id = MapId.Calling,
+            unitType = UnitType.Calling,
+            unitName = "",
+            maxHp = 10.0f,
+        };
+    }
 
     private void OnValidate()
     {
