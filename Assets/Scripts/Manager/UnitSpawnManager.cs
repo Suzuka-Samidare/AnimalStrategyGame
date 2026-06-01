@@ -49,7 +49,8 @@ public class UnitSpawnManager : MonoBehaviour
         // タイルにユニットオブジェクトを紐づけ
         tile.unitObject = unit;
         // ユニット情報の初期化
-        tile.unitStats.Initialize(unitData.profile);
+        tile.UnitBase.Stats.InitializeBaseStats(unitData.profile);
+        tile.UnitBase.Stats.InitializeRollStats(unitData);
         // マップデータの更新を促す
         _mapManager.isDirty = true;
     }
@@ -76,7 +77,7 @@ public class UnitSpawnManager : MonoBehaviour
         // タイルにユニットオブジェクトを紐づけ
         tile.unitObject = unit;
         // ユニット情報の初期化
-        tile.unitStats.Initialize(unitData.callingProfile);
+        tile.UnitBase.Stats.InitializeBaseStats(unitData.callingProfile);
         // 呼び出し完了時の処理
         Action onCompleteCallback = () =>
         {
@@ -95,7 +96,7 @@ public class UnitSpawnManager : MonoBehaviour
             SpawnUnit(tile, unitData);
         };
         // 呼び出しタイマー開始
-        tile.callingUnitController.StartTimer(unitData.callTime, onCompleteCallback);
+        tile.UnitCallable.Controller.StartTimer(unitData.callTime, onCompleteCallback);
         // マップデータの更新を促す
         _mapManager.isDirty = true;
     }
@@ -104,9 +105,9 @@ public class UnitSpawnManager : MonoBehaviour
     {
         // DEBUG ============================================================
         Debug.Log("DespawnUnit");
-        if (tile.unitStats == null)
+        if (tile.UnitBase.Stats == null)
         {
-            Debug.LogError($"タイルのユニットデータが足りないよ！ stats:{tile.unitStats}, profile:{tile.unitStats?.profile}");
+            Debug.LogError($"タイルのユニットデータが足りないよ！");
             return;
         }
         // DEBUG ============================================================
@@ -114,7 +115,7 @@ public class UnitSpawnManager : MonoBehaviour
         // オーナー情報からプール先の設定
         FactionUnitPool targetPool = (tile.owner == TileOwner.Player) ? playerPool : enemyPool;
         // プール回収するユニットタイプの取得
-        UnitType unitType = tile.unitStats.profile.unitType;
+        UnitType unitType = tile.UnitBase.Stats.profile.unitType;
         // デスポーン処理
         targetPool.Despawn(unitType, tile.unitObject);
         tile.unitObject = null;

@@ -83,8 +83,6 @@ public class TileView : MonoBehaviour
 
     private void InitializeTileColor()
     {
-        Debug.Log((_tileController.gridPos.x + _tileController.gridPos.y) % 2);
-
         if ((_tileController.gridPos.x + _tileController.gridPos.y) % 2 == 0)
         {
             baseColor = mainColor;

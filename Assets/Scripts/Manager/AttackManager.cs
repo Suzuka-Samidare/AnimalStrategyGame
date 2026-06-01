@@ -103,7 +103,7 @@ public class AttackManager : MonoBehaviour, IInitializable
         {
             if (target.isExistUnit)
             {
-                Task damageTask = target.unitController.ApplyDamageAsync(command.Damage, target.transform);
+                Task damageTask = target.UnitBase.Controller.ApplyDamageAsync(command.Damage, target);
                 // あとで一括待機するためにリストに入れておく
                 animationTasks.Add(damageTask);
             }
@@ -123,14 +123,15 @@ public class AttackManager : MonoBehaviour, IInitializable
     /// </summary>
     public void RegisterCommand()
     {
-        UnitProfile profile = _tileManager.selectedTileController.unitStats.profile;
+        UnitProfile profile = _tileManager.selectedTileController.UnitBase.Stats.profile;
+        AttackProfile attackProfile = _tileManager.selectedTileController.UnitAttackable.Stats.profile;
         // 攻撃内容を作成してキューに追加
         AttackCommand newAttack = new AttackCommand(
             _tileManager.selectedTileController.owner,
             profile.unitName,
             new List<TileController>(_tileManager.targetTiles),
-            profile.power,
-            profile.atkDelay
+            attackProfile.power,
+            attackProfile.delay
         );
         _timeline.Add(newAttack);
         _timeline.Sort((a, b) => b.time.CompareTo(a.time));

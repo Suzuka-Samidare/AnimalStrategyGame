@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 1294688600762405301}
   - component: {fileID: 719101085596639704}
   - component: {fileID: 3462580841522748451}
+  - component: {fileID: 1190618585395214496}
   m_Layer: 0
   m_Name: Headquarter
   m_TagString: Untagged
@@ -121,19 +122,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2117726ca5f76341ad20d5b32151b19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _uuid: 
   profile:
     id: 0
+    unitType: 0
     unitName: 
     maxHp: 0
-    canAttack: 0
-    power: 0
-    energy: 0
-    atkDelay: 0
-    atkType: 0
-    atkRange:
-      min: 0
-      max: 0
   hp: 0
 --- !u!114 &3462580841522748451
 MonoBehaviour:
@@ -147,3 +140,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88a4fe2ee3193364991a0b9542994a2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1190618585395214496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9160871832150813489}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d26dbcd3b8eab64cbd1acf79c976f3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseStats: {fileID: 719101085596639704}
+  baseController: {fileID: 3462580841522748451}

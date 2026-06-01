@@ -699,9 +699,12 @@ GameObject:
   - component: {fileID: 8648425310868573238}
   - component: {fileID: 4105349500978914225}
   - component: {fileID: 8033698545883803558}
+  - component: {fileID: -7254113830022568613}
   - component: {fileID: -560386582057373909}
-  - component: {fileID: -1950370414966211802}
   - component: {fileID: 2584538685240379806}
+  - component: {fileID: -1950370414966211802}
+  - component: {fileID: 3391591611000238925}
+  - component: {fileID: 2424578686958789248}
   m_Layer: 0
   m_Name: Squid
   m_TagString: Unit
@@ -781,6 +784,22 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &-7254113830022568613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7511180232019162148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 916b0dde96676524bb3abef71c6b13f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseStats: {fileID: -560386582057373909}
+  baseController: {fileID: 2584538685240379806}
+  attackStats: {fileID: 3391591611000238925}
+  attackController: {fileID: 2424578686958789248}
 --- !u!114 &-560386582057373909
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -793,19 +812,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2117726ca5f76341ad20d5b32151b19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _uuid: 
   profile:
     id: 8
+    unitType: 0
     unitName: Squid
     maxHp: 100
-    canAttack: 1
-    power: 2
-    energy: 0
-    atkType: 2
-    atkRange:
-      min: 0
-      max: 2
   hp: 0
+--- !u!114 &2584538685240379806
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7511180232019162148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88a4fe2ee3193364991a0b9542994a2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &-1950370414966211802
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -822,7 +846,7 @@ MonoBehaviour:
     m_value: 
   isBusyAnimating: 0
   isPause: 0
---- !u!114 &2584538685240379806
+--- !u!114 &3391591611000238925
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -831,7 +855,27 @@ MonoBehaviour:
   m_GameObject: {fileID: 7511180232019162148}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 88a4fe2ee3193364991a0b9542994a2d, type: 3}
+  m_Script: {fileID: 11500000, guid: 26d7ed6a7661c5243bb5f52d449a230b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  profile:
+    power: 0
+    energy: 0
+    delay: 0
+    style: 0
+    range:
+      min: 0
+      max: 0
+--- !u!114 &2424578686958789248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7511180232019162148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69303f5944512cf419f24db93810cbf3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &7535825155527325181

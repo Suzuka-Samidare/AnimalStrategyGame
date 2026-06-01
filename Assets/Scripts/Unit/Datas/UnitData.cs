@@ -40,11 +40,11 @@ public struct UnitProfile
     [Tooltip("最大耐久値")] public float maxHp;
 
     // TODO: 後で消す
-    [Tooltip("攻撃力")] public float power;
-    [Tooltip("攻撃消費エネルギー")] public int energy;
-    [Tooltip("タイムラインへの影響速度")] public float atkDelay;
-    [Tooltip("攻撃の種類")] public AttackType atkType;
-    [Tooltip("範囲攻撃の距離")] public AttackRange atkRange;
+    // [Tooltip("攻撃力")] public float power;
+    // [Tooltip("攻撃消費エネルギー")] public int energy;
+    // [Tooltip("タイムラインへの影響速度")] public float atkDelay;
+    // [Tooltip("攻撃の種類")] public AttackType atkType;
+    // [Tooltip("範囲攻撃の距離")] public AttackRange atkRange;
 }
 
 

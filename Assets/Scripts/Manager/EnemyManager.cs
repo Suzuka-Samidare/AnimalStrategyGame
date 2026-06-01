@@ -23,6 +23,7 @@ public class EnemyManager : MonoBehaviour, IInitializable
         {
             Destroy(gameObject);
         }
+        if (_hqData == null) throw new System.Exception("HQデータが設定されていません");
     }
 
     private void ResolveDependencies()

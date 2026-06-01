@@ -26,3 +26,8 @@ public interface ISupportable
     // SupportUnitController SupportController { get; }
 }
 
+public interface ICallable
+{
+    CallingUnitController Controller { get; }
+}
+

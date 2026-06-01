@@ -109,12 +109,12 @@ public class TileManager : MonoBehaviour, IInitializable
             ClearTargetTiles();
         }
 
-        if (!selectedTileController.unitController)
+        if (selectedTileController.UnitAttackable == null)
         {
             throw new Exception("UnitControllerがありません");
         }
 
-        List<Vector2Int> tilePositions = selectedTileController.unitController.GetTargetTilePositions(targetPos);
+        List<Vector2Int> tilePositions = selectedTileController.UnitAttackable.Controller.GetTargetTilePositions(targetPos);
 
         foreach (Vector2Int pos in tilePositions)
         {
@@ -267,13 +267,14 @@ public class TileManager : MonoBehaviour, IInitializable
 
     public void GetSelectedTileUnitDetail()
     {
-        if (selectedTileController.unitStats)
+        IUnit unitBase = selectedTileController.UnitBase;
+        if (unitBase != null)
         {
             UnitDetailController.Instance.Open(
-                selectedTileController.unitStats.profile.unitName,
-                selectedTileController.unitStats.profile.maxHp,
-                selectedTileController.unitStats.hp,
-                selectedTileController.unitMapId == MapId.Calling
+                unitBase.Stats.profile.unitName,
+                unitBase.Stats.profile.maxHp,
+                unitBase.Stats.hp,
+                unitBase.Stats.profile.id == MapId.Calling
             );
         }
         else

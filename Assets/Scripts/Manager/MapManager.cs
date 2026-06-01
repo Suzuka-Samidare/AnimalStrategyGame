@@ -199,9 +199,9 @@ public class MapManager : MonoBehaviour, IInitializable
         {
             for (int x = 0; x < mapWidth; x++)
             {
-                UnitStats unitStats = mapData[x, y].unitStats;
-                // nullチェックをスマートに書くのがギャル流！
-                if (unitStats != null && unitStats.profile.id == MapId.Headquarter)
+                IUnit unitBase = mapData[x, y].UnitBase;
+
+                if (unitBase != null && unitBase.Stats.profile.id == MapId.Headquarter)
                 {
                     count++;
                 }

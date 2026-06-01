@@ -25,12 +25,15 @@ public class UnitStats : MonoBehaviour
         _uuid = Guid.NewGuid().ToString();
     }
 
-    public void Initialize(UnitData unitData)
+    public void InitializeBaseStats(UnitProfile profile)
     {
         // 基本ステータスの初期化
-        this.profile = unitData.profile;
+        this.profile = profile;
         this.hp = profile.maxHp;
+    }
 
+    public void InitializeRollStats(UnitData unitData)
+    {
         // タイプ別ステータスの初期化
         if (unitData is AttackUnitData attackUnitData)
         {
@@ -49,11 +52,11 @@ public class UnitStats : MonoBehaviour
         }
     }
 
-    public void Initialize(UnitProfile profile)
-    {
-        this.profile = profile;
-        hp = profile.maxHp;
-    }
+    // public void Initialize(UnitProfile profile)
+    // {
+    //     this.profile = profile;
+    //     hp = profile.maxHp;
+    // }
 
     // TODO: タイプ別静的ステータスへのアクセス方法を考える
 }
