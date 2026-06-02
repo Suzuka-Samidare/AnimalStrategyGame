@@ -12,12 +12,12 @@ public class TileView : MonoBehaviour
     public Color blinkAllyColor;
     [Tooltip("明滅色（敵マップ用）")]
     public Color blinkEnemyColor;
-    [Tooltip("不可視状態時の色")]
-    public Color invisibleColor;
+    // [Tooltip("不可視状態時の色")]
+    // public Color invisibleColor;
 
     [Tooltip("ストライプ色"), SerializeField]
     private Color stripedColor;
-    [Tooltip("最終タイル色")]
+    [Tooltip("最終タイル色"), SerializeField]
     private Color baseColor;
 
     [Header("状態管理")]
@@ -102,33 +102,37 @@ public class TileView : MonoBehaviour
     {
         if (_tileController.isSelected) return;
 
-        if (_tileController.owner == TileController.TileOwner.Enemy && !_tileController.isRevealed)
-        {
-            currentBaseColor = invisibleColor;
-            currentTopColor = invisibleColor;
-        }
-        else
-        {
-            currentBaseColor = baseColor;
-            currentTopColor = baseColor;
-        }     
+        // if (_tileController.owner == TileController.TileOwner.Enemy && !_tileController.isRevealed)
+        // {
+        //     currentBaseColor = invisibleColor;
+        //     currentTopColor = invisibleColor;
+        // }
+        // else
+        // {
+        //     currentBaseColor = baseColor;
+        //     currentTopColor = baseColor;
+        // }
+
+        currentBaseColor = baseColor;
+        currentTopColor = baseColor;
         ApplyColors();
     }
 
     private void Blink(Color blinkColor)
     {
         float time = Mathf.PingPong(Time.time, 1.0f);
-        Color normalColor;
-        if (_tileController.owner == TileController.TileOwner.Enemy && !_tileController.isRevealed)
-        {
-            normalColor = invisibleColor;
-        }
-        else
-        {
-            normalColor = baseColor;
-        }  
 
-        currentTopColor = Color.Lerp(normalColor, blinkColor, time);
+        // Color normalColor;
+        // if (_tileController.owner == TileController.TileOwner.Enemy && !_tileController.isRevealed)
+        // {
+        //     normalColor = invisibleColor;
+        // }
+        // else
+        // {
+        //     normalColor = baseColor;
+        // }  
+
+        currentTopColor = Color.Lerp(baseColor, blinkColor, time);
 
         ApplyColors();
     }
