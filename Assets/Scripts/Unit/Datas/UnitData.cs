@@ -21,7 +21,8 @@ public enum AttackType
     Single,     // 単体
     Square,     // 正方形
     Manhattan,  // 菱形
-    Cross       // 十字
+    Cross,      // 十字
+    Test,
 }
 
 [Serializable]

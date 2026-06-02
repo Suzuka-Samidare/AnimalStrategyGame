@@ -101,6 +101,7 @@ public class AttackManager : MonoBehaviour, IInitializable
 
         foreach (var target in command.Targets)
         {
+            // if ()
             if (target.isExistUnit)
             {
                 Task damageTask = target.UnitBase.Controller.ApplyDamageAsync(command.Damage, target);

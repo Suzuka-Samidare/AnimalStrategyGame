@@ -34,9 +34,17 @@ public class AttackUnitController : MonoBehaviour
                 TileRangeUtil.ForEachManhattanRange(targetPos, _attackProfile.range.max, 
                     (pos) => tilePositions.Add(pos));
                 break;
-            case AttackType.Cross:
-                // 十字範囲が必要ならここにUtilを追加して呼ぶ感じ！
+            // DEBUG =======================================================
+            case AttackType.Test:
+                TileRangeUtil.GetForwardVerticalRange(
+                    targetPos,
+                    MapManager.Instance.mapHeight,
+                    1,
+                    (pos) => tilePositions.Add(pos)
+                );
                 break;
+            // DEBUG =======================================================
+
         }
 
         return tilePositions;

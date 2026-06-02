@@ -3126,6 +3126,7 @@ RectTransform:
   - {fileID: 255601402}
   - {fileID: 1252536473}
   - {fileID: 1691179298}
+  - {fileID: 2103718874}
   m_Father: {fileID: 1519644760}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -13079,7 +13080,6 @@ RectTransform:
   m_Children:
   - {fileID: 1019155743}
   - {fileID: 1586720348}
-  - {fileID: 2103718874}
   m_Father: {fileID: 1519644760}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -13193,7 +13193,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 837865291}
-  m_Father: {fileID: 2081599333}
+  m_Father: {fileID: 595355815}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -13631,7 +13631,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4769bf1cbfb97d4790512f21b2293ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  unitData: {fileID: 11400000, guid: da01e203107eb0840bd7ef81b1c465c4, type: 2}
+  unitData: {fileID: 11400000, guid: ae98625eb7abc014e81709dfbad9db3d, type: 2}
 --- !u!114 &2123231254
 MonoBehaviour:
   m_ObjectHideFlags: 0

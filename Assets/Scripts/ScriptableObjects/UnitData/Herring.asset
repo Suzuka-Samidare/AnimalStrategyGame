@@ -10,29 +10,29 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ec6c5cc1255daf74fad2cbb1b15c1c3d, type: 3}
-  m_Name: Squid
+  m_Name: Herring
   m_EditorClassIdentifier: 
-  prefab: {fileID: 7511180232019162148, guid: 818c5a1ba0d9810439f11299463f2294, type: 3}
+  prefab: {fileID: 1342889782683910774, guid: 4aa01f1d5c72d4e47a8c44e612a6b6fc, type: 3}
   initPos: {x: 0, y: 0.5, z: 0}
   callingPrefab: {fileID: 7977106843427714197, guid: f62d4831da787274cba79bba3a15b301,
     type: 3}
   cost: 0
-  callTime: 3
+  callTime: 2
   profile:
-    id: 8
-    unitType: 8
-    unitName: Squid
+    id: 4
+    unitType: 4
+    unitName: Herring
     maxHp: 10
   callingProfile:
     id: 99
     unitType: 0
-    unitName: Squid
-    maxHp: 10
+    unitName: Herring
+    maxHp: 2
   attackProfile:
-    power: 5
+    power: 0
     energy: 0
     delay: 0
-    style: 1
+    style: 3
     range:
       min: 0
-      max: 1
+      max: 0
