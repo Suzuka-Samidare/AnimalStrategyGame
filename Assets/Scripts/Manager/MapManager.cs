@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using System.Collections.Generic;
 
 public class MapManager : MonoBehaviour, IInitializable
 {
@@ -211,5 +211,56 @@ public class MapManager : MonoBehaviour, IInitializable
         if (count > maxHqCount) throw new Exception("Headquarters unit limit exceeded.");
         
         return count;
+    }
+
+    /// <summary>
+    /// 敵マップ上でユニット配置されていないタイルの取得
+    /// </summary>
+    public List<TileController> GetEnemyEmptyTiles(int count)
+    {
+        List<TileController> emptyTiles = new List<TileController>();
+        List<TileController> resultTiles = new List<TileController>();
+        int rows = enemyMapData.GetLength(0);
+        int cols = enemyMapData.GetLength(1);
+
+        // タイルがnullでないかつユニットが配置されていない場合は、空きタイルとしてリストに追加
+        ForEachTile((x, y) =>
+        {
+            TileController tile = enemyMapData[x, y];
+            if (tile != null && tile.unitObject == null) emptyTiles.Add(tile);
+        });
+
+        if (emptyTiles.Count == 0)
+        {
+            Debug.LogWarning("EnemyMapに空きタイルがありません。");
+            return null;
+        }
+
+        int roopCount = Mathf.Min(count, emptyTiles.Count);
+        for (int i = 0; i < roopCount; i++)
+        {
+            // 残っている空きマスからランダムにインデックスを選択
+            int index = UnityEngine.Random.Range(0, emptyTiles.Count);
+            // 選ばれたタイルを結果リストに追加
+            resultTiles.Add(emptyTiles[index]);
+            // 同じタイルを二度選ばないように、候補リストから削除
+            emptyTiles.RemoveAt(index);
+        }
+
+        return resultTiles;
+    }
+
+    /// <summary>
+    /// マップ検索処理汎用メソッド
+    /// </summary>
+    private void ForEachTile(Action<int, int> action)
+    {
+        for (int y = 0; y < mapHeight; y++)
+        {
+            for (int x = 0; x < mapWidth; x++)
+            {
+                action?.Invoke(x, y);
+            }
+        }
     }
 }

@@ -9,8 +9,11 @@ public class EnemyManager : MonoBehaviour, IInitializable
 
     [SerializeField, Tooltip("本部データ")]
     private UnitData _hqData;
+    [SerializeField, Tooltip("Herringデータ")]
+    private UnitData _herringData;
 
     [Header("Refs")]
+    private UnitSpawnManager _unitSpawnManager;
     private MapManager _mapManager;
 
     private void Awake()
@@ -29,39 +32,26 @@ public class EnemyManager : MonoBehaviour, IInitializable
     private void ResolveDependencies()
     {
         _mapManager = MapManager.Instance;
+        _unitSpawnManager = UnitSpawnManager.Instance;
     }
 
     public async UniTask Initialize()
     {
         ResolveDependencies();
-        SpawnHqRandomTiles();
+        SpawnUnitRandomTiles(_hqData, _mapManager.maxHqCount);
+        SpawnUnitRandomTiles(_herringData, 2);
         await UniTask.CompletedTask;
     }
 
-    private void SpawnHqRandomTiles()
+    private void SpawnUnitRandomTiles(UnitData unitData, int count)
     {
-        List<TileController> targetTiles = new List<TileController>();
-        int rows = _mapManager.enemyMapData.GetLength(0);
-        int cols = _mapManager.enemyMapData.GetLength(1);
-        
-        // 無限ループ防止（全要素数より多く取ろうとした場合）
-        int maxItems = Mathf.Min(_mapManager.maxHqCount, rows * cols);
+        List<TileController> tiles = _mapManager.GetEnemyEmptyTiles(count);
 
-        while (targetTiles.Count < maxItems)
-        {
-            int randY = Random.Range(0, rows);
-            int randX = Random.Range(0, cols);
-            TileController target = _mapManager.enemyMapData[randY, randX];
+        if (tiles.Count < 1) throw new System.Exception("空きタイルが取得できませんでした。");
 
-            if (!targetTiles.Contains(target)) // 重複チェック
-            {
-                targetTiles.Add(target);
-            }
-        }
-        
-        foreach (TileController tile in targetTiles)
+        for (int i = 0; i < tiles.Count; i++)
         {
-            UnitSpawnManager.Instance.SpawnUnit(tile, _hqData);
+            _unitSpawnManager.SpawnUnit(tiles[i], unitData);
         }
     }
 }
