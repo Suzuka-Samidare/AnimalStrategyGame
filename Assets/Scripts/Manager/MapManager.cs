@@ -129,7 +129,10 @@ public class MapManager : MonoBehaviour, IInitializable
         }
     }
 
-    public TileController GetPlayerMapTile(Vector2Int pos)
+    /// <summary>
+    /// 味方マップのTileControllerを取得する
+    /// </summary>
+    public TileController GetPlayerTile(Vector2Int pos)
     {
         // 範囲外チェック（ガード句）
         if (pos.x < 0 || pos.x >= playerMapData.GetLength(0) || 
@@ -141,7 +144,10 @@ public class MapManager : MonoBehaviour, IInitializable
         return playerMapData[pos.x, pos.y];
     }
 
-    public TileController GetEnemyMapTile(Vector2Int pos)
+    /// <summary>
+    /// 敵マップのTileControllerを取得する
+    /// </summary>
+    public TileController GetEnemyTile(Vector2Int pos)
     {
         // 範囲外チェック（ガード句）
         if (pos.x < 0 || pos.x >= enemyMapData.GetLength(0) || 
@@ -151,6 +157,20 @@ public class MapManager : MonoBehaviour, IInitializable
             return null; // 安全にnullを返す
         }
         return enemyMapData[pos.x, pos.y];
+    }
+
+    /// <summary>
+    /// 敵マップのTileControllerリストを取得する
+    /// </summary>
+    public List<TileController> GetEnemyTiles(List<Vector2Int> positions)
+    {
+        List<TileController> result = new List<TileController>();
+        foreach(var pos in positions)
+        {
+            TileController tileController = GetEnemyTile(pos);
+            if (tileController != null) result.Add(tileController);
+        }
+        return result;
     }
 
     private void UpdateMapData()
@@ -248,6 +268,40 @@ public class MapManager : MonoBehaviour, IInitializable
         }
 
         return resultTiles;
+    }
+
+    /// <summary>
+    /// 味方マップ上のHerringユニットが配置されているタイルの全取得
+    /// </summary>
+    public List<TileController> GetPlayerMapHerringTiles()
+    {
+        List<TileController> tiles = new List<TileController>();
+        ForEachTile((x, y) =>
+        {
+            if (playerMapData[x, y].unitObject != null && playerMapData[x, y].UnitBase.Stats.profile.unitType == UnitType.Herring)
+            {
+                tiles.Add(playerMapData[x, y]);
+            }
+        });
+
+        return tiles;
+    }
+
+    /// <summary>
+    /// 敵マップ上Herringユニットが配置されているタイルの全取得
+    /// </summary>
+    public List<TileController> GetEnemyMapHerringTiles()
+    {
+        List<TileController> tiles = new List<TileController>();
+        ForEachTile((x, y) =>
+        {
+            if (enemyMapData[x, y].unitObject != null && enemyMapData[x, y].UnitBase.Stats.profile.unitType == UnitType.Herring) 
+            {
+                tiles.Add(enemyMapData[x, y]);
+            }
+        });
+
+        return tiles;
     }
 
     /// <summary>

@@ -35,14 +35,14 @@ public class AttackUnitController : MonoBehaviour
                     (pos) => tilePositions.Add(pos));
                 break;
             // DEBUG =======================================================
-            case AttackType.Test:
-                TileRangeUtil.GetForwardVerticalRange(
-                    targetPos,
-                    MapManager.Instance.mapHeight,
-                    1,
-                    (pos) => tilePositions.Add(pos)
-                );
-                break;
+            // case AttackType.Test:
+            //     TileRangeUtil.GetForwardVerticalRange(
+            //         targetPos,
+            //         MapManager.Instance.mapHeight - 1 - targetPos.y,
+            //         1,
+            //         (pos) => tilePositions.Add(pos)
+            //     );
+            //     break;
             // DEBUG =======================================================
 
         }

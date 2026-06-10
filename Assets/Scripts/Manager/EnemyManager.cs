@@ -39,7 +39,9 @@ public class EnemyManager : MonoBehaviour, IInitializable
     {
         ResolveDependencies();
         SpawnUnitRandomTiles(_hqData, _mapManager.maxHqCount);
-        SpawnUnitRandomTiles(_herringData, 2);
+         _unitSpawnManager.SpawnUnit(_mapManager.enemyMapData[3, 9], _herringData);
+         _unitSpawnManager.SpawnUnit(_mapManager.enemyMapData[5, 4], _herringData);
+        // SpawnUnitRandomTiles(_herringData, 2);
         await UniTask.CompletedTask;
     }
 

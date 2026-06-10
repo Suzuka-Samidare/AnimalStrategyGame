@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using TileOwner = TileController.TileOwner;
 
 public class AttackManager : MonoBehaviour, IInitializable
@@ -14,15 +16,17 @@ public class AttackManager : MonoBehaviour, IInitializable
     {
         public TileOwner Owner;
         public string UnitName;
-        public List<TileController> Targets;    // 攻撃対象の中心タイル
+        public TileController Target;  // 攻撃対象の中心タイル
+        public List<TileController> AffectedTiles; 
         public float Damage;        // ダメージ量
         public float time; // 経過時間 + 適用必要時間
 
-        public AttackCommand(TileOwner owner, string unitName, List<TileController> tiles, float damage, float delay)
+        public AttackCommand(TileOwner owner, string unitName, TileController target, List<TileController> tiles, float damage, float delay)
         {
             Owner = owner;
             UnitName = unitName;
-            Targets = tiles;
+            Target = target;
+            AffectedTiles = tiles;
             Damage = damage;
             time = delay;
         }
@@ -99,12 +103,27 @@ public class AttackManager : MonoBehaviour, IInitializable
         // 演出を管理するタスクのリストを用意（後で全部終わったかチェックするため）
         List<Task> animationTasks = new List<Task>();
 
-        foreach (var target in command.Targets)
+        // 攻撃対象へカメラ移動
+        // CameraMovement.Instance.SetDestination(new Vector3(command.Target.globalPos.x, 1, command.Target.globalPos.z));
+        bool isSuccessDefence = false;
+        if (command.Owner == TileOwner.Player)
         {
-            // if ()
-            if (target.isExistUnit)
+            isSuccessDefence = GetEnemyDefenceResult(command);
+        }
+        else
+        {
+            ;
+        }
+
+        if (isSuccessDefence == true) return;
+        
+        Debug.Log("防衛に失敗したため、ダメージ反映に入ります。");
+
+        foreach (var tile in command.AffectedTiles)
+        {
+            if (tile.isExistUnit)
             {
-                Task damageTask = target.UnitBase.Controller.ApplyDamageAsync(command.Damage, target);
+                Task damageTask = tile.UnitBase.Controller.ApplyDamageAsync(command.Damage, tile);
                 // あとで一括待機するためにリストに入れておく
                 animationTasks.Add(damageTask);
             }
@@ -112,11 +131,120 @@ public class AttackManager : MonoBehaviour, IInitializable
             {
                 // TODO: MISS表記を入れたい -> ユニットによる位置基準ではダメ
                 // TODO: MISS表記しない場合 -> ACTION中に攻撃範囲を分かるようにしたい
-                Debug.Log("ターゲットがもういないみたい。攻撃スカった！");
+                Debug.Log("ダメージを与えるユニットが、このタイルにはいません。");
             }
         }
 
         await Task.WhenAll(animationTasks);
+    }
+
+    [ContextMenu("じっけん！")]
+    public void TestestFunc()
+    {
+        Debug.Log("====== TestestFunc =================");
+        GetEnemyDefenceResult(_timeline[0]);
+    }
+
+    /// <summary>
+    /// 攻撃物がターゲットに着弾するまでに通過するタイルの取得
+    /// </summary>
+    private List<TileController> GetTrajectoryTiles(TileController target, TileController[,] mapData)
+    {
+        List<TileController> tiles = new List<TileController>();
+
+        for (int y = target.gridPos.y; y < _mapManager.mapHeight; y++)
+        {
+            int x = target.gridPos.x;
+            if (mapData[x, y] != null) tiles.Add(mapData[x, y]);
+        }
+
+        return tiles;
+    }
+
+    /// <summary>
+    /// 敵エリアへの攻撃に対する防衛判定
+    /// </summary>
+    private bool GetEnemyDefenceResult(AttackCommand command)
+    {
+        // ターゲットの座標
+        Vector2Int tgtPos = command.Target.gridPos;
+        // 攻撃が着弾するまでに通過するタイルを取得
+        List<TileController> trajectoryTiles = GetTrajectoryTiles(command.Target, _mapManager.enemyMapData);
+        // Herringユニットがあるタイルを取得
+        List<TileController> herringTiles = _mapManager.GetEnemyMapHerringTiles();
+
+        Debug.Log($"Herringユニットの総数: {herringTiles.Count}");
+
+        // 各Herringユニットごとに防衛処理
+        foreach (var herringTile in herringTiles)
+        {
+            // Herringユニットの左右防衛幅
+            int horizonRange = herringTile.UnitDefendable.Stats.profile.range.max;
+            // ターゲットのx座標がHerringユニットの防衛幅に入らない場合はスキップ
+            if (tgtPos.x < herringTile.gridPos.x - horizonRange || tgtPos.x > herringTile.gridPos.x + horizonRange) continue;
+
+            // Herringユニットの防衛座標リストを取得
+            List<Vector2Int> defencePositions = herringTile.UnitDefendable.Controller.GetDefensiveRangePos(herringTile.gridPos);
+            // 有効な防衛タイル数の集計
+            int overlapCount = 0;
+
+            // ====================================================
+            // マップ外の防衛座標の集計
+            // ====================================================
+            // yが10以上の座標を取得し、座標数をカウントに追加
+            HashSet<int> uniqueYValues = new HashSet<int>();
+            for (int i = 0; i < defencePositions.Count; i++)
+            {
+                int currentY = defencePositions[i].y;
+                if (currentY >= 10) uniqueYValues.Add(currentY);
+            }
+            overlapCount += uniqueYValues.Count;
+
+            Debug.Log($"マップ外の有効な防衛数の集計: {overlapCount}");
+
+            // ====================================================
+            // マップ内の防衛座標の集計
+            // ====================================================
+            // マップ内で有効な防衛座標リストを取得
+            List<TileController> defenceTiles = _mapManager.GetEnemyTiles(defencePositions);
+            // 有効な防衛座標がある場合、攻撃の軌道になっているタイルと重複している分をカウントする
+            if (defenceTiles.Count > 0)
+            {
+                foreach (TileController defenceTile in defenceTiles)
+                {
+                    // Debug.Log($"trajectoryTiles.Contains: {trajectoryTiles.Contains(defenceTile)}");
+                    if (trajectoryTiles.Contains(defenceTile)) overlapCount++;
+                } 
+            }
+
+            Debug.Log($"マップ内外を合わせた有効な防衛数の集計: {overlapCount}");
+
+            // ターゲットとHerringユニットのx座標の差（命中減衰率に影響する）
+            float distanceX = Mathf.Abs(tgtPos.x - herringTile.gridPos.x);
+            // 防衛判定結果を受け取る
+            bool result = herringTile.UnitDefendable.Controller.IsIntercepted(overlapCount, distanceX);
+
+            if (result)
+            {
+                // TODO: 迎撃成功アニメーション
+                Debug.Log("迎撃成功。この攻撃の防衛行動を終了。");
+                return true;
+            }
+            else
+            {
+                // TODO: 迎撃失敗アニメーション
+                Debug.Log("迎撃失敗。次の防衛ユニットへ");
+            }
+
+            // TODO: mapHeightを超えた防衛範囲をoverlapCountに加算する
+            // Debug.Log("==== defencePositions ===========================================");
+            // foreach (Vector2Int pos in defencePositions)
+            // {
+            //     Debug.Log($"x:{pos.x}, y:{pos.y}");
+            // }
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -130,6 +258,7 @@ public class AttackManager : MonoBehaviour, IInitializable
         AttackCommand newAttack = new AttackCommand(
             _tileManager.selectedTileController.owner,
             profile.unitName,
+            _tileManager.targetTile,
             new List<TileController>(_tileManager.targetTiles),
             attackProfile.power,
             attackProfile.delay
@@ -141,3 +270,5 @@ public class AttackManager : MonoBehaviour, IInitializable
         Debug.Log($"攻撃予約完了！");
     }
 }
+
+

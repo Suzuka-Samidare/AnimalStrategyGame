@@ -118,7 +118,7 @@ public class TileManager : MonoBehaviour, IInitializable
 
         foreach (Vector2Int pos in tilePositions)
         {
-            TileController tileController = _mapManager.GetEnemyMapTile(pos);
+            TileController tileController = _mapManager.GetEnemyTile(pos);
 
             if (tileController != null)
             {

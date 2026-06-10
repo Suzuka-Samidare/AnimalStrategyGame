@@ -16,14 +16,14 @@ public interface IAttackable
 public interface IDefendable
 {
     DefenceUnitStats Stats { get; }
-    // DefenceUnitController DefenceController { get; }
+    DefenceUnitController Controller { get; }
 }
 
 // サポート系ロール
 public interface ISupportable
 {
     SupportUnitStats Stats { get; }
-    // SupportUnitController SupportController { get; }
+    // SupportUnitController Controller { get; }
 }
 
 public interface ICallable

@@ -33,11 +33,13 @@ public static class TileRangeUtil
         }
     }
 
-    public static void GetForwardVerticalRange(Vector2Int tgt, int verticalRange, int horizonSpread, Action<Vector2Int> action)
+    public static void GetForwardVerticalRange(Vector2Int pos, int verticalRange, int horizonSpread, Action<Vector2Int> action)
     {
-        for (int y = tgt.y + 1; y <= tgt.y + verticalRange; y++)
+        // for (int y = pos.y; y <= pos.y + verticalRange; y++)
+        int frontPos = pos.y + 1;
+        for (int y = frontPos; y < frontPos + verticalRange; y++)
         {
-            for (int x = tgt.x - horizonSpread; x <= tgt.x + horizonSpread; x++)
+            for (int x = pos.x - horizonSpread; x <= pos.x + horizonSpread; x++)
             {
                 action(new Vector2Int(x, y));
             }
