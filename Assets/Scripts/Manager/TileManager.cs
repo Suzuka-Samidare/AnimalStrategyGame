@@ -45,8 +45,8 @@ public class TileManager : MonoBehaviour, IInitializable
     }
     [SerializeField, Tooltip("ターゲット指定中タイル")]
     public List<TileController> targetTiles { get; private set; } = new List<TileController>();
-    [SerializeField, Tooltip("最後にチェックした場所")]
-    public Vector3 EnemyMapLastViewedPosition;
+    [Tooltip("最後にチェックした場所")]
+    public Vector3 EnemyMapLastViewedPosition {get; private set; }
 
     [Header("Refs")]
     private MapManager _mapManager;
@@ -70,8 +70,13 @@ public class TileManager : MonoBehaviour, IInitializable
 
     public async UniTask Initialize()
     {
-         ResolveDependencies();
-         await UniTask.CompletedTask;
+        ResolveDependencies();
+        EnemyMapLastViewedPosition = new Vector3(
+            _mapManager.enemyMapData[4, 4].globalPos.x,
+            1,
+            _mapManager.enemyMapData[4, 4].globalPos.z
+        );
+        await UniTask.CompletedTask;
     }
 
     private void RefreshComponents()
