@@ -10172,7 +10172,7 @@ MonoBehaviour:
     type: 3}
   mapWidth: 10
   mapHeight: 10
-  mapDistance: 5
+  mapDistance: 20
   isDirty: 0
   PlayerHqCount: 0
   EnemyHqCount: 0

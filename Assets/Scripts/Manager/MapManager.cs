@@ -19,7 +19,7 @@ public class MapManager : MonoBehaviour, IInitializable
     [Header("生成情報")]
     public int mapWidth;     // マップの幅
     public int mapHeight;    // マップの高さ
-    public int mapDistance = 5;
+    public int mapDistance = 10;
 
     [Header("管理ステータス")]
     public bool isDirty;
