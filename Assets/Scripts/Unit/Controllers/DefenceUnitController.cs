@@ -61,16 +61,17 @@ public class DefenceUnitController : MonoBehaviour
         if (_defenceProfile.ignoreAccuracy) return true;
 
         // x座標の差による命中減衰率
-        float distanceXRate = _defenceProfile.accuracyDecay * distanceX;
-        // 基本命中率から減衰率を引いた、最終的な命中率
-        float interceptRate = _defenceProfile.accuracy - distanceXRate;
+        float xOffsetPenaltyRate = _defenceProfile.accuracyDecay * distanceX;
+        float attackerHitRate = Random.value;
 
-        Debug.Log($"命中率: {interceptRate}");
         for (int i = 0; i < overlapCount; i++)
         {
-            float randomRate = Random.value;
-            Debug.Log($"{i+1}回目 => randomRate: {randomRate} {(randomRate < interceptRate ? "成功" : "失敗")}");
-            if (randomRate < interceptRate) return true;
+            float yOffsetPenaltyRate = (_verticalRange - i) * _defenceProfile.accuracyDecay;
+            float defencerHitRate = _defenceProfile.accuracy -  xOffsetPenaltyRate - yOffsetPenaltyRate;
+            bool result = attackerHitRate < defencerHitRate;
+
+            Debug.Log($"{i+1}回目 => 攻撃側: {attackerHitRate} 防衛側: {defencerHitRate} {(result ? "成功" : "失敗")}");
+            if (result) return true;
         }
 
         return false;
