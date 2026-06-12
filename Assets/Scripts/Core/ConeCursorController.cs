@@ -31,19 +31,19 @@ public class ConeCursorController : MonoBehaviour
         if (_tileManager.selectedTileController != null && _gameManager.currentPhase == Phase.INIT)
         {
             objectRenderer.enabled = true;
-            Vector3 selectedTilePos = _tileManager.selectedTileController.globalPos;
+            Vector3 selectedTilePos = _tileManager.selectedTileController.GlobalPos;
             transform.position = new Vector3(selectedTilePos.x, transform.position.y, selectedTilePos.z);
         }
         else if (_tileManager.selectedTileController != null && _gameManager.currentPhase == Phase.PREPARATION)
         {
             objectRenderer.enabled = true;
-            Vector3 selectedTilePos = _tileManager.selectedTileController.globalPos;
+            Vector3 selectedTilePos = _tileManager.selectedTileController.GlobalPos;
             transform.position = new Vector3(selectedTilePos.x, transform.position.y, selectedTilePos.z);
         }
         else if (_tileManager.targetTile != null && _gameManager.currentPhase == Phase.COMMAND)
         {
             objectRenderer.enabled = true;
-            Vector3 targetTilePos = _tileManager.targetTile.globalPos;
+            Vector3 targetTilePos = _tileManager.targetTile.GlobalPos;
             transform.position = new Vector3(targetTilePos.x, transform.position.y, targetTilePos.z);
         }
         else

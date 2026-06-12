@@ -109,22 +109,6 @@ public class CameraMovement : MonoBehaviour
         }
     }
 
-    // private void TestSetDestination()
-    // {
-    //     int height = UnityEngine.Random.Range(0, _mapManager.mapHeight);
-    //     int width = UnityEngine.Random.Range(0, _mapManager.mapWidth);
-    //     if (UnityEngine.Random.value > 0.5f)
-    //     {
-    //         TileController tgt = _mapManager.playerMapData[height, width];
-    //         SetDestination(new Vector3(tgt.globalPos.x, 1, tgt.globalPos.z));
-    //     }
-    //     else
-    //     {
-    //         TileController tgt = _mapManager.enemyMapData[height, width];
-    //         SetDestination(new Vector3(tgt.globalPos.x, 1, tgt.globalPos.z));
-    //     }
-    // }
-
     public void SetDestination(Vector3 destination)
     {
         _destination = destination;

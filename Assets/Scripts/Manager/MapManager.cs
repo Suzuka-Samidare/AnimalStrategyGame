@@ -83,17 +83,19 @@ public class MapManager : MonoBehaviour, IInitializable
         {
             for (int x = 0; x < mapWidth; x++)
             {
-                // グローバル座標の定義
-                Vector3 position = new Vector3(x, 0, y);
                 // Prefabをインスタンス化
-                GameObject tile = Instantiate(tilePrefab, position, Quaternion.identity);
+                GameObject tile = Instantiate(
+                    tilePrefab,
+                    new Vector3(x, 0, y),
+                    Quaternion.identity
+                );
                 // 生成したタイルをMapGeneratorの子オブジェクトにする (任意、Hierarchyを整理するため)
                 tile.transform.SetParent(playerMap.transform);
                 tile.name = $"AllyTile_{x}_{y}";
                 // 各フィールド値の更新
                 TileController tileController = tile.GetComponent<TileController>();
                 tileController.mapManager = this;
-                tileController.globalPos = position;
+                tileController.GlobalPos = tile.transform.position;
                 tileController.gridPos = new Vector2Int(x, y);
                 tileController.SetOwner(TileController.TileOwner.Player);
                 // クラスをマップデータとして格納
@@ -110,17 +112,19 @@ public class MapManager : MonoBehaviour, IInitializable
         {
             for (int x = 0; x < mapWidth; x++)
             {
-                // マスの位置を計算
-                Vector3 position = new Vector3(mapWidth - 1 - x, 0, mapHeight * 2 + mapDistance - y);
                 // Prefabをインスタンス化
-                GameObject tile = Instantiate(tilePrefab, position, Quaternion.identity);
+                GameObject tile = Instantiate(
+                    tilePrefab,
+                    new Vector3(mapWidth - 1 - x, 0, mapHeight * 2 + mapDistance - y),
+                    Quaternion.identity
+                );
                 // 生成したタイルをMapGeneratorの子オブジェクトにする (任意、Hierarchyを整理するため)
                 tile.transform.SetParent(enemyMap.transform);
                 tile.name = $"EnemyTile_{x}_{y}";
                 // 各フィールド値の更新
                 TileController tileController = tile.GetComponent<TileController>();
                 tileController.mapManager = this;
-                tileController.globalPos = position;
+                tileController.GlobalPos = tile.transform.position;
                 tileController.gridPos = new Vector2Int(x, y);
                 tileController.SetOwner(TileController.TileOwner.Enemy);
                  // クラスをマップデータとして格納

@@ -47,7 +47,7 @@ public class TileController : MonoBehaviour
 
     [Header("タイル座標情報")]
     [Tooltip("ワールド座標")]
-    public Vector3 globalPos;
+    public Vector3 GlobalPos;
     [Tooltip("マップ上座標")]
     public Vector2Int gridPos;
 

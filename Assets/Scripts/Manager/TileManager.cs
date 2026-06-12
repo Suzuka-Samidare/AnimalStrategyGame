@@ -40,7 +40,7 @@ public class TileManager : MonoBehaviour, IInitializable
         {
             if (_targetTile == value) return;
             _targetTile = value;
-            EnemyMapLastViewedPosition = new Vector3(_targetTile.globalPos.x, 1f, _targetTile.globalPos.z);
+            EnemyMapLastViewedPosition = new Vector3(_targetTile.GlobalPos.x, 1f, _targetTile.GlobalPos.z);
         }
     }
     [SerializeField, Tooltip("ターゲット指定中タイル")]
@@ -72,9 +72,9 @@ public class TileManager : MonoBehaviour, IInitializable
     {
         ResolveDependencies();
         EnemyMapLastViewedPosition = new Vector3(
-            _mapManager.enemyMapData[4, 4].globalPos.x,
+            _mapManager.enemyMapData[4, 4].GlobalPos.x,
             1,
-            _mapManager.enemyMapData[4, 4].globalPos.z
+            _mapManager.enemyMapData[4, 4].GlobalPos.z
         );
         await UniTask.CompletedTask;
     }
@@ -85,9 +85,9 @@ public class TileManager : MonoBehaviour, IInitializable
         {
             selectedTileController = selectedTile.GetComponent<TileController>();
             PlayerMapLastViewedPosition = new Vector3(
-                selectedTileController.globalPos.x,
+                selectedTileController.GlobalPos.x,
                 1f,
-                selectedTileController.globalPos.z
+                selectedTileController.GlobalPos.z
             );
         }
         else
