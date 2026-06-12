@@ -102,18 +102,23 @@ public class AttackManager : MonoBehaviour, IInitializable
     {
         // 演出を管理するタスクのリストを用意（後で全部終わったかチェックするため）
         List<Task> animationTasks = new List<Task>();
-
+        // 防衛が成功したか
+        bool isSuccessDefence;
+        // 迎撃完了座標
+        Vector2Int interceptedPos;
         // 攻撃対象へカメラ移動
         // CameraMovement.Instance.SetDestination(new Vector3(command.Target.globalPos.x, 1, command.Target.globalPos.z));
-        bool isSuccessDefence = false;
+        // 防衛処理
         if (command.Owner == TileOwner.Player)
         {
-            isSuccessDefence = GetEnemyDefenceResult(command);
+            isSuccessDefence = GetEnemyDefenceResult(command, out interceptedPos);
+            Debug.Log($"interceptedPos: {interceptedPos}");
         }
         else
         {
-            ;
+            isSuccessDefence = false;
         }
+
 
         if (isSuccessDefence == true) return;
         
@@ -138,12 +143,12 @@ public class AttackManager : MonoBehaviour, IInitializable
         await Task.WhenAll(animationTasks);
     }
 
-    [ContextMenu("じっけん！")]
-    public void TestestFunc()
-    {
-        Debug.Log("====== TestestFunc =================");
-        GetEnemyDefenceResult(_timeline[0]);
-    }
+    // [ContextMenu("じっけん！")]
+    // public void TestestFunc()
+    // {
+    //     Debug.Log("====== TestestFunc =================");
+    //     GetEnemyDefenceResult(_timeline[0]);
+    // }
 
     /// <summary>
     /// 攻撃物がターゲットに着弾するまでに通過するタイルの取得
@@ -161,10 +166,11 @@ public class AttackManager : MonoBehaviour, IInitializable
         return tiles;
     }
 
+
     /// <summary>
     /// 敵エリアへの攻撃に対する防衛判定
     /// </summary>
-    private bool GetEnemyDefenceResult(AttackCommand command)
+    private bool GetEnemyDefenceResult(AttackCommand command, out Vector2Int interceptedPos)
     {
         // ターゲットの座標
         Vector2Int tgtPos = command.Target.gridPos;
@@ -172,6 +178,8 @@ public class AttackManager : MonoBehaviour, IInitializable
         List<TileController> trajectoryTiles = GetTrajectoryTiles(command.Target, _mapManager.enemyMapData);
         // Herringユニットがあるタイルを取得
         List<TileController> herringTiles = _mapManager.GetEnemyMapHerringTiles();
+        // y座標値が高い順に並べ替え
+        herringTiles.Sort((a, b) => b.gridPos.y.CompareTo(a.gridPos.y));
 
         Debug.Log($"Herringユニットの総数: {herringTiles.Count}");
 
@@ -221,29 +229,25 @@ public class AttackManager : MonoBehaviour, IInitializable
 
             // ターゲットとHerringユニットのx座標の差（命中減衰率に影響する）
             float distanceX = Mathf.Abs(tgtPos.x - herringTile.gridPos.x);
+            // 今回の防衛ユニット攻撃の命中率
+            float attackerEvasionRate = UnityEngine.Random.value;
+            // 防衛ユニットのy座標の防衛距離
+            int verticalRange = herringTile.UnitDefendable.Controller.VerticalRange;
             // 防衛判定結果を受け取る
-            bool result = herringTile.UnitDefendable.Controller.IsIntercepted(overlapCount, distanceX);
-
-            if (result)
+            for (int i = 0; i < overlapCount; i++)
             {
-                // TODO: 迎撃成功アニメーション
-                Debug.Log("迎撃成功。この攻撃の防衛行動を終了。");
-                return true;
-            }
-            else
-            {
-                // TODO: 迎撃失敗アニメーション
-                Debug.Log("迎撃失敗。次の防衛ユニットへ");
-            }
+                bool result = herringTile.UnitDefendable.Controller.IsIntercepted(attackerEvasionRate, i, distanceX);
 
-            // TODO: mapHeightを超えた防衛範囲をoverlapCountに加算する
-            // Debug.Log("==== defencePositions ===========================================");
-            // foreach (Vector2Int pos in defencePositions)
-            // {
-            //     Debug.Log($"x:{pos.x}, y:{pos.y}");
-            // }
+                // 防衛成功判定を受け取った場合は、迎撃できたポジションを返す
+                if (result)
+                {
+                    interceptedPos = new Vector2Int(tgtPos.x, herringTile.gridPos.y + verticalRange - i);
+                    return true;
+                }
+            }
         }
 
+        interceptedPos = Vector2Int.zero;
         return false;
     }
 

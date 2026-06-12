@@ -6,7 +6,7 @@ using UnityEngine;
 public class DefenceUnitController : MonoBehaviour
 {
     [Header("ステータス")]
-    private int _verticalRange = 5;
+    public readonly int VerticalRange = 5;
 
     [Header("Refs")]
     private DefenceProfile _defenceProfile;
@@ -28,7 +28,7 @@ public class DefenceUnitController : MonoBehaviour
             case DefenceType.Vertical:
                 TileRangeUtil.GetForwardVerticalRange(
                     myGridPos,
-                    _verticalRange,
+                    VerticalRange,
                     // Mathf.Min(5, MapManager.Instance.mapHeight - 1 - myGridPos.y),
                     _defenceProfile.range.max,
                     (pos) => tiles.Add(pos)
@@ -40,40 +40,21 @@ public class DefenceUnitController : MonoBehaviour
     }
 
     /// <summary>
-    /// 防衛可能最大タイル数
-    /// </summary>
-    // public int GetMaxDefendableTiles()
-    // {
-    //     switch (_defenceProfile.style)
-    //     {
-    //         case DefenceType.Vertical:
-    //             return (1 + _defenceProfile.range.max * 2) * _verticalRange;
-    //     }
-
-    //     throw new System.Exception("合致するDefenceTypeがありませんでした。");
-    // }
-
-    /// <summary>
     /// 防衛判定結果
     /// </summary>
-    public bool IsIntercepted(int overlapCount, float distanceX)
+    public bool IsIntercepted(float attackerEvasionRate, int overlap, float distanceX)
     {
         if (_defenceProfile.ignoreAccuracy) return true;
 
         // x座標の差による命中減衰率
         float xOffsetPenaltyRate = _defenceProfile.accuracyDecay * distanceX;
-        float attackerHitRate = Random.value;
 
-        for (int i = 0; i < overlapCount; i++)
-        {
-            float yOffsetPenaltyRate = (_verticalRange - i) * _defenceProfile.accuracyDecay;
-            float defencerHitRate = _defenceProfile.accuracy -  xOffsetPenaltyRate - yOffsetPenaltyRate;
-            bool result = attackerHitRate < defencerHitRate;
+        float yOffsetPenaltyRate = (VerticalRange - overlap) * _defenceProfile.accuracyDecay;
+        float defencerHitRate = _defenceProfile.accuracy -  xOffsetPenaltyRate - yOffsetPenaltyRate;
+        bool result = attackerEvasionRate < defencerHitRate;
 
-            Debug.Log($"{i+1}回目 => 攻撃側: {attackerHitRate} 防衛側: {defencerHitRate} {(result ? "成功" : "失敗")}");
-            if (result) return true;
-        }
+        Debug.Log($"{overlap + 1}回目 => 攻撃側: {attackerEvasionRate} 防衛側: {defencerHitRate} {(result ? "成功" : "失敗")}");
 
-        return false;
+        return result;
     }
 }
