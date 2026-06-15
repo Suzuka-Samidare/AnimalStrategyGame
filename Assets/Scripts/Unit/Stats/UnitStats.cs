@@ -14,6 +14,7 @@ public class UnitStats : MonoBehaviour
 
     [Header("動的ステータス")]
     [Tooltip("耐久値")] public float hp;
+    [Tooltip("気絶フラグ")] public bool IsFaint = false;
 
     [Header("Refs")]
     private AttackUnitStats _attackUnitStats;

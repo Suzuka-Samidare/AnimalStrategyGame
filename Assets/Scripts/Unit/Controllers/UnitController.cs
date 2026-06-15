@@ -34,28 +34,30 @@ public class UnitController : MonoBehaviour
         }
     }
 
-    public async Task ApplyDamageAsync(float power, TileController tile) {
-        Transform tileTransform = tile.transform;
+    public async UniTask ApplyDamageAsync(float power, TileController tile) {
+        // Transform tileTransform = tile.transform;
         // 更新前のHPを記録
         float previousHp = _stats.hp;
         // HP更新
         UpdateHp(-power);
         // 攻撃対象へカメラ移動
-        _cameraMovement.SetDestination(new Vector3(tileTransform.position.x, 1, tileTransform.position.z));
+        // _cameraMovement.SetDestination(new Vector3(tileTransform.position.x, 1, tileTransform.position.z));
+
         // Explosionパーティクル演出
-        _particlePoolMnager.SpawnParticle(tileTransform.position + Vector3.up, Quaternion.identity);
+        // _particlePoolMnager.SpawnParticle(tileTransform.position + Vector3.up, Quaternion.identity);
         // HP変化に応じてダメージ表現
-        if (Mathf.Approximately(previousHp, _stats.hp))
-        {
-            await _floatingTextPresenter.SpawnDamageAsync(tileTransform, 0);
-        }
-        else
-        {
-            _animation?.PlayOnce(AnimationName.Hit);
-            await _floatingTextPresenter.SpawnDamageAsync(tileTransform, power);
-        }
-        // HPが0の場合、気絶処理を実行
-        if (_stats.hp <= 0) await OnFaint(tile);
+        // if (Mathf.Approximately(previousHp, _stats.hp))
+        // {
+        //     await _floatingTextPresenter.SpawnDamageAsync(tileTransform, 0);
+        // }
+        // else
+        // {
+        //     _animation?.PlayOnce(AnimationName.Hit);
+        //     await _floatingTextPresenter.SpawnDamageAsync(tileTransform, power);
+        // }
+
+        // HPが0以下の場合、気絶フラグを立てる
+        if (_stats.hp <= 0) _stats.IsFaint = true;
     }
 
     // public async UniTask ApplyHealAsync(float heal, Transform tileTransform)
@@ -85,7 +87,7 @@ public class UnitController : MonoBehaviour
     /// <summary>
     /// 気絶処理
     /// </summary>
-    private async UniTask OnFaint(TileController tile)
+    public async UniTask OnFaint(TileController tile)
     {
         if (_animation)
         {

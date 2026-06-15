@@ -24,7 +24,7 @@ public class FloatingTextView : MonoBehaviour
     private bool _isRoutineFinished;
 
     [Header("Ref")]
-    [SerializeField] private Transform _tileTransform;
+    [SerializeField] private Vector3 _position;
     [SerializeField] private TextMeshProUGUI _textMesh;
     [SerializeField] private CanvasGroup _canvasGroup;
 
@@ -44,18 +44,18 @@ public class FloatingTextView : MonoBehaviour
 
     void Update()
     {
-        if (_tileTransform != null)
+        if (_position != null)
         {
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(_tileTransform.position);
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(_position);
             Vector3 fixOffset = new Vector3(0f, 20f, 0f); // 20ピクセル分
             transform.position = screenPos + fixOffset + _animationOffset;
         }
     }
 
-    public async Task SetupAsync(Transform tileTranform, float amount, Color color)
+    public async Task SetupAsync(Vector3 position, float amount, Color color)
     {
         _isRoutineFinished = false;
-        _tileTransform = tileTranform;
+        _position = position;
         _faceColor = color;
 
         if (_textMesh == null) throw new Exception("TextMeshProUGUIの取得失敗");
@@ -63,8 +63,8 @@ public class FloatingTextView : MonoBehaviour
         _textMesh.outlineColor = Color.white;
         _textMesh.text = amount.ToString();
 
-        if (_tileTransform == null) throw new Exception("ユニットのオブジェクト情報の取得失敗");
-        Vector3 screenPos = Camera.main.WorldToScreenPoint(_tileTransform.position);
+        if (_position == null) throw new Exception("タイル座標が取得できませんでした");
+        Vector3 screenPos = Camera.main.WorldToScreenPoint(_position);
         transform.position = screenPos;
 
         _fadeRoutine = StartCoroutine(FullFadeRoutine());

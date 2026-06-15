@@ -16,15 +16,24 @@ public class AttackManager : MonoBehaviour, IInitializable
     {
         public TileOwner Owner;
         public string UnitName;
+        public TileController Attacker;
         public TileController Target;  // 攻撃対象の中心タイル
         public List<TileController> AffectedTiles; 
         public float Damage;        // ダメージ量
         public float time; // 経過時間 + 適用必要時間
 
-        public AttackCommand(TileOwner owner, string unitName, TileController target, List<TileController> tiles, float damage, float delay)
-        {
+        public AttackCommand(
+            TileOwner owner,
+            string unitName,
+            TileController attacker,
+            TileController target,
+            List<TileController> tiles,
+            float damage,
+            float delay
+        ){
             Owner = owner;
             UnitName = unitName;
+            Attacker = attacker;
             Target = target;
             AffectedTiles = tiles;
             Damage = damage;
@@ -100,14 +109,10 @@ public class AttackManager : MonoBehaviour, IInitializable
     /// </summary>
     private async Task ExecuteCommandAsync(AttackCommand command)
     {
-        // 演出を管理するタスクのリストを用意（後で全部終わったかチェックするため）
-        List<Task> animationTasks = new List<Task>();
         // 防衛が成功したか
         bool isSuccessDefence;
         // 迎撃完了座標
         Vector2Int interceptedPos;
-        // 攻撃対象へカメラ移動
-        // CameraMovement.Instance.SetDestination(new Vector3(command.Target.globalPos.x, 1, command.Target.globalPos.z));
         // 防衛処理
         if (command.Owner == TileOwner.Player)
         {
@@ -116,21 +121,44 @@ public class AttackManager : MonoBehaviour, IInitializable
         }
         else
         {
+            // isSuccessDefence = GetPlayerDefenceResult();
             isSuccessDefence = false;
         }
 
 
         if (isSuccessDefence == true) return;
-        
-        Debug.Log("防衛に失敗したため、ダメージ反映に入ります。");
 
-        foreach (var tile in command.AffectedTiles)
+        Debug.Log("ダメージ反映に入ります");
+
+        // 演出を管理するタスクのリストを用意（後で全部終わったかチェックするため）
+        await ApplyDamage(command);
+
+        // ===================================================
+        // 見た目の演出
+        // ===================================================
+        // 攻撃対象へカメラ移動
+        CameraMovement.Instance.SetDestination(new Vector3(command.Target.GlobalPos.x, 1, command.Target.GlobalPos.z));
+
+        var squidController = command.Attacker.unitObject.GetComponent<SquidController>();
+        if (squidController != null)
+        {
+            await squidController.LerpLaunch(command.Target.GlobalPos);
+        }
+
+        await AttackDirection(command);
+        await FaintDirection(command);
+    }
+
+    private async UniTask ApplyDamage(AttackCommand command)
+    {
+        List<UniTask> applyTask = new List<UniTask>();
+        foreach (TileController tile in command.AffectedTiles)
         {
             if (tile.isExistUnit)
             {
-                Task damageTask = tile.UnitBase.Controller.ApplyDamageAsync(command.Damage, tile);
+                UniTask damageTask = tile.UnitBase.Controller.ApplyDamageAsync(command.Damage, tile);
                 // あとで一括待機するためにリストに入れておく
-                animationTasks.Add(damageTask);
+                applyTask.Add(damageTask);
             }
             else
             {
@@ -139,8 +167,43 @@ public class AttackManager : MonoBehaviour, IInitializable
                 Debug.Log("ダメージを与えるユニットが、このタイルにはいません。");
             }
         }
+        await UniTask.WhenAll(applyTask.ToArray());
+    }
 
-        await Task.WhenAll(animationTasks);
+    // private async UniTask DefenceDirection(Vector2Int interceptedPos)
+    // {
+        
+    // }
+
+    private async UniTask AttackDirection(AttackCommand command)
+    {
+        List<UniTask> animationTasks = new List<UniTask>();
+        foreach (TileController tile in command.AffectedTiles)
+        {
+            // 爆発のパーティクルを生成
+            ParticlePoolManager.Instance.SpawnParticle(tile.transform.position + Vector3.up, Quaternion.identity);
+            // ユニットがいない場合はここで処理終了
+            if (!tile.isExistUnit) continue;
+            // ダメージ表示
+            UniTask damageText = FloatingTextPresenter.Instance.SpawnDamageAsync(tile.GlobalPos, command.Damage);
+            animationTasks.Add(damageText);
+        }
+        await UniTask.WhenAll(animationTasks.ToArray());
+    }
+
+
+    private async UniTask FaintDirection(AttackCommand command)
+    {
+        List<UniTask> animationTasks = new List<UniTask>();
+        foreach (TileController tile in command.AffectedTiles)
+        {
+            // 気絶している場合は、アニメーション
+            if (tile.UnitBase != null && tile.UnitBase.Stats.IsFaint) {
+                UniTask faint = tile.UnitBase.Controller.OnFaint(tile);
+                animationTasks.Add(faint);
+            }
+        }
+        await UniTask.WhenAll(animationTasks.ToArray());
     }
 
     // [ContextMenu("じっけん！")]
@@ -262,6 +325,7 @@ public class AttackManager : MonoBehaviour, IInitializable
         AttackCommand newAttack = new AttackCommand(
             _tileManager.selectedTileController.owner,
             profile.unitName,
+            _tileManager.selectedTileController,
             _tileManager.targetTile,
             new List<TileController>(_tileManager.targetTiles),
             attackProfile.power,
