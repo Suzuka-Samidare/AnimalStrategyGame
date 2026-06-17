@@ -1,11 +1,12 @@
 using System;
-using System.ComponentModel;
 using UnityEngine;
 using Phase = GameManager.Phase;
 
 public class TileView : MonoBehaviour
 {
     [Header("タイル色設定")]
+    [Tooltip("ストライプ色の自動設定")]
+    public bool isAutoStripedColor;
     [Tooltip("タイルベース色")]
     public Color mainColor;
     [Tooltip("明滅色（自マップ用）")]
@@ -76,6 +77,7 @@ public class TileView : MonoBehaviour
 
     private void OnValidate()
     {
+        if (!isAutoStripedColor) return;
         // ストライプ色の計算
         stripedColor = mainColor * 0.9f;
         stripedColor.a = 1f;
