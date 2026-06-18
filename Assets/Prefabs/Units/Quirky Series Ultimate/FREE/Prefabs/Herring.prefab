@@ -130,6 +130,7 @@ MonoBehaviour:
     unitName: 
     maxHp: 0
   hp: 0
+  IsFaint: 0
 --- !u!114 &-1457273137684473161
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -176,6 +177,9 @@ MonoBehaviour:
     range:
       min: 0
       max: 0
+    ignoreAccuracy: 0
+    accuracy: 0
+    accuracyDecay: 0
 --- !u!114 &6179463497649021637
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -21,7 +21,7 @@ MonoBehaviour:
     id: 4
     unitType: 4
     unitName: Herring
-    maxHp: 0
+    maxHp: 3
   callingProfile:
     id: 99
     unitType: 0

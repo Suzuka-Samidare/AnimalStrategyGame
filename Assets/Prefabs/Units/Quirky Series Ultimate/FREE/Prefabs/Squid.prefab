@@ -721,8 +721,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7511180232019162148}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.2573338, y: 10.548937, z: 20.316004}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -880,8 +880,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69303f5944512cf419f24db93810cbf3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sphere: {fileID: 7719982994858457651, guid: 7f41867b407172745ac06cda47b4519c, type: 3}
-  tgtPos: {x: 5, y: 0, z: 5}
 --- !u!114 &-1498862429491261121
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -894,9 +892,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e7ea5e51dd852f49a9edeeceaceea6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  launchPos: {x: 2.2573338, y: 10.548937, z: 20.316004}
-  tgtPos: {x: 4, y: 1, z: 36}
-  speed: 20
+  _ascentStartPos: {x: 0, y: 0, z: 0}
+  _ascentFinishPos: {x: 0, y: 0, z: 0}
+  _peakHeight: 3
+  _inkPrefab: {fileID: 8959812219773788065, guid: bf288e12851516745bf37a6fbdddc533,
+    type: 3}
 --- !u!1 &7535825155527325181
 GameObject:
   m_ObjectHideFlags: 0

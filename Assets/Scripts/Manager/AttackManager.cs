@@ -111,13 +111,16 @@ public class AttackManager : MonoBehaviour, IInitializable
     {
         // 防衛が成功したか
         bool isSuccessDefence;
-        // 迎撃完了座標
-        Vector2Int interceptedPos;
+        // 迎撃完了座標（グリッド）
+        Vector2Int interceptedGridPos = Vector2Int.zero;
+        // 迎撃完了座標（グローバル）
+        Vector3 interceptedPos = Vector3.zero;
         // 防衛処理
         if (command.Owner == TileOwner.Player)
         {
-            isSuccessDefence = GetEnemyDefenceResult(command, out interceptedPos);
-            Debug.Log($"interceptedPos: {interceptedPos}");
+            isSuccessDefence = GetEnemyDefenceResult(command, out interceptedGridPos);
+            TileController interceptedTile = _mapManager.GetEnemyTile(interceptedGridPos, true);
+            interceptedPos = interceptedTile.GlobalPos;
         }
         else
         {
@@ -125,28 +128,27 @@ public class AttackManager : MonoBehaviour, IInitializable
             isSuccessDefence = false;
         }
 
-
-        if (isSuccessDefence == true) return;
-
-        Debug.Log("ダメージ反映に入ります");
-
-        // 演出を管理するタスクのリストを用意（後で全部終わったかチェックするため）
-        await ApplyDamage(command);
+        // 防衛に失敗している場合、内部的なダメージの反映（見た目に反映されないAPI通信に近い更新）
+        if (!isSuccessDefence)
+        {
+            await ApplyDamage(command);
+        }
 
         // ===================================================
         // 見た目の演出
         // ===================================================
-        // 攻撃対象へカメラ移動
-        CameraMovement.Instance.SetDestination(new Vector3(command.Target.GlobalPos.x, 1, command.Target.GlobalPos.z));
-
-        var squidController = command.Attacker.unitObject.GetComponent<SquidController>();
-        if (squidController != null)
+        // 防錆成功 => 攻撃が迎撃される演出のみ
+        // 防衛失敗 => 攻撃ヒット及びユニットの気絶演出
+        if (command.Attacker.unitObject.TryGetComponent<SquidController>(out var squidController))
         {
-            await squidController.LerpLaunch(command.Target.GlobalPos);
+            await squidController.AttackInkSuccess(command.Target.GlobalPos, interceptedPos);
         }
-
-        await AttackDirection(command);
-        await FaintDirection(command);
+        // 防衛に失敗している場合は、攻撃ヒット及びユニットの気絶演出
+        if (!isSuccessDefence)
+        {
+            await AttackHitEffects(command);
+            await FaintEffects(command);
+        }
     }
 
     private async UniTask ApplyDamage(AttackCommand command)
@@ -170,12 +172,7 @@ public class AttackManager : MonoBehaviour, IInitializable
         await UniTask.WhenAll(applyTask.ToArray());
     }
 
-    // private async UniTask DefenceDirection(Vector2Int interceptedPos)
-    // {
-        
-    // }
-
-    private async UniTask AttackDirection(AttackCommand command)
+    private async UniTask AttackHitEffects(AttackCommand command)
     {
         List<UniTask> animationTasks = new List<UniTask>();
         foreach (TileController tile in command.AffectedTiles)
@@ -192,7 +189,7 @@ public class AttackManager : MonoBehaviour, IInitializable
     }
 
 
-    private async UniTask FaintDirection(AttackCommand command)
+    private async UniTask FaintEffects(AttackCommand command)
     {
         List<UniTask> animationTasks = new List<UniTask>();
         foreach (TileController tile in command.AffectedTiles)
