@@ -8,18 +8,30 @@ public class MapManager : MonoBehaviour, IInitializable
     public static MapManager Instance;
 
     [Header("Ref")]
-    public GameObject playerMap;
-    public GameObject enemyMap;
-    public GameObject tilePrefab; // マスのPrefab
+    [Tooltip("プレイヤーマップオブジェクト"), SerializeField]
+    private GameObject playerMap;
+    [Tooltip("エネミーマップオブジェクト"), SerializeField]
+    private GameObject enemyMap;
+
+    [Header("Prefab")]
+    [Tooltip("タイル本体"), SerializeField]
+    private GameObject _tilePrefab; // マスのPrefab
+    [Tooltip("操作不可タイル本体"), SerializeField]
+    private GameObject _metaTilePrefab;
 
     [Header("マップデータ")]
     public TileController[,] playerMapData;
     public TileController[,] enemyMapData;
 
     [Header("生成情報")]
-    public int mapWidth;     // マップの幅
-    public int mapHeight;    // マップの高さ
+    [Tooltip("マップの幅")]
+    public int mapWidth;
+    [Tooltip("マップの高さ")]
+    public int mapHeight;
+    [Tooltip("マップ間の距離")]
     public int mapDistance = 10;
+    [Tooltip("操作不可マップの高さ"), SerializeField]
+    private int _metaMapHeight = 5;
 
     [Header("管理ステータス")]
     public bool isDirty;
@@ -46,6 +58,7 @@ public class MapManager : MonoBehaviour, IInitializable
     [Header("OTHER")]
     [Tooltip("本部最大設置数")] public int maxHqCount = 2; // TODO: マップと関係ない気がするので検討
 
+    [Header("Action")]
     public Action<int> OnHqCountChanged;
 
     void Awake()
@@ -75,23 +88,29 @@ public class MapManager : MonoBehaviour, IInitializable
         }
     }
 
+    /// <summary>
+    /// 味方マップの生成
+    /// </summary>
     private void GenerateAllyMapData()
     {
-        playerMapData = new TileController[mapHeight, mapWidth];
+        playerMapData = new TileController[mapWidth, mapHeight + _metaMapHeight];
 
-        for (int y = 0; y < mapHeight; y++)
+        for (int y = 0; y < mapHeight + _metaMapHeight; y++)
         {
+            // mapHeightを上回る座標のタイルはメタタイルとして登録
+            GameObject prefab = y < mapHeight ? _tilePrefab : _metaTilePrefab;
             for (int x = 0; x < mapWidth; x++)
             {
                 // Prefabをインスタンス化
                 GameObject tile = Instantiate(
-                    tilePrefab,
+                    prefab,
                     new Vector3(x, 0, y),
                     Quaternion.identity
                 );
                 // 生成したタイルをMapGeneratorの子オブジェクトにする (任意、Hierarchyを整理するため)
                 tile.transform.SetParent(playerMap.transform);
-                tile.name = $"AllyTile_{x}_{y}";
+                // tile.name = $"PlayerTile_{x}_{y}";
+                tile.name = "Player" + (y < mapHeight ? "" : "Meta") + $"_{x}_{y}";
                 // 各フィールド値の更新
                 TileController tileController = tile.GetComponent<TileController>();
                 tileController.mapManager = this;
@@ -104,23 +123,29 @@ public class MapManager : MonoBehaviour, IInitializable
         }
     }
 
+    /// <summary>
+    /// 敵マップの生成
+    /// </summary>
     private void GenerateEnemyMapData()
     {
-        enemyMapData = new TileController[mapHeight, mapWidth];
+        enemyMapData = new TileController[mapWidth, mapHeight + _metaMapHeight];
 
-        for (int y = 0; y < mapHeight; y++)
+        for (int y = 0; y < mapHeight + _metaMapHeight; y++)
         {
+            // mapHeightを上回る座標のタイルはメタタイルとして登録
+            GameObject prefab = y < mapHeight ? _tilePrefab : _metaTilePrefab;
             for (int x = 0; x < mapWidth; x++)
             {
                 // Prefabをインスタンス化
                 GameObject tile = Instantiate(
-                    tilePrefab,
+                    prefab,
                     new Vector3(mapWidth - 1 - x, 0, mapHeight * 2 + mapDistance - y),
                     Quaternion.identity
                 );
                 // 生成したタイルをMapGeneratorの子オブジェクトにする (任意、Hierarchyを整理するため)
                 tile.transform.SetParent(enemyMap.transform);
-                tile.name = $"EnemyTile_{x}_{y}";
+                // tile.name = $"EnemyTile_{x}_{y}";
+                tile.name = "Enemy" + (y < mapHeight ? "" : "Meta") + $"_{x}_{y}";
                 // 各フィールド値の更新
                 TileController tileController = tile.GetComponent<TileController>();
                 tileController.mapManager = this;
@@ -134,28 +159,32 @@ public class MapManager : MonoBehaviour, IInitializable
     }
 
     /// <summary>
-    /// 味方マップのTileControllerを取得する
+    /// 味方マップのTileControllerを取得する（メタタイルは取得不可）
     /// </summary>
-    public TileController GetPlayerTile(Vector2Int pos)
+    public TileController GetPlayerTile(Vector2Int pos, bool isCalculableMetaTile = false)
     {
+        int heightLength =
+            isCalculableMetaTile ? playerMapData.GetLength(1) : playerMapData.GetLength(1) - _metaMapHeight;
         // 範囲外チェック（ガード句）
         if (pos.x < 0 || pos.x >= playerMapData.GetLength(0) || 
-            pos.y < 0 || pos.y >= playerMapData.GetLength(1))
+            pos.y < 0 || pos.y >= heightLength)
         {
             Debug.LogWarning($"マップ範囲外へのアクセスを検知: {pos}");
-            return null; // 安全にnullを返す
+            return null;
         }
         return playerMapData[pos.x, pos.y];
     }
 
     /// <summary>
-    /// 敵マップのTileControllerを取得する
+    /// 敵マップのTileControllerを取得する（メタタイルは取得不可）
     /// </summary>
-    public TileController GetEnemyTile(Vector2Int pos)
+    public TileController GetEnemyTile(Vector2Int pos, bool isCalculableMetaTile = false)
     {
+        int heightLength =
+            isCalculableMetaTile ? enemyMapData.GetLength(1) : enemyMapData.GetLength(1) - _metaMapHeight;
         // 範囲外チェック（ガード句）
         if (pos.x < 0 || pos.x >= enemyMapData.GetLength(0) || 
-            pos.y < 0 || pos.y >= enemyMapData.GetLength(1))
+            pos.y < 0 || pos.y >= heightLength)
         {
             Debug.LogWarning($"マップ範囲外へのアクセスを検知: {pos}");
             return null; // 安全にnullを返す
@@ -187,31 +216,9 @@ public class MapManager : MonoBehaviour, IInitializable
         OnHqCountChanged?.Invoke(PlayerHqCount);
     }
 
-    // private void UpdateMapText()
-    // {
-    //     string resultText = "";
-    //     for (int y = 0; y < mapHeight; y++)
-    //     {
-    //         string rowstr = "";
-    //         for (int x = 0; x < mapWidth; x++)
-    //         {
-    //             MapId id;
-    //             GameObject currentUnit =  playerMapData[x, y].currentUnit;
-    //             if (currentUnit != null)
-    //             {
-    //                 id = currentUnit.GetComponent<UnitData>().id;
-    //             }
-    //             else
-    //             {
-    //                 id = MapId.Empty;
-    //             }
-    //             rowstr = rowstr + (int)id + " ";
-    //         }
-    //         resultText = rowstr + "\n" + resultText;
-    //     }
-    //     Debug.Log(resultText);
-    // }
-
+    /// <summary>
+    /// 指定したマップ上にある本部ユニット数を取得
+    /// </summary>
     public int CountHeadquarters(TileController[,] mapData)
     {
         int count = 0;
@@ -233,7 +240,6 @@ public class MapManager : MonoBehaviour, IInitializable
         }
 
         if (count > maxHqCount) throw new Exception("Headquarters unit limit exceeded.");
-        
         return count;
     }
 
