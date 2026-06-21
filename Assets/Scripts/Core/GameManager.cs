@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour, IInitializable
 {
@@ -212,7 +213,8 @@ public class GameManager : MonoBehaviour, IInitializable
             message: "Retry?",
             onConfirm: () =>
             {
-                Debug.Log("OK");
+                string currentSceneName = SceneManager.GetActiveScene().name;
+                SceneManager.LoadScene(currentSceneName);
             },
             onCancel: () =>
             {
