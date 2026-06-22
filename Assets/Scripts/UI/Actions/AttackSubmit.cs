@@ -6,15 +6,15 @@ using UnityEngine;
 public class AttackSubmit : MonoBehaviour, IButtonAction
 {
     [Header("Refs")]
-    private AttackManager _attackManager;
+    private TimelineManager _timelineManager;
 
     private void Start()
     {
-        _attackManager = AttackManager.Instance;
+        _timelineManager = TimelineManager.Instance;
     }
 
     public void Execute()
     {
-        _attackManager.RegisterCommand();
+        _timelineManager.RegisterCommand();
     }
 }

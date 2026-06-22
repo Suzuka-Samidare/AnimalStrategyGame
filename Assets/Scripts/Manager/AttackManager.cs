@@ -1,55 +1,14 @@
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Tilemaps;
-using TileOwner = TileController.TileOwner;
+using TimelineCommand = TimelineManager.TimelineCommand;
 
-public class AttackManager : MonoBehaviour, IInitializable
+public class AttackManager : MonoBehaviour
 {
     public static AttackManager Instance { get; private set; }
 
-    // 攻撃の情報をまとめたクラス
-    [System.Serializable]
-    public class AttackCommand
-    {
-        public TileOwner Owner;
-        public string UnitName;
-        public TileController Attacker;
-        public TileController Target;  // 攻撃対象の中心タイル
-        public List<TileController> AffectedTiles; 
-        public float Damage;        // ダメージ量
-        public float time; // 経過時間 + 適用必要時間
-
-        public AttackCommand(
-            TileOwner owner,
-            string unitName,
-            TileController attacker,
-            TileController target,
-            List<TileController> tiles,
-            float damage,
-            float delay
-        ){
-            Owner = owner;
-            UnitName = unitName;
-            Attacker = attacker;
-            Target = target;
-            AffectedTiles = tiles;
-            Damage = damage;
-            time = delay;
-        }
-    }
-
-    [SerializeField, Tooltip("攻撃タイムライン")]
-    private List<AttackCommand> _timeline = new List<AttackCommand>();
-    public int TimelineCount => _timeline.Count;
-
     [Header("Refs")]
-    private GameManager _gameManager;
     private MapManager _mapManager;
-    private TileManager _tileManager;
-    private TimelinePresenter _timelinePresenter;
 
     private void Awake()
     {
@@ -63,95 +22,23 @@ public class AttackManager : MonoBehaviour, IInitializable
         }
     }
 
-    private void ResolveDependencies()
-    {
-        _gameManager = GameManager.Instance;
-        _mapManager = MapManager.Instance;
-        _tileManager = TileManager.Instance;
-        _timelinePresenter = TimelinePresenter.Instance;
-    }
-
-    public async UniTask Initialize()
+    private void Start()
     {
         ResolveDependencies();
-        await UniTask.CompletedTask;
     }
 
-    /// <summary>
-    /// タイムラインのコマンド呼び出し
-    /// </summary>
-    public async UniTask ProcessTimeline()
+    private void ResolveDependencies()
     {
-        while (_timeline.Count > 0)
-        {
-            // 先頭コマンドの実行
-            await ExecuteCommandAsync(_timeline[0]);
-            // コマンドをタイムラインから除外
-            _timeline.RemoveAt(0);
-            _timelinePresenter.UpdateTimeline(_timeline);
-
-            // マップデータ処理完了待ち
-            await UniTask.WaitUntil(() => _mapManager.isDirty == false);
-            // 双方どちらかの本部ユニット数が0の場合ゲームオーバーに
-            if (_mapManager.PlayerHqCount < 1 || _mapManager.EnemyHqCount < 1)
-            {
-                _gameManager.IsGameOver = true;
-                break;
-            }
-        }
-
-        // タイムラインの中身を完全クリアにする（おまじない）
-        _timeline.Clear();
+        _mapManager = MapManager.Instance;
     }
 
-    /// <summary>
-    /// コマンドの実行
-    /// </summary>
-    private async Task ExecuteCommandAsync(AttackCommand command)
-    {
-        // 防衛が成功したか
-        bool isSuccessDefence;
-        // 迎撃完了座標（グリッド）
-        Vector2Int interceptedGridPos = Vector2Int.zero;
-        // 迎撃完了座標（グローバル）
-        Vector3 interceptedPos = Vector3.zero;
-        // 防衛処理
-        if (command.Owner == TileOwner.Player)
-        {
-            isSuccessDefence = GetEnemyDefenceResult(command, out interceptedGridPos);
-            TileController interceptedTile = _mapManager.GetEnemyTile(interceptedGridPos, true);
-            interceptedPos = interceptedTile.GlobalPos;
-        }
-        else
-        {
-            // isSuccessDefence = GetPlayerDefenceResult();
-            isSuccessDefence = false;
-        }
+    // public async UniTask Initialize()
+    // {
+    //     ResolveDependencies();
+    //     await UniTask.CompletedTask;
+    // }
 
-        // 防衛に失敗している場合、内部的なダメージの反映（見た目に反映されないAPI通信に近い更新）
-        if (!isSuccessDefence)
-        {
-            await ApplyDamage(command);
-        }
-
-        // ===================================================
-        // 見た目の演出
-        // ===================================================
-        // 防錆成功 => 攻撃が迎撃される演出のみ
-        // 防衛失敗 => 攻撃ヒット及びユニットの気絶演出
-        if (command.Attacker.unitObject.TryGetComponent<SquidController>(out var squidController))
-        {
-            await squidController.AttackInkSuccess(command.Target.GlobalPos, interceptedPos);
-        }
-        // 防衛に失敗している場合は、攻撃ヒット及びユニットの気絶演出
-        if (!isSuccessDefence)
-        {
-            await AttackHitEffects(command);
-            await FaintEffects(command);
-        }
-    }
-
-    private async UniTask ApplyDamage(AttackCommand command)
+    public async UniTask ApplyDamage(TimelineCommand command)
     {
         List<UniTask> applyTask = new List<UniTask>();
         foreach (TileController tile in command.AffectedTiles)
@@ -172,7 +59,7 @@ public class AttackManager : MonoBehaviour, IInitializable
         await UniTask.WhenAll(applyTask.ToArray());
     }
 
-    private async UniTask AttackHitEffects(AttackCommand command)
+    public async UniTask AttackHitEffects(TimelineCommand command)
     {
         List<UniTask> animationTasks = new List<UniTask>();
         foreach (TileController tile in command.AffectedTiles)
@@ -189,7 +76,7 @@ public class AttackManager : MonoBehaviour, IInitializable
     }
 
 
-    private async UniTask FaintEffects(AttackCommand command)
+    public async UniTask FaintEffects(TimelineCommand command)
     {
         List<UniTask> animationTasks = new List<UniTask>();
         foreach (TileController tile in command.AffectedTiles)
@@ -230,7 +117,7 @@ public class AttackManager : MonoBehaviour, IInitializable
     /// <summary>
     /// 敵エリアへの攻撃に対する防衛判定
     /// </summary>
-    private bool GetEnemyDefenceResult(AttackCommand command, out Vector2Int interceptedPos)
+    public bool GetEnemyDefenceResult(TimelineCommand command, out Vector2Int interceptedPos)
     {
         // ターゲットの座標
         Vector2Int tgtPos = command.Target.gridPos;
@@ -280,7 +167,6 @@ public class AttackManager : MonoBehaviour, IInitializable
             {
                 foreach (TileController defenceTile in defenceTiles)
                 {
-                    // Debug.Log($"trajectoryTiles.Contains: {trajectoryTiles.Contains(defenceTile)}");
                     if (trajectoryTiles.Contains(defenceTile)) overlapCount++;
                 } 
             }
@@ -293,9 +179,10 @@ public class AttackManager : MonoBehaviour, IInitializable
             float attackerEvasionRate = UnityEngine.Random.value;
             // 防衛ユニットのy座標の防衛距離
             int verticalRange = herringTile.UnitDefendable.Controller.VerticalRange;
-            // 防衛判定結果を受け取る
+            // 防衛数分の判定処理を実行
             for (int i = 0; i < overlapCount; i++)
             {
+                // 防衛判定結果を受け取る
                 bool result = herringTile.UnitDefendable.Controller.IsIntercepted(attackerEvasionRate, i, distanceX);
 
                 // 防衛成功判定を受け取った場合は、迎撃できたポジションを返す
@@ -309,30 +196,6 @@ public class AttackManager : MonoBehaviour, IInitializable
 
         interceptedPos = Vector2Int.zero;
         return false;
-    }
-
-    /// <summary>
-    /// コマンドを予約する（外部から呼ぶ）
-    /// </summary>
-    public void RegisterCommand()
-    {
-        UnitProfile profile = _tileManager.selectedTileController.UnitBase.Stats.profile;
-        AttackProfile attackProfile = _tileManager.selectedTileController.UnitAttackable.Stats.profile;
-        // 攻撃内容を作成してキューに追加
-        AttackCommand newAttack = new AttackCommand(
-            _tileManager.selectedTileController.owner,
-            profile.unitName,
-            _tileManager.selectedTileController,
-            _tileManager.targetTile,
-            new List<TileController>(_tileManager.targetTiles),
-            attackProfile.power,
-            attackProfile.delay
-        );
-        _timeline.Add(newAttack);
-        _timeline.Sort((a, b) => b.time.CompareTo(a.time));
-        _timelinePresenter.UpdateTimeline(_timeline);
-        
-        Debug.Log($"攻撃予約完了！");
     }
 }
 

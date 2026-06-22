@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using AttackCommand = AttackManager.AttackCommand;
+using TimelineCommand = TimelineManager.TimelineCommand;
 using TileOwner = TileController.TileOwner;
 
 public class TimelinePresenter : MonoBehaviour
@@ -26,7 +26,7 @@ public class TimelinePresenter : MonoBehaviour
         }
     }
 
-    public void UpdateTimeline(List<AttackCommand> commands)
+    public void UpdateTimeline(List<TimelineCommand> commands)
     {
         // 古いカードを全部消す（更新用）
         foreach (Transform child in contentParent) {

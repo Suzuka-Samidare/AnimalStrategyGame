@@ -37,7 +37,7 @@ public class GameManager : MonoBehaviour, IInitializable
 
     [Header("Refs")]
     private MapManager _mapManager;
-    private AttackManager _attackManager; // AttackManager -> ActionManagerに名前を変えたい
+    private TimelineManager _timelineManager;
     private UIManager _uiManager;
     private DialogController _dialogController;
     private InfomationController _infomationController;
@@ -66,7 +66,7 @@ public class GameManager : MonoBehaviour, IInitializable
     private void ResolveDependencies()
     {
         _mapManager = MapManager.Instance;
-        _attackManager = AttackManager.Instance;
+        _timelineManager = TimelineManager.Instance;
         _uiManager = UIManager.Instance;
         _dialogController = DialogController.Instance;
         _infomationController = InfomationController.Instance;
@@ -172,9 +172,9 @@ public class GameManager : MonoBehaviour, IInitializable
         // アナウンスパネル表示
         await _uiManager.BannerView.PlayAnnouncement("ACTION");
 
-        if (_attackManager.TimelineCount > 0)
+        if (_timelineManager.TimelineCount > 0)
         {
-            await _attackManager.ProcessTimeline();
+            await _timelineManager.ProcessTimeline();
             if (IsGameOver) {
                 EnterGameOver();
                 return;
