@@ -36,7 +36,7 @@ public class SquidController : MonoBehaviour
         _ascentFinishPos.y = _peakHeight;
     }
 
-    public async UniTask AttackInkFailed(Vector3 descentFinishPos)
+    public async UniTask AttackInkSuccess(Vector3 descentFinishPos)
     {
         GameObject ink = Instantiate(_inkPrefab, _ascentStartPos, transform.rotation);
         if (ink != null && ink.TryGetComponent<ParabolicMover>(out var parabolicMover))
@@ -56,7 +56,7 @@ public class SquidController : MonoBehaviour
         }
     }
 
-    public async UniTask AttackInkSuccess(Vector3 descentFinishPos, Vector3 interceptedPos)
+    public async UniTask AttackInkFailed(Vector3 descentFinishPos, Vector3 interceptedPos)
     {
         GameObject ink = Instantiate(_inkPrefab, _ascentStartPos, transform.rotation);
         if (ink != null && ink.TryGetComponent<ParabolicMover>(out var parabolicMover))
@@ -71,7 +71,7 @@ public class SquidController : MonoBehaviour
             await parabolicMover.DescentWithInterruptAsync(
                 new MovementPath { start = descentStartPos, end = descentFinishPos },
                 interceptedPos,
-                (pos) => ParticlePoolManager.Instance.SpawnParticle(pos, Quaternion.identity)
+                async (pos) => await ParticlePoolManager.Instance.SpawnParticleAsync(pos, Quaternion.identity)
             );
         }
         else

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using TileOwner = TileController.TileOwner;
 using TimelineCommand = TimelineManager.TimelineCommand;
 
 public class AttackManager : MonoBehaviour
@@ -32,11 +33,67 @@ public class AttackManager : MonoBehaviour
         _mapManager = MapManager.Instance;
     }
 
-    // public async UniTask Initialize()
-    // {
-    //     ResolveDependencies();
-    //     await UniTask.CompletedTask;
-    // }
+    /// <summary>
+    /// 迎撃プロセス
+    /// </summary>
+    public async UniTask ProcessInterceptAttempt(TimelineCommand command)
+    {
+        // 防衛が成功したか
+        bool isSuccessDefence;
+        // 迎撃完了座標（グリッド）
+        Vector2Int interceptedGridPos = Vector2Int.zero;
+        // 迎撃完了座標（グローバル）
+        Vector3 interceptedPos = Vector3.zero;
+        // 防衛処理
+        if (command.Owner == TileOwner.Player)
+        {
+            isSuccessDefence = GetEnemyDefenceResult(command, out interceptedGridPos);
+            TileController interceptedTile = _mapManager.GetEnemyTile(interceptedGridPos, true);
+            interceptedPos = interceptedTile.GlobalPos;
+        }
+        else
+        {
+            // isSuccessDefence = GetPlayerDefenceResult();
+            isSuccessDefence = false;
+        }
+
+        Debug.Log($"isSuccessDefence: {isSuccessDefence}");
+        
+        // 防衛に失敗している場合、内部的なダメージの反映（見た目に反映されないAPI通信に近い更新）
+        if (!isSuccessDefence)
+        {
+            await ApplyDamage(command);
+        }
+        
+
+        // ===================================================
+        // 見た目の演出
+        // ===================================================
+        // 防錆成功 => 攻撃が迎撃される演出のみ
+        // 防衛失敗 => 攻撃ヒット及びユニットの気絶演出
+        if (command.Attacker.unitObject.TryGetComponent<SquidController>(out var squidController))
+        {
+            if (isSuccessDefence)
+            {
+                await squidController.AttackInkFailed(command.Target.GlobalPos, interceptedPos);
+            }
+            else
+            {
+                await squidController.AttackInkSuccess(command.Target.GlobalPos);
+            }
+        }
+        else
+        {
+            throw new System.Exception("SquidControllerの参照に失敗しました。");
+        }
+
+        // 防衛に失敗している場合は、攻撃ヒット及びユニットの気絶演出
+        if (!isSuccessDefence)
+        {
+            await AttackHitEffects(command);
+            await FaintEffects(command);
+        }
+    }
 
     public async UniTask ApplyDamage(TimelineCommand command)
     {
@@ -65,7 +122,8 @@ public class AttackManager : MonoBehaviour
         foreach (TileController tile in command.AffectedTiles)
         {
             // 爆発のパーティクルを生成
-            ParticlePoolManager.Instance.SpawnParticle(tile.transform.position + Vector3.up, Quaternion.identity);
+            UniTask explosion = ParticlePoolManager.Instance.SpawnParticleAsync(tile.transform.position + Vector3.up, Quaternion.identity);
+            animationTasks.Add(explosion);
             // ユニットがいない場合はここで処理終了
             if (!tile.isExistUnit) continue;
             // ダメージ表示

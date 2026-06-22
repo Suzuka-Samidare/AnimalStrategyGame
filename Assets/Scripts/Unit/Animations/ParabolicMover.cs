@@ -31,7 +31,7 @@ public class ParabolicMover : MonoBehaviour
 
     [Header("移動設定")]
     [Tooltip("スピード"), SerializeField]
-    private float _speed = 5.0f;
+    private float _speed = 7.0f;
 
     private float _elapsedTime = 0f;
     public bool _isAnimating { get; private set; } = false;
@@ -81,6 +81,8 @@ public class ParabolicMover : MonoBehaviour
     /// </summary>
     public async UniTask DescentAsync(MovementPath descentPath)
     {
+        Debug.Log("[[[DescentAsync]]]");
+
         if (_isAnimating) return;
         _isAnimating = true;
 
@@ -120,8 +122,10 @@ public class ParabolicMover : MonoBehaviour
     /// <summary>
     /// 下降移動 + 途中でアクション
     /// </summary>
-    public async UniTask DescentWithInterruptAsync(MovementPath descentPath, Vector3 interceptedPos, Action<Vector3> interruptAction )
+    public async UniTask DescentWithInterruptAsync(MovementPath descentPath, Vector3 interceptedPos, Func<Vector3, UniTask> interruptAction )
     {
+        Debug.Log("[[[DescentWithInterruptAsync]]]");
+
         if (_isAnimating) return;
         _isAnimating = true;
 
@@ -152,7 +156,8 @@ public class ParabolicMover : MonoBehaviour
 
             // TODO: 移動速度が速いと正確に判定が動かないので、別の方法が無いか考える
             if (Mathf.Abs(currentZ - interceptedPos.z) < 0.1) {
-                interruptAction(currentPos);
+                Destroy(gameObject);
+                await interruptAction(currentPos);
                 break;
             }
 
@@ -161,6 +166,6 @@ public class ParabolicMover : MonoBehaviour
         }
 
         _isAnimating = false;
-        Destroy(gameObject);
+        // Destroy(gameObject);
     }
 }

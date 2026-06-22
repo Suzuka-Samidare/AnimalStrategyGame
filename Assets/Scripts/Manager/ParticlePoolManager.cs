@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Pool; // これを使う！
 using Cysharp.Threading.Tasks;
+using System.Threading.Tasks;
 
 public class ParticlePoolManager : MonoBehaviour, IInitializable
 {
@@ -81,10 +82,47 @@ public class ParticlePoolManager : MonoBehaviour, IInitializable
     }
 
     // 外部から呼び出す用のカスタムEmitメソッド
-    public PooledParticle SpawnParticle(Vector3 position, Quaternion rotation)
+    public void SpawnParticle(Vector3 position, Quaternion rotation)
     {
         var particle = _pool.Get(); // プールから取得（なければ自動生成される）
         particle.transform.SetPositionAndRotation(position, rotation);
-        return particle;
+
+        if (particle.TryGetComponent<ParticleSystem>(out var particleSystem))
+        {
+            ForgetAndRelease(particleSystem).Forget();
+        }
+        else
+        {
+            throw new System.Exception("ParticleSystemの取得に失敗しました。");
+        }
+    }
+
+    // 外部から呼び出す用のカスタムEmitメソッド
+    public async UniTask SpawnParticleAsync(Vector3 position, Quaternion rotation)
+    {
+        var particle = _pool.Get(); // プールから取得（なければ自動生成される）
+        particle.transform.SetPositionAndRotation(position, rotation);
+        
+        if (particle.TryGetComponent<ParticleSystem>(out var particleSystem))
+        {
+            await WaitAndReleaseAsync(particleSystem);
+        }
+        else
+        {
+            throw new System.Exception("ParticleSystemの取得に失敗しました。");
+        }
+    }
+
+    private async UniTaskVoid ForgetAndRelease(ParticleSystem particle)
+    {
+        await WaitAndReleaseAsync(particle);
+    }
+
+    private async UniTask WaitAndReleaseAsync(ParticleSystem particle, PlayerLoopTiming timing = PlayerLoopTiming.Update)
+    {
+        particle.Play();
+        // ParticleSystemが停止する（再生終了する）まで待機
+        // ※ParticleSystemのStopActionが"None"になっている前提
+        await UniTask.WaitUntil(() => !particle.isPlaying, timing, this.GetCancellationTokenOnDestroy());
     }
 }
