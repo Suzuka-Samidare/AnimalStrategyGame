@@ -1,6 +1,8 @@
 using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
+[RequireComponent(typeof(Camera))]
 public class CameraMovement : MonoBehaviour
 {
     public static CameraMovement Instance { get; private set; }
@@ -13,6 +15,8 @@ public class CameraMovement : MonoBehaviour
 
     [Header("ステータス")]
     [SerializeField] private bool _isAutoMoving = false;
+    public bool IsAutoMoving => _isAutoMoving;
+    [SerializeField] private bool _isSmoothMove = false;
     private bool isReconMode => GameManager.Instance.currentPhase ==  GameManager.Phase.COMMAND;
 
     [Header("基本設定")]
@@ -41,14 +45,12 @@ public class CameraMovement : MonoBehaviour
 
     private void Awake()
     {
-        cam = GetComponent<Camera>();
-
-        if (cam == null) Debug.Log("カメラコンポーネントの取得失敗");
-
-        if (!cam.orthographic) Debug.Log("カメラがOrthographicモードではありません。");
-
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        cam = GetComponent<Camera>();
+
+        if (!cam.orthographic) Debug.LogError("カメラがOrthographicモードではありません。");
         
         // ターゲットが設定されていない場合は、カメラの親オブジェクトをターゲットとする
         if (focusPoint == null) focusPoint = transform.parent;
@@ -79,11 +81,6 @@ public class CameraMovement : MonoBehaviour
 
     private void Update()
     {
-        // if (Input.GetKeyDown(KeyCode.L) && !_isAutoMoving)
-        // {
-        //     TestSetDestination();
-        // }
-
         if (_isAutoMoving)
         {
             AutoMove();
@@ -97,7 +94,7 @@ public class CameraMovement : MonoBehaviour
             focusPoint.position, 
             _destination, 
             ref _currentVelocity, 
-            smoothTime
+            _isSmoothMove ? smoothTime : 0
         );
 
         // 目的地に十分近づいたら、自由操作を解禁！
@@ -105,14 +102,27 @@ public class CameraMovement : MonoBehaviour
         {
             focusPoint.position = _destination; // 最後にピタッと合わせる
             _isAutoMoving = false;
+            _isSmoothMove = false;
             Debug.Log("到着！自由操作できるよ〜✨");
         }
     }
 
-    public void SetDestination(Vector3 destination)
+    public void SetDestination(Vector3 destination, bool isSmooth = true)
     {
         _destination = destination;
+
         _isAutoMoving = true;
+        _isSmoothMove = isSmooth;
+    }
+
+    public async UniTask SetDestinationAsync(Vector3 destination, bool isSmooth = true)
+    {
+        _destination = destination;
+
+        _isAutoMoving = true;
+        _isSmoothMove = isSmooth;
+        
+        await UniTask.WaitUntil(() => focusPoint.position == destination);
     }
 
     private void HandleMove(Vector2 delta)

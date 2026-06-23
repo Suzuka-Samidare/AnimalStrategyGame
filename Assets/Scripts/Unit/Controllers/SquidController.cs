@@ -44,10 +44,10 @@ public class SquidController : MonoBehaviour
             Vector3 descentStartPos = new Vector3(descentFinishPos.x, _peakHeight, descentFinishPos.z - 10);
             descentFinishPos.y = 0.5f;
 
-            CameraMovement.Instance.SetDestination(transform.position);
+            await CameraMovement.Instance.SetDestinationAsync(transform.position);
             await _unitAnimation.PlayOnceAsync(AnimationName.Attack);
             await parabolicMover.AscendAsync(new MovementPath { start = _ascentStartPos, end = _ascentFinishPos });
-            CameraMovement.Instance.SetDestination(descentFinishPos);
+            // CameraMovement.Instance.SetDestination(descentFinishPos);
             await parabolicMover.DescentAsync(new MovementPath { start = descentStartPos, end = descentFinishPos });
         }
         else
@@ -64,10 +64,10 @@ public class SquidController : MonoBehaviour
             Vector3 descentStartPos = new Vector3(descentFinishPos.x, _peakHeight, descentFinishPos.z - 10);
             descentFinishPos.y = 0.5f;
 
-            CameraMovement.Instance.SetDestination(transform.position);
+            await CameraMovement.Instance.SetDestinationAsync(transform.position);
             await _unitAnimation.PlayOnceAsync(AnimationName.Attack);
             await parabolicMover.AscendAsync(new MovementPath { start = _ascentStartPos, end = _ascentFinishPos });
-            CameraMovement.Instance.SetDestination(descentFinishPos);
+            // CameraMovement.Instance.SetDestination(descentFinishPos);
             await parabolicMover.DescentWithInterruptAsync(
                 new MovementPath { start = descentStartPos, end = descentFinishPos },
                 interceptedPos,
