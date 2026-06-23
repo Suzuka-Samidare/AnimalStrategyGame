@@ -2227,14 +2227,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   focusPoint: {fileID: 0}
   cam: {fileID: 0}
-  _isAutoMoving: 0
   distance: 5
   dragSpeed: 0.01
   _destination: {x: 0, y: 0, z: 0}
   _currentVelocity: {x: 0, y: 0, z: 0}
-  smoothTime: 0.2
-  arrivalThreshold: 0.01
-  zoomSpeed: 0.02
+  _smoothTime: 0.2
+  _arrivalThreshold: 0.1
+  _trackingTarget: {fileID: 0}
+  zoomSpeed: 0.05
   minZoom: 2
   maxZoom: 3.26
   rotationSpeed: 0.3

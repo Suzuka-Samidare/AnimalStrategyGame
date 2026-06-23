@@ -18,6 +18,6 @@ public class MoveCamera : MonoBehaviour, IButtonAction
 
     public void Execute() {
         Vector3 destination = _targetMap == Map.PLAYER ? _tileManager.PlayerMapLastViewedPosition : _tileManager.EnemyMapLastViewedPosition;
-        CameraMovement.Instance.SetDestination(destination);
+        CameraMovement.Instance.MoveTo(destination);
     }
 }

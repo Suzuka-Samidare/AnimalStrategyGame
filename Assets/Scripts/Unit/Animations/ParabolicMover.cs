@@ -41,6 +41,8 @@ public class ParabolicMover : MonoBehaviour
     /// </summary>
     public async UniTask AscendAsync(MovementPath ascentPath)
     {
+        Debug.Log("[[[AscendAsync]]]");
+
         if (_isAnimating) return;
         _isAnimating = true;
 
@@ -111,8 +113,6 @@ public class ParabolicMover : MonoBehaviour
             // 放物線に沿って移動
             transform.position = currentPos;
 
-            CameraMovement.Instance.SetDestination(currentPos, false);
-
             // 次のフレームのUpdateタイミングまで待機する
             await UniTask.Yield(PlayerLoopTiming.Update);
         }
@@ -157,8 +157,6 @@ public class ParabolicMover : MonoBehaviour
             Vector3 currentPos = new Vector3(currentX, currentY, currentZ);
             // 放物線に沿って移動
             transform.position = currentPos;
-
-            CameraMovement.Instance.SetDestination(currentPos, false);
 
             // TODO: 移動速度が速いと正確に判定が動かないので、別の方法が無いか考える
             if (Mathf.Abs(currentZ - interceptedPos.z) < 0.1) {

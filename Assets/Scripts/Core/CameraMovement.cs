@@ -1,5 +1,7 @@
 using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
+using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 
 [RequireComponent(typeof(Camera))]
@@ -13,11 +15,21 @@ public class CameraMovement : MonoBehaviour
     private MapManager _mapManager;
     private TileManager _tileManager;
 
-    [Header("ステータス")]
-    [SerializeField] private bool _isAutoMoving = false;
-    public bool IsAutoMoving => _isAutoMoving;
-    [SerializeField] private bool _isSmoothMove = false;
+    [Header("カメラステータス")]
+    private CameraMode _currentMode = CameraMode.Idle;
+    // カメラの動作モード
+    private enum CameraMode
+    {
+        Idle,
+        Linear,
+        Tracking
+    }
+
+    // [SerializeField] private bool _isAutoMoving = false;
+    // public bool IsAutoMoving => _isAutoMoving;
+    // [SerializeField] private bool _isSmoothMove = false;
     private bool isReconMode => GameManager.Instance.currentPhase ==  GameManager.Phase.COMMAND;
+    private CancellationTokenSource _cancelTokenSource;
 
     [Header("基本設定")]
     [SerializeField] private float distance = 5f; // カメラとフォーカス地点の距離（固定）
@@ -28,11 +40,13 @@ public class CameraMovement : MonoBehaviour
     [Header("自動移動設定")]
     [SerializeField] private Vector3 _destination;
     [SerializeField] private Vector3 _currentVelocity = Vector3.zero;
-    [SerializeField] private float smoothTime = 0.2f;
-    [SerializeField] private float arrivalThreshold = 0.01f; // 到着とみなす距離
+    [SerializeField] private float _smoothTime = 0.2f;
+    [SerializeField] private float _arrivalThreshold = 0.1f; // 到着とみなす距離
+    [SerializeField] private Transform _trackingTarget;
+    private Func<bool> _stopCondition;
 
     [Header("ズーム設定（Projection Sizeの変更）")]
-    [SerializeField] private float zoomSpeed = 0.02f;
+    [SerializeField] private float zoomSpeed = 0.05f;
     [SerializeField] private float minZoom = 2.0f;
     [SerializeField] private float maxZoom = 3.26f;
 
@@ -60,6 +74,11 @@ public class CameraMovement : MonoBehaviour
 
     private void Start()
     {
+        ResolveDependencies();
+    }
+
+    private void ResolveDependencies()
+    {
         _mapManager = MapManager.Instance;
         _tileManager = TileManager.Instance;
         if (!_mapManager || !_tileManager) {
@@ -79,55 +98,161 @@ public class CameraMovement : MonoBehaviour
         InputHandler.OnZoomUpdate -= HandleZoom;
     }
 
-    private void Update()
+    private void LateUpdate()
     {
-        if (_isAutoMoving)
+        switch (_currentMode)
         {
-            AutoMove();
+            case CameraMode.Linear:
+                ExecuteLinearMove();
+                break;
+
+            case CameraMode.Tracking:
+                ExecuteTracking();
+                break;
+                
+            case CameraMode.Idle:
+                break;
         }
     }
 
-    private void AutoMove()
+    /// <summary>
+    /// 非同期カメラ処理の強制中止処理
+    /// </summary>
+    private void StopCurrentMovement()
     {
-        // 滑らかに移動！
-        focusPoint.position = Vector3.SmoothDamp(
-            focusPoint.position, 
-            _destination, 
-            ref _currentVelocity, 
-            _isSmoothMove ? smoothTime : 0
+        _cancelTokenSource?.Cancel();
+        _cancelTokenSource?.Dispose();
+        _cancelTokenSource = null;
+    }
+
+    /// <summary>
+    /// 指定の目的地へ直線的に移動を開始する
+    /// </summary>
+    public void MoveTo(Vector3 destination)
+    {
+        // もし既に前の移動を待機中なら、それをキャンセルする（二重動作防止）
+        StopCurrentMovement();
+
+        _destination = destination;
+        _currentMode = CameraMode.Linear;
+    }
+
+    /// <summary>
+    /// 指定の目的地へ直線的に移動を開始する
+    /// </summary>
+    public async UniTask MoveToAsync(Vector3 destination)
+    {
+        // もし既に前の移動を待機中なら、それをキャンセルする（二重動作防止）
+        StopCurrentMovement();
+        // 新しいキャンセルトークンの生成及び取得
+        _cancelTokenSource = new CancellationTokenSource();
+        var token = _cancelTokenSource.Token;
+
+        _destination = destination;
+        _currentMode = CameraMode.Linear;
+
+        await UniTask.WaitUntil(() =>
+            Vector3.Distance(focusPoint.position, destination) < _arrivalThreshold,
+            cancellationToken: token
         );
+    }
 
-        // 目的地に十分近づいたら、自由操作を解禁！
-        if (Vector3.Distance(focusPoint.position, _destination) < arrivalThreshold)
+    /// <summary>
+    /// 提案A: 指定のオブジェクトを条件を満たすまで追尾する
+    /// </summary>
+    /// <param name="target">追尾対象</param>
+    /// <param name="untilCondition">「この条件が true になったら追尾をやめる」という条件式</param>
+    public void Follow(Transform target, Func<bool> untilCondition)
+    {
+        if (target == null) return;
+
+        _trackingTarget = target;
+        _stopCondition = untilCondition;
+        _currentMode = CameraMode.Tracking;
+    }
+
+    // 直線移動の具体的な処理
+    private void ExecuteLinearMove()
+    {
+        focusPoint.position = Vector3.SmoothDamp(focusPoint.position, _destination, ref _currentVelocity, _smoothTime);
+
+        // 目的地にほぼ到着したらIdleに戻す
+        if (Vector3.Distance(focusPoint.position, _destination) < _arrivalThreshold)
         {
-            focusPoint.position = _destination; // 最後にピタッと合わせる
-            _isAutoMoving = false;
-            _isSmoothMove = false;
-            Debug.Log("到着！自由操作できるよ〜✨");
+            focusPoint.position = _destination;
+            _currentMode = CameraMode.Idle;
         }
     }
 
-    public void SetDestination(Vector3 destination, bool isSmooth = true)
+    // 追尾の具体的な処理
+    private void ExecuteTracking()
     {
-        _destination = destination;
+        // ターゲットが消失した、または終了条件を満たしたら追尾終了
+        if (_trackingTarget == null || (_stopCondition != null && _stopCondition()))
+        {
+            _currentMode = CameraMode.Idle;
+            _trackingTarget = null;
+            _stopCondition = null;
+            return;
+        }
 
-        _isAutoMoving = true;
-        _isSmoothMove = isSmooth;
+        // ターゲットの現在地から目標座標を計算して追従
+        focusPoint.position = _trackingTarget.position;
+        // Vector3 desiredPosition = _trackingTarget.position + offset;
+        // transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref _currentVelocity, _smoothTime);
     }
 
-    public async UniTask SetDestinationAsync(Vector3 destination, bool isSmooth = true)
-    {
-        _destination = destination;
+    // private void Update()
+    // {
+    //     if (_isAutoMoving)
+    //     {
+    //         AutoMove();
+    //     }
+    // }
 
-        _isAutoMoving = true;
-        _isSmoothMove = isSmooth;
-        
-        await UniTask.WaitUntil(() => focusPoint.position == destination);
-    }
+    // private void AutoMove()
+    // {
+    //     // 滑らかに移動！
+    //     focusPoint.position = Vector3.SmoothDamp(
+    //         focusPoint.position, 
+    //         _destination, 
+    //         ref _currentVelocity, 
+    //         _isSmoothMove ? _smoothTime : 0
+    //     );
+
+    //     // 目的地に十分近づいたら、自由操作を解禁！
+    //     if (Vector3.Distance(focusPoint.position, _destination) < _arrivalThreshold)
+    //     {
+    //         focusPoint.position = _destination; // 最後にピタッと合わせる
+    //         _isAutoMoving = false;
+    //         _isSmoothMove = false;
+    //         Debug.Log("到着！自由操作できるよ〜✨");
+    //     }
+    // }
+
+    // public void SetDestination(Vector3 destination, bool isSmooth = true)
+    // {
+    //     _destination = destination;
+
+    //     _isAutoMoving = true;
+    //     _isSmoothMove = isSmooth;
+    // }
+
+    // public async UniTask SetDestinationAsync(Vector3 destination, bool isSmooth = true)
+    // {
+    //     _destination = destination;
+
+    //     _isAutoMoving = true;
+    //     _isSmoothMove = isSmooth;
+
+    //     await UniTask.WaitUntil(() => focusPoint.position == destination);
+    // }
+
 
     private void HandleMove(Vector2 delta)
     {
-        if (_isAutoMoving) return;
+        // if (_isAutoMoving) return;
+        if (_currentMode != CameraMode.Idle) return;
 
         // カメラの移動量を計算 (Y軸方向はZ軸にマッピングすることが多い)
         // スクリーン座標のY軸方向のドラッグをワールド座標のZ軸方向の移動に、

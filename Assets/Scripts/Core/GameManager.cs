@@ -188,7 +188,7 @@ public class GameManager : MonoBehaviour, IInitializable
 
         await Task.Delay(2000);
         _infomationController.Close();
-        CameraMovement.Instance.SetDestination(TileManager.Instance.PlayerMapLastViewedPosition);
+        CameraMovement.Instance.MoveTo(TileManager.Instance.PlayerMapLastViewedPosition);
         EnterPreparationPhase();
     }
 
