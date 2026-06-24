@@ -1,10 +1,12 @@
 using UnityEngine;
 
-public class DefenceUnit : MonoBehaviour, IUnit, IDefendable
+[RequireComponent(typeof(DefenceUnitStats))]
+[RequireComponent(typeof(DefenceUnitController))]
+public class DefenceUnit : BaseUnit, IDefendable
 {
     [Header("Refs")]
-    [SerializeField] private UnitStats baseStats;
-    [SerializeField] private UnitController baseController;
+    // [SerializeField] private UnitStats baseStats;
+    // [SerializeField] private UnitController baseController;
     [SerializeField] private DefenceUnitStats defenceStats;
     [SerializeField] private DefenceUnitController defenceController;
 
@@ -13,8 +15,8 @@ public class DefenceUnit : MonoBehaviour, IUnit, IDefendable
     // public DefenceUnitStats DefenceStats => defenceStats;
     // public DefenceUnitController DefenceController => defenceController;
 
-    UnitStats IUnit.Stats => baseStats;
-    UnitController IUnit.Controller => baseController;
+    // UnitStats IUnit.Stats => baseStats;
+    // UnitController IUnit.Controller => baseController;
     DefenceUnitStats IDefendable.Stats => defenceStats;
     DefenceUnitController IDefendable.Controller => defenceController;
 }

@@ -1,5 +1,7 @@
 using UnityEngine;
 
+[RequireComponent(typeof(UnitStats))]
+[RequireComponent(typeof(UnitController))]
 public class BaseUnit : MonoBehaviour, IUnit
 {
     [Header("Refs")]

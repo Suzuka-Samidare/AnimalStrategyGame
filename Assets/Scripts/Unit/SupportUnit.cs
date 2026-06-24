@@ -1,10 +1,12 @@
 using UnityEngine;
 
-public class SupportUnit : MonoBehaviour, IUnit, ISupportable
+[RequireComponent(typeof(SupportUnitStats))]
+// [RequireComponent(typeof(UnitController))]
+public class SupportUnit : BaseUnit, ISupportable
 {
     [Header("Refs")]
-    [SerializeField] private UnitStats baseStats;
-    [SerializeField] private UnitController baseController;
+    // [SerializeField] private UnitStats baseStats;
+    // [SerializeField] private UnitController baseController;
     [SerializeField] private SupportUnitStats supportStats;
     // [SerializeField] private SupportUnitController supportController;
 
@@ -13,8 +15,8 @@ public class SupportUnit : MonoBehaviour, IUnit, ISupportable
     // public SupportUnitStats SupportStats => supportStats;
     // public SupportUnitController SupportController => supportController;
 
-    UnitStats IUnit.Stats => baseStats;
-    UnitController IUnit.Controller => baseController;
+    // UnitStats IUnit.Stats => baseStats;
+    // UnitController IUnit.Controller => baseController;
     SupportUnitStats ISupportable.Stats => supportStats;
     // SupportUnitController ISupportable.Controller => supportController;
 }

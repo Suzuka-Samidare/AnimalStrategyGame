@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(AttackUnitStats))]
 public class AttackUnitController : MonoBehaviour
 {
     private AttackProfile _attackProfile;

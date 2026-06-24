@@ -1,24 +1,25 @@
 using UnityEngine;
 
-public class CallingUnit : MonoBehaviour, IUnit, ICallable
+[RequireComponent(typeof(CallingUnitController))]
+public class CallingUnit : BaseUnit, ICallable
 {
-    [Header("Refs")]
-    [SerializeField] private UnitStats baseStats;
-    [SerializeField] private UnitController baseController;
+    // [Header("Refs")]
+    // [SerializeField] private UnitStats baseStats;
+    // [SerializeField] private UnitController baseController;
     [SerializeField] private CallingUnitController callingController;
 
     // public UnitStats BaseStats => baseStats;
     // public UnitController BaseController => baseController;
     // public CallingUnitController CallingController => callingController;
 
-    UnitStats IUnit.Stats => baseStats;
-    UnitController IUnit.Controller => baseController;
+    // UnitStats IUnit.Stats => baseStats;
+    // UnitController IUnit.Controller => baseController;
     CallingUnitController ICallable.Controller => callingController;
 
     private void Awake()
     {
-        if (baseStats == null) throw new System.Exception("UnitStatsがアタッチされていません");
-        if (baseController == null) throw new System.Exception("UnitControllerがアタッチされていません");
+        // if (baseStats == null) throw new System.Exception("UnitStatsがアタッチされていません");
+        // if (baseController == null) throw new System.Exception("UnitControllerがアタッチされていません");
         if (callingController == null) throw new System.Exception("CallingUnitControllerがアタッチされていません");
     }
 }
