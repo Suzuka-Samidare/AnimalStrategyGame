@@ -111,7 +111,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
     private async UniTask ExecuteCommandAsync(TimelineCommand command)
     {
         // 迎撃プロセスの実行
-        await _attackManager.ProcessInterceptAttempt(command);
+        await _attackManager.ProcessInkInterceptAttempt(command);
     }
 
     /// <summary>

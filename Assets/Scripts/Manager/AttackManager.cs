@@ -34,14 +34,14 @@ public class AttackManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 迎撃プロセス
+    /// インク迎撃プロセス
     /// </summary>
-    public async UniTask ProcessInterceptAttempt(TimelineCommand command)
+    public async UniTask ProcessInkInterceptAttempt(TimelineCommand command)
     {
         // 防衛が成功したか
         bool isSuccessDefence;
         // 迎撃完了座標（グリッド）
-        Vector2Int interceptedGridPos = Vector2Int.zero;
+        Vector2Int interceptedGridPos;
         // 迎撃完了座標（グローバル）
         Vector3 interceptedPos = Vector3.zero;
         // 防衛処理
