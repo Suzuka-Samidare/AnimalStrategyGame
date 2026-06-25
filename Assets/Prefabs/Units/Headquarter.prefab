@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 1916835951523277541}
   - component: {fileID: 8356623291657105423}
   - component: {fileID: 1294688600762405301}
+  - component: {fileID: 1190618585395214496}
   - component: {fileID: 719101085596639704}
   - component: {fileID: 3462580841522748451}
-  - component: {fileID: 1190618585395214496}
   m_Layer: 0
   m_Name: Headquarter
   m_TagString: Untagged
@@ -110,6 +110,20 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+--- !u!114 &1190618585395214496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9160871832150813489}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d26dbcd3b8eab64cbd1acf79c976f3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  baseStats: {fileID: 719101085596639704}
+  baseController: {fileID: 3462580841522748451}
 --- !u!114 &719101085596639704
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -128,6 +142,7 @@ MonoBehaviour:
     unitName: 
     maxHp: 0
   hp: 0
+  IsFaint: 0
 --- !u!114 &3462580841522748451
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -140,17 +155,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88a4fe2ee3193364991a0b9542994a2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1190618585395214496
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9160871832150813489}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d26dbcd3b8eab64cbd1acf79c976f3f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  baseStats: {fileID: 719101085596639704}
-  baseController: {fileID: 3462580841522748451}

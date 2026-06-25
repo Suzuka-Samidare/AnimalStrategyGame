@@ -6,46 +6,53 @@ public class FactionUnitPool : MonoBehaviour
     [System.Serializable]
     public struct PoolSetupData
     {
-        public UnitType type;
-        public GameObject prefab;
+        public UnitType Type;
+        public BaseUnit Prefab;
+        public int DefaultCapacity;
+        public int MaxSize;
     }
 
     [SerializeField] private List<PoolSetupData> setupDataList;
     
-    private Dictionary<UnitType, UnitPool> _poolDictionary = new();
+    private Dictionary<UnitType, ComponentPool<BaseUnit>> _poolDictionary = new();
 
     private void Awake()
     {
         foreach (var data in setupDataList)
         {
             // 子オブジェクトとして純粋なプールを動的に生成（ヒエラルキーも整理されて綺麗！）
-            GameObject poolObj = new GameObject($"{data.type}Pool");
+            GameObject poolObj = new GameObject($"{data.Type}Pool");
             poolObj.transform.SetParent(this.transform);
             
-            UnitPool unitPool = poolObj.AddComponent<UnitPool>();
-            unitPool.Initialize(data.prefab);
+            // C#クラスとしてプールを new する（AddComponent は不要に！）
+            var unitPool = new ComponentPool<BaseUnit>(
+                prefab: data.Prefab,
+                parent: poolObj.transform,
+                defaultCapacity: data.DefaultCapacity > 0 ? data.DefaultCapacity : 5,
+                maxSize: data.MaxSize > 0 ? data.MaxSize : 10
+            );
 
-            _poolDictionary[data.type] = unitPool;
+            _poolDictionary[data.Type] = unitPool;
         }
     }
 
-    public GameObject Spawn(UnitType type, Vector3 position, Quaternion rotation)
+    public BaseUnit Spawn(UnitType type, Vector3 position, Quaternion rotation)
     {
         if (_poolDictionary.TryGetValue(type, out var pool))
         {
-            GameObject obj = pool.Get();
-            obj.transform.SetPositionAndRotation(position, rotation);
-            return obj;
+            BaseUnit unit = pool.Get();
+            unit.transform.SetPositionAndRotation(position, rotation);
+            return unit;
         }
         Debug.LogWarning($"プールに {type} が登録されてないよ！");
         return null;
     }
 
-    public void Despawn(UnitType type, GameObject obj)
+    public void Despawn(UnitType type, BaseUnit unit)
     {
         if (_poolDictionary.TryGetValue(type, out var pool))
         {
-            pool.Release(obj);
+            pool.Release(unit);
         }
     }
 }

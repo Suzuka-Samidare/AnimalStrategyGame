@@ -41,13 +41,13 @@ public class UnitSpawnManager : MonoBehaviour
         Vector3 tilePosition = tile.transform.position;
         Vector3 unitPosition = new Vector3(tilePosition.x, unitData.initPos.y, tilePosition.z);
         Quaternion unitRotation = tile.owner == TileOwner.Enemy ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
-        GameObject unit = targetPool.Spawn(
+        BaseUnit unit = targetPool.Spawn(
             unitData.profile.unitType,
             unitPosition,
             unitRotation
         );
         // タイルにユニットオブジェクトを紐づけ
-        tile.unitObject = unit;
+        tile.unitObject = unit.gameObject;
         // ユニット情報の初期化
         tile.UnitBase.Stats.InitializeBaseStats(unitData.profile);
         tile.UnitBase.Stats.InitializeRollStats(unitData);
@@ -69,13 +69,13 @@ public class UnitSpawnManager : MonoBehaviour
         Vector3 tilePosition = tile.transform.position;
         Vector3 unitPosition = new Vector3(tilePosition.x, 0.75f, tilePosition.z);
         Quaternion unitRotation = tile.owner == TileOwner.Enemy ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
-        GameObject unit = targetPool.Spawn(
+        BaseUnit unit = targetPool.Spawn(
             unitData.callingProfile.unitType,
             unitPosition,
             unitRotation
         );
         // タイルにユニットオブジェクトを紐づけ
-        tile.unitObject = unit;
+        tile.unitObject = unit.gameObject;
         // ユニット情報の初期化
         tile.UnitBase.Stats.InitializeBaseStats(unitData.callingProfile);
         // 呼び出し完了時の処理
@@ -116,13 +116,19 @@ public class UnitSpawnManager : MonoBehaviour
         FactionUnitPool targetPool = (tile.owner == TileOwner.Player) ? playerPool : enemyPool;
         // プール回収するユニットタイプの取得
         UnitType unitType = tile.UnitBase.Stats.profile.unitType;
-        // デスポーン処理
-        targetPool.Despawn(unitType, tile.unitObject);
-        tile.unitObject = null;
-        // 処理待ち
-        // await UniTask.WaitUntil(() => tile.unitObject == null);
-        // マップデータの更新を促す
-        _mapManager.isDirty = true;
+        // BaseUnitコンポーネントを取得
+        if (tile.unitObject.TryGetComponent<BaseUnit>(out var unit))
+        {   
+            // デスポーン処理
+            targetPool.Despawn(unitType, unit);
+            tile.unitObject = null;
+            // マップデータの更新を促す
+            _mapManager.isDirty = true;
+        }
+        else
+        {
+            throw new Exception("BaseUnitコンポーネントがアタッチされていないため、Despawn処理を中止します。");
+        }
     }
 
     public void DespawnAllUnit()
