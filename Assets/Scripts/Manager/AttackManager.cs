@@ -10,6 +10,7 @@ public class AttackManager : MonoBehaviour
 
     [Header("Refs")]
     private MapManager _mapManager;
+    private ParticleManager _particleManager;
 
     private void Awake()
     {
@@ -31,6 +32,7 @@ public class AttackManager : MonoBehaviour
     private void ResolveDependencies()
     {
         _mapManager = MapManager.Instance;
+        _particleManager = ParticleManager.Instance;
     }
 
     /// <summary>
@@ -62,7 +64,7 @@ public class AttackManager : MonoBehaviour
         // 防衛に失敗している場合、内部的なダメージの反映（見た目に反映されないAPI通信に近い更新）
         if (!isSuccessDefence)
         {
-            await ApplyDamage(command);
+            ApplyDamage(command);
         }
         
 
@@ -95,16 +97,17 @@ public class AttackManager : MonoBehaviour
         }
     }
 
-    public async UniTask ApplyDamage(TimelineCommand command)
+    public void ApplyDamage(TimelineCommand command)
     {
-        List<UniTask> applyTask = new List<UniTask>();
+        // List<UniTask> applyTask = new List<UniTask>();
         foreach (TileController tile in command.AffectedTiles)
         {
             if (tile.isExistUnit)
             {
-                UniTask damageTask = tile.UnitBase.Controller.ApplyDamageAsync(command.Damage, tile);
-                // あとで一括待機するためにリストに入れておく
-                applyTask.Add(damageTask);
+                tile.UnitBase.Controller.ApplyDamageAsync(command.Damage, tile);
+                // UniTask damageTask = tile.UnitBase.Controller.ApplyDamageAsync(command.Damage, tile);
+                // // あとで一括待機するためにリストに入れておく
+                // applyTask.Add(damageTask);
             }
             else
             {
@@ -113,7 +116,7 @@ public class AttackManager : MonoBehaviour
                 Debug.Log("ダメージを与えるユニットが、このタイルにはいません。");
             }
         }
-        await UniTask.WhenAll(applyTask.ToArray());
+        // await UniTask.WhenAll(applyTask.ToArray());
     }
 
     public async UniTask AttackHitEffects(TimelineCommand command)
@@ -122,7 +125,7 @@ public class AttackManager : MonoBehaviour
         foreach (TileController tile in command.AffectedTiles)
         {
             // 爆発のパーティクルを生成
-            UniTask explosion = ParticlePoolManager.Instance.SpawnParticleAsync(tile.transform.position + Vector3.up, Quaternion.identity);
+            UniTask explosion = _particleManager.PerformFireExplosionAsync(tile.transform.position + Vector3.up, Quaternion.identity);
             animationTasks.Add(explosion);
             // ユニットがいない場合はここで処理終了
             if (!tile.isExistUnit) continue;

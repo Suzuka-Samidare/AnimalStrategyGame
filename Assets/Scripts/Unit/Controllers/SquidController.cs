@@ -18,6 +18,7 @@ public class SquidController : MonoBehaviour
 
     [Header("Refs")]
     private MapManager _mapManager;
+    private ParticleManager _particleManager;
     private UnitAnimation _unitAnimation;
 
     private void Awake()
@@ -27,13 +28,19 @@ public class SquidController : MonoBehaviour
 
     private void Start()
     {
-        _mapManager = MapManager.Instance;
+        ResolveDependencies();
 
         _ascentStartPos = transform.position;
         _ascentStartPos.y = 0.5f;
         // TODO: playerからenemyへの攻撃にしか対応してない（ハードコーティング）
         _ascentFinishPos = _mapManager.playerMapData[(_mapManager.playerMapData.GetLength(0) - 1) / 2, _mapManager.playerMapData.GetLength(1) - 1].GlobalPos;
         _ascentFinishPos.y = _peakHeight;
+    }
+
+    private void ResolveDependencies()
+    {
+        _mapManager = MapManager.Instance;
+        _particleManager = ParticleManager.Instance;
     }
 
     public async UniTask AttackInkSuccess(Vector3 descentFinishPos)
@@ -77,7 +84,7 @@ public class SquidController : MonoBehaviour
             await parabolicMover.DescentWithInterruptAsync(
                 new MovementPath { start = descentStartPos, end = descentFinishPos },
                 interceptedPos,
-                async (pos) => await ParticlePoolManager.Instance.SpawnParticleAsync(pos, Quaternion.identity)
+                async (pos) => await _particleManager.PerformFireExplosionAsync(pos, Quaternion.identity)
             );
         }
         else

@@ -12,7 +12,7 @@ public class UnitController : MonoBehaviour
     private UnitAnimation _animation;
     private AttackManager _attackManager;
     private MapManager _mapManager;
-    private ParticlePoolManager _particlePoolMnager;
+    private ParticleManager _particleManager;
     private CameraMovement _cameraMovement;
     private FloatingTextPresenter _floatingTextPresenter;
 
@@ -24,7 +24,7 @@ public class UnitController : MonoBehaviour
         _animation = GetComponent<UnitAnimation>();
         _attackManager = AttackManager.Instance;
         _mapManager = MapManager.Instance;
-        _particlePoolMnager = ParticlePoolManager.Instance;
+        _particleManager = ParticleManager.Instance;
         _cameraMovement = CameraMovement.Instance;
         _floatingTextPresenter = FloatingTextPresenter.Instance;
 
@@ -34,7 +34,7 @@ public class UnitController : MonoBehaviour
         }
     }
 
-    public async UniTask ApplyDamageAsync(float power, TileController tile) {
+    public void ApplyDamageAsync(float power, TileController tile) {
         // Transform tileTransform = tile.transform;
         // 更新前のHPを記録
         float previousHp = _stats.hp;
