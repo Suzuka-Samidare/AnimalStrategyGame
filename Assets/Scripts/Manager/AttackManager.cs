@@ -73,20 +73,20 @@ public class AttackManager : MonoBehaviour
         // ===================================================
         // 防錆成功 => 攻撃が迎撃される演出のみ
         // 防衛失敗 => 攻撃ヒット及びユニットの気絶演出
-        if (command.Attacker.unitObject.TryGetComponent<SquidController>(out var squidController))
+        if (command.Attacker.unitObject.TryGetComponent<SquidAttackVisualizer>(out var squidAttackVisualizer))
         {
             if (isSuccessDefence)
             {
-                await squidController.AttackInkFailed(command.Target.GlobalPos, interceptedPos);
+                await squidAttackVisualizer.AttackInkFailed(command.Target.GlobalPos, interceptedPos, _mapManager.GetEnemyTile(new Vector2Int(5, 5), true).GlobalPos);
             }
             else
             {
-                await squidController.AttackInkSuccess(command.Target.GlobalPos);
+                await squidAttackVisualizer.AttackInkSuccess(command.Target.GlobalPos);
             }
         }
         else
         {
-            throw new System.Exception("SquidControllerの参照に失敗しました。");
+            throw new System.Exception("SquidAttackVisualizerの参照に失敗しました。");
         }
 
         // 防衛に失敗している場合は、攻撃ヒット及びユニットの気絶演出

@@ -126,7 +126,7 @@ public class ParabolicMover : MonoBehaviour
     /// <summary>
     /// 下降移動 + 途中でアクション
     /// </summary>
-    public async UniTask DescentWithInterruptAsync(MovementPath descentPath, Vector3 interceptedPos, Func<Vector3, UniTask> interruptAction )
+    public async UniTask DescentWithInterruptAsync(MovementPath descentPath, Vector3 interceptedPos, Func<Vector3, UniTask> onBlockedAction, Action onIntercept)
     {
         Debug.Log("[[[DescentWithInterruptAsync]]]");
 
@@ -140,6 +140,8 @@ public class ParabolicMover : MonoBehaviour
         _elapsedTime = 0f;
         // オブジェクトを開始地点に合わせる
         transform.position = _descentPath.start;
+        // 迎撃
+        bool isInterceptStarted = false;
         // 下降持続時間中はオブジェクト移動
         while (_elapsedTime < _descentDuration)
         {
@@ -161,8 +163,15 @@ public class ParabolicMover : MonoBehaviour
             // TODO: 移動速度が速いと正確に判定が動かないので、別の方法が無いか考える
             if (Mathf.Abs(currentZ - interceptedPos.z) < 0.1) {
                 Destroy(gameObject);
-                await interruptAction(currentPos);
+                await onBlockedAction(currentPos);
                 break;
+            }
+
+            if (!isInterceptStarted)
+            {
+                isInterceptStarted = true;
+                Debug.Log("onIntercept++++++++++++++++");
+                onIntercept();
             }
 
             // 次のフレームのUpdateタイミングまで待機する

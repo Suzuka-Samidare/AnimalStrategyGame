@@ -2,7 +2,7 @@ using UnityEngine;
 using Cysharp.Threading.Tasks;
 using MovementPath = ParabolicMover.MovementPath;
 
-public class SquidController : MonoBehaviour
+public class SquidAttackVisualizer : MonoBehaviour
 {
     [Header("インク攻撃設定")]
     [SerializeField]
@@ -15,6 +15,8 @@ public class SquidController : MonoBehaviour
     [Header("Prefabs")]
     [SerializeField]
     private GameObject _inkPrefab;
+    [SerializeField]
+    private GameObject _herringSchoolPrefab;
 
     [Header("Refs")]
     private MapManager _mapManager;
@@ -66,25 +68,30 @@ public class SquidController : MonoBehaviour
         }
     }
 
-    public async UniTask AttackInkFailed(Vector3 descentFinishPos, Vector3 interceptedPos)
+    public async UniTask AttackInkFailed(Vector3 descentFinishPos, Vector3 interceptedPos, Vector3 interceptUnitPos)
     {
         GameObject ink = Instantiate(_inkPrefab, _ascentStartPos, transform.rotation);
-        if (ink != null && ink.TryGetComponent<ParabolicMover>(out var parabolicMover))
+        GameObject herringSchool = Instantiate(_herringSchoolPrefab, interceptUnitPos, transform.rotation);
+
+        if (ink != null &&
+            ink.TryGetComponent<ParabolicMover>(out var inkMover) &&
+            herringSchool.TryGetComponent<ParabolicMover>(out var herringSchoolMover))
         {
             Vector3 descentStartPos = new Vector3(descentFinishPos.x, _peakHeight, descentFinishPos.z - 10);
             descentFinishPos.y = 0.5f;
 
             await CameraMovement.Instance.MoveToAsync(transform.position);
             await _unitAnimation.PlayOnceAsync(AnimationName.Attack);
-            await parabolicMover.AscendAsync(new MovementPath { start = _ascentStartPos, end = _ascentFinishPos });
+            await inkMover.AscendAsync(new MovementPath { start = _ascentStartPos, end = _ascentFinishPos });
             CameraMovement.Instance.Follow(
                 ink.transform,
                 () => Vector3.Distance(ink.transform.position, interceptedPos) < 0.1f
             );
-            await parabolicMover.DescentWithInterruptAsync(
+            await inkMover.DescentWithInterruptAsync(
                 new MovementPath { start = descentStartPos, end = descentFinishPos },
                 interceptedPos,
-                async (pos) => await _particleManager.PerformFireExplosionAsync(pos, Quaternion.identity)
+                async (pos) => await _particleManager.PerformFireExplosionAsync(pos, Quaternion.identity),
+                () => herringSchoolMover.AscendAsync(new MovementPath { start = interceptUnitPos, end = interceptedPos }).Forget()
             );
         }
         else

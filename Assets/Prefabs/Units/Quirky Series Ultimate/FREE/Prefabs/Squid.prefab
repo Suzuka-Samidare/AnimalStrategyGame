@@ -897,6 +897,8 @@ MonoBehaviour:
   _peakHeight: 3
   _inkPrefab: {fileID: 8959812219773788065, guid: bf288e12851516745bf37a6fbdddc533,
     type: 3}
+  _herringSchoolPrefab: {fileID: 4670089757983615095, guid: 36937f7e13143f04cbed713350d48882,
+    type: 3}
 --- !u!1 &7535825155527325181
 GameObject:
   m_ObjectHideFlags: 0
