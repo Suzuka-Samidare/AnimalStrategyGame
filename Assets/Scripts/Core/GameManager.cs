@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UnityEngine.SceneManagement;
 
@@ -186,7 +185,7 @@ public class GameManager : MonoBehaviour, IInitializable
             _infomationController.Open("No pending attacks.");
         }
 
-        await Task.Delay(2000);
+        await UniTask.Delay(2000);
         _infomationController.Close();
         CameraMovement.Instance.MoveTo(TileManager.Instance.PlayerMapLastViewedPosition);
         EnterPreparationPhase();

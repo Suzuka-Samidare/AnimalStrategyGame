@@ -1,6 +1,6 @@
 using System;
 using System.Collections;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 
@@ -52,7 +52,7 @@ public class FloatingTextView : MonoBehaviour
         }
     }
 
-    public async Task SetupAsync(Vector3 position, float amount, Color color)
+    public async UniTask SetupAsync(Vector3 position, float amount, Color color)
     {
         _isRoutineFinished = false;
         _position = position;
@@ -69,10 +69,7 @@ public class FloatingTextView : MonoBehaviour
 
         _fadeRoutine = StartCoroutine(FullFadeRoutine());
 
-        while (!_isRoutineFinished)
-        {
-            await Task.Yield();
-        }
+        await UniTask.WaitUntil(() => _isRoutineFinished == true);
 
         Debug.Log("演出が完全に終わったよ！✨");
     }

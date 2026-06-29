@@ -1,6 +1,4 @@
-using System;
-using System.Threading.Tasks;
-using Unity.VisualScripting;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using MapId = MapManager.MapId;
 
@@ -195,7 +193,7 @@ public class TileController : MonoBehaviour
     {
         Destroy(unitObject);
         while (unitObject != null) {
-            await Task.Yield();
+            await UniTask.Yield();
         }
         // マップデータの更新を促す
         mapManager.isDirty = true;
