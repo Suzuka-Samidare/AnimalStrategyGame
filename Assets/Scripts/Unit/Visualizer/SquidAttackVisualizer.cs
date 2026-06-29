@@ -1,16 +1,20 @@
 using UnityEngine;
 using Cysharp.Threading.Tasks;
-using MovementPath = ParabolicMover.MovementPath;
+// using MovementPath = TrajectoryCalculator.MovementPath;
 
 public class SquidAttackVisualizer : MonoBehaviour
 {
     [Header("インク攻撃設定")]
     [SerializeField]
-    private Vector3 _ascentStartPos;
+    private MovementPath _ascentPath;
+    // [SerializeField]
+    // private float _ascentDuration;
     [SerializeField]
-    private Vector3 _ascentFinishPos;
+    private float _groundHeight = 0.5f;
     [SerializeField]
     private float _peakHeight = 3f;
+    [SerializeField]
+    private float _inkSpeed = 7.0f;
 
     [Header("Prefabs")]
     [SerializeField]
@@ -32,11 +36,12 @@ public class SquidAttackVisualizer : MonoBehaviour
     {
         ResolveDependencies();
 
-        _ascentStartPos = transform.position;
-        _ascentStartPos.y = 0.5f;
+        _ascentPath.start = transform.position;
+        _ascentPath.start.y = 0.5f;
         // TODO: playerからenemyへの攻撃にしか対応してない（ハードコーティング）
-        _ascentFinishPos = _mapManager.playerMapData[(_mapManager.playerMapData.GetLength(0) - 1) / 2, _mapManager.playerMapData.GetLength(1) - 1].GlobalPos;
-        _ascentFinishPos.y = _peakHeight;
+        _ascentPath.end = _mapManager.playerMapData[(_mapManager.playerMapData.GetLength(0) - 1) / 2, _mapManager.playerMapData.GetLength(1) - 1].GlobalPos;
+        _ascentPath.end.y = _peakHeight;
+        // _ascentDuration = Vector3.Distance(_ascentPath.start, _ascentPath.end) / _inkSpeed;
     }
 
     private void ResolveDependencies()
@@ -47,7 +52,7 @@ public class SquidAttackVisualizer : MonoBehaviour
 
     public async UniTask AttackInkSuccess(Vector3 descentFinishPos)
     {
-        GameObject ink = Instantiate(_inkPrefab, _ascentStartPos, transform.rotation);
+        GameObject ink = Instantiate(_inkPrefab, _ascentPath.start, transform.rotation);
         if (ink != null && ink.TryGetComponent<ParabolicMover>(out var parabolicMover))
         {
             Vector3 descentStartPos = new Vector3(descentFinishPos.x, _peakHeight, descentFinishPos.z - 10);
@@ -55,7 +60,7 @@ public class SquidAttackVisualizer : MonoBehaviour
 
             await CameraMovement.Instance.MoveToAsync(transform.position);
             await _unitAnimation.PlayOnceAsync(AnimationName.Attack);
-            await parabolicMover.AscendAsync(new MovementPath { start = _ascentStartPos, end = _ascentFinishPos });
+            await parabolicMover.AscendAsync(_ascentPath);
             CameraMovement.Instance.Follow(
                 ink.transform,
                 () => Vector3.Distance(ink.transform.position, descentFinishPos) < 0.1f
@@ -70,33 +75,92 @@ public class SquidAttackVisualizer : MonoBehaviour
 
     public async UniTask AttackInkFailed(Vector3 descentFinishPos, Vector3 interceptedPos, Vector3 interceptUnitPos)
     {
-        GameObject ink = Instantiate(_inkPrefab, _ascentStartPos, transform.rotation);
+        // 座標定義
+        Vector3 descentStartPos = new Vector3(descentFinishPos.x, _peakHeight, descentFinishPos.z - 10);
+        descentFinishPos.y = _groundHeight;
+        MovementPath descentPath = new MovementPath { start = descentStartPos, end = descentFinishPos };
+        // 各発射物オブジェクトの生成
+        GameObject ink = Instantiate(_inkPrefab, _ascentPath.start, transform.rotation);
         GameObject herringSchool = Instantiate(_herringSchoolPrefab, interceptUnitPos, transform.rotation);
+        // インクの上昇時間
+        float inkDuration = Vector3.Distance(_ascentPath.start, _ascentPath.end) / _inkSpeed;
+        // 下降開始から、迎撃Z地点に届くまでの情報を計算
+        InterceptTargetInfo interceptInfo = TrajectoryCalculator.CalculateDescentInterceptInfo(
+            descentPath,
+            _inkSpeed,
+            interceptedPos.z
+        );
+        // インクが発射されてから、迎撃されるまでの総時間
+        float totalTimeToIntercept = inkDuration + interceptInfo.TimeToReach;
+        // 4. Herring側発射物の上昇時間を計算
+        float fishSchoolSpeed = 7.0f;
+        float herringSchoolDuration = Vector3.Distance(interceptUnitPos, interceptInfo.Position) / fishSchoolSpeed;
+        // 5. fishSchoolを発射するまでの「待ち時間（ディレイ）」を逆算
+        float delayBeforeLaunch = totalTimeToIntercept - herringSchoolDuration;
 
-        if (ink != null &&
-            ink.TryGetComponent<ParabolicMover>(out var inkMover) &&
-            herringSchool.TryGetComponent<ParabolicMover>(out var herringSchoolMover))
+        await CameraMovement.Instance.MoveToAsync(transform.position);
+        await _unitAnimation.PlayOnceAsync(AnimationName.Attack);
+
+        // 6. 二つの移動処理を並列で実行
+        UniTask inkTask = UniTask.Create(async () =>
         {
-            Vector3 descentStartPos = new Vector3(descentFinishPos.x, _peakHeight, descentFinishPos.z - 10);
-            descentFinishPos.y = 0.5f;
+            if (ink != null && ink.TryGetComponent<ParabolicMover>(out var inkMover))
+            {
+                // 上昇
+                await inkMover.AscendAsync(_ascentPath);
+                // 下降（タイミングが来たら内部で消失し、コールバックを呼ぶ）
+                CameraMovement.Instance.Follow(
+                    ink.transform,
+                    () => Vector3.Distance(ink.transform.position, interceptedPos) < 0.1f
+                );
+                await inkMover.DescentWithInterruptAsync(
+                    descentPath,
+                    interceptInfo,
+                    async (pos) =>
+                    {
+                        await _particleManager.PerformFireExplosionAsync(pos, Quaternion.identity);
+                        await UniTask.CompletedTask;
+                    }
+                );
+            }
+            else
+            {
+                throw new System.Exception("Ink: のParabolicMoverにアクセスできません。");
+            }
+        });
+        UniTask interceptorTask = LaunchFishSchoolWithDelayAsync(
+            herringSchool,
+            new MovementPath { start = interceptUnitPos, end = interceptInfo.Position },
+            delayBeforeLaunch
+        );
 
-            await CameraMovement.Instance.MoveToAsync(transform.position);
-            await _unitAnimation.PlayOnceAsync(AnimationName.Attack);
-            await inkMover.AscendAsync(new MovementPath { start = _ascentStartPos, end = _ascentFinishPos });
-            CameraMovement.Instance.Follow(
-                ink.transform,
-                () => Vector3.Distance(ink.transform.position, interceptedPos) < 0.1f
-            );
-            await inkMover.DescentWithInterruptAsync(
-                new MovementPath { start = descentStartPos, end = descentFinishPos },
-                interceptedPos,
-                async (pos) => await _particleManager.PerformFireExplosionAsync(pos, Quaternion.identity),
-                () => herringSchoolMover.AscendAsync(new MovementPath { start = interceptUnitPos, end = interceptedPos }).Forget()
-            );
+        // 両方の移動・演出が終わるまで待機
+        await UniTask.WhenAll(inkTask, interceptorTask);
+    }
+
+    private async UniTask LaunchFishSchoolWithDelayAsync(GameObject herringSchool, MovementPath ascentPath, float delay)
+    {
+        Debug.Log("LaunchFishSchoolWithDelayAsync");
+
+        if (delay > 0)
+        {
+            await UniTask.Delay(System.TimeSpan.FromSeconds(delay));
+        }
+
+        if (herringSchool != null && herringSchool.TryGetComponent<ParabolicMover>(out var herringSchoolMover))
+        {
+            Vector3 startToEnd = ascentPath.end - ascentPath.start;
+            Vector3 descentEnd = ascentPath.end + new Vector3(startToEnd.x, -startToEnd.y, startToEnd.z);
+            MovementPath descentPath = new MovementPath{ start = ascentPath.end, end = descentEnd };
+            // 迎撃側の魚の群れが、ターゲット（交差ポイント）に向かって上昇しながら向かう演出
+            await herringSchoolMover.AscendAsync(ascentPath);
+            // 到着したら消失
+            await herringSchoolMover.DescentAsync(descentPath);
+            // Destroy(herringSchoolMover.gameObject);
         }
         else
         {
-            throw new System.Exception("ParabolicMoverにアクセスできません。");
+            throw new System.Exception("Herring: ParabolicMoverにアクセスできません。");
         }
     }
 }

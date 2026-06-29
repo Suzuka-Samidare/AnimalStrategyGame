@@ -4,31 +4,6 @@ using System;
 
 public class ParabolicMover : MonoBehaviour
 {
-    [System.Serializable]
-    public struct MovementPath
-    {
-        public Vector3 start;  // 始点
-        public Vector3 end;   // 頂点
-    }
-
-    [Header("【上昇フェーズ】設定")]
-    [Tooltip("上昇座標情報"), SerializeField]
-    private MovementPath _ascentPath = new MovementPath {
-        start = Vector3.zero,
-        end =  Vector3.zero,
-    };
-    [Tooltip("上昇時間"), SerializeField]
-    private float _ascentDuration = 1.0f;
-
-    [Header("【下降フェーズ】設定")]
-    [Tooltip("下降座標情報"), SerializeField]
-    private MovementPath _descentPath = new MovementPath {
-        start =  Vector3.zero,
-        end =  Vector3.zero,
-    };
-    [Tooltip("下降時間"), SerializeField]
-    private float _descentDuration = 1.0f;
-
     [Header("移動設定")]
     [Tooltip("スピード"), SerializeField]
     private float _speed = 7.0f;
@@ -43,29 +18,28 @@ public class ParabolicMover : MonoBehaviour
     {
         Debug.Log("[[[AscendAsync]]]");
 
+        // 移動処理中の場合は中止
         if (_isAnimating) return;
         _isAnimating = true;
 
-        _ascentPath = ascentPath;
-        // 上昇時間の算出
-        _ascentDuration = Mathf.Abs(_ascentPath.start.z - _ascentPath.end.z) / _speed;
+        // 移動時間の計算
+        float duration = Vector3.Distance(ascentPath.start, ascentPath.end) / _speed;
         // 時間をリセット
         _elapsedTime = 0f;
         // オブジェクトを開始地点に合わせる
-        transform.position = _ascentPath.start;
+        transform.position = ascentPath.start;
         // 上昇持続時間中はオブジェクト移動
-        while (_elapsedTime < _ascentDuration)
+        while (_elapsedTime < duration)
         {
             // 経過時間の加算
             _elapsedTime += Time.deltaTime;
             // 進行度 (0.0 ～ 1.0)
-            float t = Mathf.Clamp01(_elapsedTime / _ascentDuration);
-            
+            float t = Mathf.Clamp01(_elapsedTime / duration);
             // 水平（X, Z）の補間
-            float currentX = Mathf.Lerp(_ascentPath.start.x, _ascentPath.end.x, t);
-            float currentZ = Mathf.Lerp(_ascentPath.start.z, _ascentPath.end.z, t);
+            float currentX = Mathf.Lerp(ascentPath.start.x, ascentPath.end.x, t);
+            float currentZ = Mathf.Lerp(ascentPath.start.z, ascentPath.end.z, t);
             // 垂直（Y）の計算：Sinを使って頂点に向けて滑らかに減速
-            float currentY = Mathf.Lerp(_ascentPath.start.y, _ascentPath.end.y, Mathf.Sin(t * Mathf.PI / 2));
+            float currentY = Mathf.Lerp(ascentPath.start.y, ascentPath.end.y, Mathf.Sin(t * Mathf.PI / 2));
             // 放物線に沿って移動
             transform.position = new Vector3(currentX, currentY, currentZ);
 
@@ -73,8 +47,8 @@ public class ParabolicMover : MonoBehaviour
             await UniTask.Yield(PlayerLoopTiming.Update);
         }
         // オブジェクトを終着地点に合わせる
-        transform.position = _ascentPath.end;
-
+        transform.position = ascentPath.end;
+        // フラグ解除
         _isAnimating = false;
     }
 
@@ -88,26 +62,25 @@ public class ParabolicMover : MonoBehaviour
         if (_isAnimating) return;
         _isAnimating = true;
 
-        _descentPath = descentPath;
         // 下降時間の算出
-        _descentDuration = Mathf.Abs(_descentPath.start.z - _descentPath.end.z) / _speed;
+        float duration = Mathf.Abs(descentPath.start.z - descentPath.end.z) / _speed;
         // 時間をリセット
         _elapsedTime = 0f;
         // オブジェクトを開始地点に合わせる
-        transform.position = _descentPath.start;
+        transform.position = descentPath.start;
         // 下降持続時間中はオブジェクト移動
-        while (_elapsedTime < _descentDuration)
+        while (_elapsedTime < duration)
         {
             // 経過時間の加算
             _elapsedTime += Time.deltaTime;
             // 進行度 (0.0 ～ 1.0)
-            float t = Mathf.Clamp01(_elapsedTime / _descentDuration);
+            float t = Mathf.Clamp01(_elapsedTime / duration);
 
             // 水平（X, Z）の補間
-            float currentX = Mathf.Lerp(_descentPath.start.x, _descentPath.end.x, t);
-            float currentZ = Mathf.Lerp(_descentPath.start.z, _descentPath.end.z, t);
+            float currentX = Mathf.Lerp(descentPath.start.x, descentPath.end.x, t);
+            float currentZ = Mathf.Lerp(descentPath.start.z, descentPath.end.z, t);
             // 垂直（Y）の計算：Cosを使って頂点から滑らかに加速しながら落下
-            float currentY = Mathf.Lerp(_descentPath.start.y, _descentPath.end.y, 1 - Mathf.Cos(t * Mathf.PI / 2));
+            float currentY = Mathf.Lerp(descentPath.start.y, descentPath.end.y, 1 - Mathf.Cos(t * Mathf.PI / 2));
             // 最終的な座標
             Vector3 currentPos = new Vector3(currentX, currentY, currentZ);
             // 放物線に沿って移動
@@ -117,7 +90,7 @@ public class ParabolicMover : MonoBehaviour
             await UniTask.Yield(PlayerLoopTiming.Update);
         }
         // オブジェクトを終着地点に合わせる
-        transform.position = _descentPath.end;
+        transform.position = descentPath.end;
 
         _isAnimating = false;
         Destroy(gameObject);
@@ -126,52 +99,49 @@ public class ParabolicMover : MonoBehaviour
     /// <summary>
     /// 下降移動 + 途中でアクション
     /// </summary>
-    public async UniTask DescentWithInterruptAsync(MovementPath descentPath, Vector3 interceptedPos, Func<Vector3, UniTask> onBlockedAction, Action onIntercept)
+    public async UniTask DescentWithInterruptAsync(
+        MovementPath descentPath,
+        InterceptTargetInfo interceptInfo,
+        Func<Vector3, UniTask> onBlockedAction)
     {
         Debug.Log("[[[DescentWithInterruptAsync]]]");
 
         if (_isAnimating) return;
         _isAnimating = true;
 
-        _descentPath = descentPath;
         // 下降時間の算出
-        _descentDuration = Mathf.Abs(_descentPath.start.z - _descentPath.end.z) / _speed;
+        float duration = Mathf.Abs(descentPath.start.z - descentPath.end.z) / _speed;
         // 時間をリセット
         _elapsedTime = 0f;
         // オブジェクトを開始地点に合わせる
-        transform.position = _descentPath.start;
+        transform.position = descentPath.start;
         // 迎撃
-        bool isInterceptStarted = false;
+        // bool isInterceptStarted = false;
         // 下降持続時間中はオブジェクト移動
-        while (_elapsedTime < _descentDuration)
+        while (_elapsedTime < duration)
         {
             // 経過時間の加算
             _elapsedTime += Time.deltaTime;
             // 進行度 (0.0 ～ 1.0)
-            float t = Mathf.Clamp01(_elapsedTime / _descentDuration);
+            float t = Mathf.Clamp01(_elapsedTime / duration);
 
             // 水平（X, Z）の補間
-            float currentX = Mathf.Lerp(_descentPath.start.x, _descentPath.end.x, t);
-            float currentZ = Mathf.Lerp(_descentPath.start.z, _descentPath.end.z, t);
+            float currentX = Mathf.Lerp(descentPath.start.x, descentPath.end.x, t);
+            float currentZ = Mathf.Lerp(descentPath.start.z, descentPath.end.z, t);
             // 垂直（Y）の計算：Cosを使って頂点から滑らかに加速しながら落下
-            float currentY = Mathf.Lerp(_descentPath.start.y, _descentPath.end.y, 1 - Mathf.Cos(t * Mathf.PI / 2));
+            float currentY = Mathf.Lerp(descentPath.start.y, descentPath.end.y, 1 - Mathf.Cos(t * Mathf.PI / 2));
             // 最終的な座標
             Vector3 currentPos = new Vector3(currentX, currentY, currentZ);
             // 放物線に沿って移動
             transform.position = currentPos;
 
             // TODO: 移動速度が速いと正確に判定が動かないので、別の方法が無いか考える
-            if (Mathf.Abs(currentZ - interceptedPos.z) < 0.1) {
+            if (_elapsedTime >= interceptInfo.TimeToReach)
+            {
+                transform.position = interceptInfo.Position;
                 Destroy(gameObject);
                 await onBlockedAction(currentPos);
                 break;
-            }
-
-            if (!isInterceptStarted)
-            {
-                isInterceptStarted = true;
-                Debug.Log("onIntercept++++++++++++++++");
-                onIntercept();
             }
 
             // 次のフレームのUpdateタイミングまで待機する
@@ -179,6 +149,5 @@ public class ParabolicMover : MonoBehaviour
         }
 
         _isAnimating = false;
-        // Destroy(gameObject);
     }
 }
