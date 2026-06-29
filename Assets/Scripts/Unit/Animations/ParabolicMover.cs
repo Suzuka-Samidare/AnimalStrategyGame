@@ -93,7 +93,6 @@ public class ParabolicMover : MonoBehaviour
         transform.position = descentPath.end;
 
         _isAnimating = false;
-        Destroy(gameObject);
     }
 
     /// <summary>
@@ -139,7 +138,6 @@ public class ParabolicMover : MonoBehaviour
             if (_elapsedTime >= interceptInfo.TimeToReach)
             {
                 transform.position = interceptInfo.Position;
-                Destroy(gameObject);
                 await onBlockedAction(currentPos);
                 break;
             }

@@ -66,6 +66,7 @@ public class SquidAttackVisualizer : MonoBehaviour
                 () => Vector3.Distance(ink.transform.position, descentFinishPos) < 0.1f
             );
             await parabolicMover.DescentAsync(new MovementPath { start = descentStartPos, end = descentFinishPos });
+            Destroy(ink);
         }
         else
         {
@@ -118,6 +119,7 @@ public class SquidAttackVisualizer : MonoBehaviour
                     interceptInfo,
                     async (pos) =>
                     {
+                        Destroy(ink);
                         await _particleManager.PerformFireExplosionAsync(pos, Quaternion.identity);
                         await UniTask.CompletedTask;
                     }
@@ -140,8 +142,6 @@ public class SquidAttackVisualizer : MonoBehaviour
 
     private async UniTask LaunchFishSchoolWithDelayAsync(GameObject herringSchool, MovementPath ascentPath, float delay)
     {
-        Debug.Log("LaunchFishSchoolWithDelayAsync");
-
         if (delay > 0)
         {
             await UniTask.Delay(System.TimeSpan.FromSeconds(delay));
@@ -156,7 +156,7 @@ public class SquidAttackVisualizer : MonoBehaviour
             await herringSchoolMover.AscendAsync(ascentPath);
             // 到着したら消失
             await herringSchoolMover.DescentAsync(descentPath);
-            // Destroy(herringSchoolMover.gameObject);
+            Destroy(herringSchoolMover.gameObject);
         }
         else
         {
