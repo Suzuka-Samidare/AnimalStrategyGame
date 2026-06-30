@@ -35,15 +35,13 @@ public class TileView : MonoBehaviour
     private static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
     private static readonly int TopColorId = Shader.PropertyToID("_TopColor");
     private GameManager _gameManager;
-    private TileController _tileController;
+    private TileStats _tileStats;
 
     private void Awake()
     {
         objectRenderer = GetComponent<Renderer>();
         propBlock = new MaterialPropertyBlock();
-        _tileController = GetComponent<TileController>();
-
-        if (_tileController == null) throw new Exception("TileControllerがありません。");
+        _tileStats = GetComponent<TileStats>();
     }
 
     private void Start()
@@ -56,19 +54,19 @@ public class TileView : MonoBehaviour
 
     private void Update()
     {
-        if (_tileController.isSelected && _gameManager.currentPhase == Phase.INIT)
+        if (_tileStats.isSelected && _gameManager.currentPhase == Phase.INIT)
         {
             Blink(blinkAllyColor);
             return;
         }
 
-        if (_tileController.isSelected && _gameManager.currentPhase == Phase.PREPARATION)
+        if (_tileStats.isSelected && _gameManager.currentPhase == Phase.PREPARATION)
         {
             Blink(blinkAllyColor);
             return;
         }
 
-        if (_tileController.isTargeted && _gameManager.currentPhase == Phase.COMMAND)
+        if (_tileStats.isTargeted && _gameManager.currentPhase == Phase.COMMAND)
         {
             Blink(blinkEnemyColor);
             return;
@@ -85,7 +83,7 @@ public class TileView : MonoBehaviour
 
     private void InitializeTileColor()
     {
-        if ((_tileController.gridPos.x + _tileController.gridPos.y) % 2 == 0)
+        if ((_tileStats.GridPos.x + _tileStats.GridPos.y) % 2 == 0)
         {
             baseColor = mainColor;
         }
@@ -102,9 +100,9 @@ public class TileView : MonoBehaviour
 
     public void RefreshVisual()
     {
-        if (_tileController.isSelected) return;
+        if (_tileStats.isSelected) return;
 
-        // if (_tileController.owner == TileController.TileOwner.Enemy && !_tileController.isRevealed)
+        // if (_tileStats.owner == TileStats.TileOwner.Enemy && !_tileStats.isRevealed)
         // {
         //     currentBaseColor = invisibleColor;
         //     currentTopColor = invisibleColor;
@@ -125,7 +123,7 @@ public class TileView : MonoBehaviour
         float time = Mathf.PingPong(Time.time, 1.0f);
 
         // Color normalColor;
-        // if (_tileController.owner == TileController.TileOwner.Enemy && !_tileController.isRevealed)
+        // if (_tileStats.owner == TileStats.TileOwner.Enemy && !_tileStats.isRevealed)
         // {
         //     normalColor = invisibleColor;
         // }
