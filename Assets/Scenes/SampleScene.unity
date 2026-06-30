@@ -2644,6 +2644,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b009a3d2c48b2084db581719d6a521e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _tileManager: {fileID: 0}
 --- !u!4 &518152042
 Transform:
   m_ObjectHideFlags: 0
@@ -9772,7 +9773,6 @@ Transform:
   m_Children:
   - {fileID: 898237332}
   - {fileID: 1668789070}
-  - {fileID: 518152042}
   - {fileID: 1799742564}
   - {fileID: 1533495492}
   - {fileID: 1975244718}
@@ -9782,6 +9782,7 @@ Transform:
   - {fileID: 567354686}
   - {fileID: 1790418067}
   - {fileID: 66366370}
+  - {fileID: 518152042}
   - {fileID: 1525800336}
   - {fileID: 1216893514}
   m_Father: {fileID: 0}
@@ -12541,7 +12542,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _selectedTile: {fileID: 0}
-  <selectedTileController>k__BackingField: {fileID: 0}
   PlayerMapLastViewedPosition: {x: 4, y: 1, z: 5}
   _targetTile: {fileID: 0}
 --- !u!1 &2103718873
