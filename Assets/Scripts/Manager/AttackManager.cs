@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using TileOwner = TileController.TileOwner;
+using TileOwner = TileStats.TileOwner;
 using TimelineCommand = TimelineManager.TimelineCommand;
 
 public class AttackManager : MonoBehaviour
@@ -50,8 +50,8 @@ public class AttackManager : MonoBehaviour
         if (command.Owner == TileOwner.Player)
         {
             isSuccessDefence = GetEnemyDefenceResult(command, out interceptedGridPos);
-            TileController interceptedTile = _mapManager.GetEnemyTile(interceptedGridPos, true);
-            interceptedPos = interceptedTile.GlobalPos;
+            Tile interceptedTile = _mapManager.GetEnemyTile(interceptedGridPos, true);
+            interceptedPos = interceptedTile.Stats.GlobalPos;
         }
         else
         {
@@ -77,11 +77,11 @@ public class AttackManager : MonoBehaviour
         {
             if (isSuccessDefence)
             {
-                await squidAttackVisualizer.AttackInkFailed(command.Target.GlobalPos, interceptedPos, _mapManager.GetEnemyTile(new Vector2Int(5, 5), true).GlobalPos);
+                await squidAttackVisualizer.AttackInkFailed(command.Target.Stats.GlobalPos, interceptedPos, _mapManager.GetEnemyTile(new Vector2Int(5, 5), true).Stats.GlobalPos);
             }
             else
             {
-                await squidAttackVisualizer.AttackInkSuccess(command.Target.GlobalPos);
+                await squidAttackVisualizer.AttackInkSuccess(command.Target.Stats.GlobalPos);
             }
         }
         else
@@ -100,9 +100,9 @@ public class AttackManager : MonoBehaviour
     public void ApplyDamage(TimelineCommand command)
     {
         // List<UniTask> applyTask = new List<UniTask>();
-        foreach (TileController tile in command.AffectedTiles)
+        foreach (Tile tile in command.AffectedTiles)
         {
-            if (tile.isExistUnit)
+            if (tile.IsExistUnit)
             {
                 tile.UnitBase.Controller.ApplyDamageAsync(command.Damage, tile);
                 // UniTask damageTask = tile.UnitBase.Controller.ApplyDamageAsync(command.Damage, tile);
@@ -122,15 +122,15 @@ public class AttackManager : MonoBehaviour
     public async UniTask AttackHitEffects(TimelineCommand command)
     {
         List<UniTask> animationTasks = new List<UniTask>();
-        foreach (TileController tile in command.AffectedTiles)
+        foreach (Tile tile in command.AffectedTiles)
         {
             // 爆発のパーティクルを生成
             UniTask explosion = _particleManager.PerformFireExplosionAsync(tile.transform.position + Vector3.up, Quaternion.identity);
             animationTasks.Add(explosion);
             // ユニットがいない場合はここで処理終了
-            if (!tile.isExistUnit) continue;
+            if (!tile.IsExistUnit) continue;
             // ダメージ表示
-            UniTask damageText = FloatingTextPresenter.Instance.SpawnDamageAsync(tile.GlobalPos, command.Damage);
+            UniTask damageText = FloatingTextPresenter.Instance.SpawnDamageAsync(tile.Stats.GlobalPos, command.Damage);
             animationTasks.Add(damageText);
         }
         await UniTask.WhenAll(animationTasks.ToArray());
@@ -140,7 +140,7 @@ public class AttackManager : MonoBehaviour
     public async UniTask FaintEffects(TimelineCommand command)
     {
         List<UniTask> animationTasks = new List<UniTask>();
-        foreach (TileController tile in command.AffectedTiles)
+        foreach (Tile tile in command.AffectedTiles)
         {
             // 気絶している場合は、アニメーション
             if (tile.UnitBase != null && tile.UnitBase.Stats.IsFaint) {
@@ -161,13 +161,13 @@ public class AttackManager : MonoBehaviour
     /// <summary>
     /// 攻撃物がターゲットに着弾するまでに通過するタイルの取得
     /// </summary>
-    private List<TileController> GetTrajectoryTiles(TileController target, TileController[,] mapData)
+    private List<Tile> GetTrajectoryTiles(Tile target, Tile[,] mapData)
     {
-        List<TileController> tiles = new List<TileController>();
+        List<Tile> tiles = new List<Tile>();
 
-        for (int y = target.gridPos.y; y < _mapManager.mapHeight; y++)
+        for (int y = target.Stats.GridPos.y; y < _mapManager.mapHeight; y++)
         {
-            int x = target.gridPos.x;
+            int x = target.Stats.GridPos.x;
             if (mapData[x, y] != null) tiles.Add(mapData[x, y]);
         }
 
@@ -181,13 +181,13 @@ public class AttackManager : MonoBehaviour
     public bool GetEnemyDefenceResult(TimelineCommand command, out Vector2Int interceptedPos)
     {
         // ターゲットの座標
-        Vector2Int tgtPos = command.Target.gridPos;
+        Vector2Int tgtPos = command.Target.Stats.GridPos;
         // 攻撃が着弾するまでに通過するタイルを取得
-        List<TileController> trajectoryTiles = GetTrajectoryTiles(command.Target, _mapManager.enemyMapData);
+        List<Tile> trajectoryTiles = GetTrajectoryTiles(command.Target, _mapManager.enemyMapData);
         // Herringユニットがあるタイルを取得
-        List<TileController> herringTiles = _mapManager.GetEnemyMapHerringTiles();
+        List<Tile> herringTiles = _mapManager.GetEnemyMapHerringTiles();
         // y座標値が高い順に並べ替え
-        herringTiles.Sort((a, b) => b.gridPos.y.CompareTo(a.gridPos.y));
+        herringTiles.Sort((a, b) => b.Stats.GridPos.y.CompareTo(a.Stats.GridPos.y));
 
         Debug.Log($"Herringユニットの総数: {herringTiles.Count}");
 
@@ -197,10 +197,10 @@ public class AttackManager : MonoBehaviour
             // Herringユニットの左右防衛幅
             int horizonRange = herringTile.UnitDefendable.Stats.profile.range.max;
             // ターゲットのx座標がHerringユニットの防衛幅に入らない場合はスキップ
-            if (tgtPos.x < herringTile.gridPos.x - horizonRange || tgtPos.x > herringTile.gridPos.x + horizonRange) continue;
+            if (tgtPos.x < herringTile.Stats.GridPos.x - horizonRange || tgtPos.x > herringTile.Stats.GridPos.x + horizonRange) continue;
 
             // Herringユニットの防衛座標リストを取得
-            List<Vector2Int> defencePositions = herringTile.UnitDefendable.Controller.GetDefensiveRangePos(herringTile.gridPos);
+            List<Vector2Int> defencePositions = herringTile.UnitDefendable.Controller.GetDefensiveRangePos(herringTile.Stats.GridPos);
             // 有効な防衛タイル数の集計
             int overlapCount = 0;
 
@@ -222,11 +222,11 @@ public class AttackManager : MonoBehaviour
             // マップ内の防衛座標の集計
             // ====================================================
             // マップ内で有効な防衛座標リストを取得
-            List<TileController> defenceTiles = _mapManager.GetEnemyTiles(defencePositions);
+            List<Tile> defenceTiles = _mapManager.GetEnemyTiles(defencePositions);
             // 有効な防衛座標がある場合、攻撃の軌道になっているタイルと重複している分をカウントする
             if (defenceTiles.Count > 0)
             {
-                foreach (TileController defenceTile in defenceTiles)
+                foreach (Tile defenceTile in defenceTiles)
                 {
                     if (trajectoryTiles.Contains(defenceTile)) overlapCount++;
                 } 
@@ -235,9 +235,9 @@ public class AttackManager : MonoBehaviour
             Debug.Log($"マップ内外を合わせた有効な防衛数の集計: {overlapCount}");
 
             // ターゲットとHerringユニットのx座標の差（命中減衰率に影響する）
-            float distanceX = Mathf.Abs(tgtPos.x - herringTile.gridPos.x);
+            float distanceX = Mathf.Abs(tgtPos.x - herringTile.Stats.GridPos.x);
             // 今回の防衛ユニット攻撃の命中率
-            float attackerEvasionRate = UnityEngine.Random.value;
+            float attackerEvasionRate = Random.value;
             // 防衛ユニットのy座標の防衛距離
             int verticalRange = herringTile.UnitDefendable.Controller.VerticalRange;
             // 防衛数分の判定処理を実行
@@ -249,7 +249,7 @@ public class AttackManager : MonoBehaviour
                 // 防衛成功判定を受け取った場合は、迎撃できたポジションを返す
                 if (result)
                 {
-                    interceptedPos = new Vector2Int(tgtPos.x, herringTile.gridPos.y + verticalRange - i);
+                    interceptedPos = new Vector2Int(tgtPos.x, herringTile.Stats.GridPos.y + verticalRange - i);
                     return true;
                 }
             }

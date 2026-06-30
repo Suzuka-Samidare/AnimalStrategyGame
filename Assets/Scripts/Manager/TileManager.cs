@@ -1,19 +1,17 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using MapId = MapManager.MapId;
 
 public class TileManager : MonoBehaviour, IInitializable
 {
-    public static TileManager Instance;
+    public static TileManager Instance { get; private set; }
 
     [Header("味方マップ関連")]
-    // TODO: 型をGameObjectではなく、TileControllerに出来ないか検討する。
     [SerializeField, Tooltip("セレクト中のタイル")]
-    private GameObject _selectedTile;
-    public GameObject selectedTile
+    private Tile _selectedTile;
+    public Tile selectedTile
     {
         get => _selectedTile;
         set
@@ -23,28 +21,24 @@ public class TileManager : MonoBehaviour, IInitializable
             RefreshComponents();
         }
     }
-    [field: SerializeField, Tooltip("セレクト中のタイルコントローラ")]
-    public TileController selectedTileController { get; private set; }
-    [SerializeField, Tooltip("アクセス可否")]
-    private bool _canAccessSelectedTileController => selectedTile != null && selectedTileController != null;
     [SerializeField, Tooltip("最後にチェックした場所")]
     public Vector3 PlayerMapLastViewedPosition;
 
     [Header("敵マップ関連")]
     [SerializeField, Tooltip("ターゲット指定中タイル")]
-    private TileController _targetTile;
-    public TileController targetTile
+    private Tile _targetTile;
+    public Tile targetTile
     {
         get => _targetTile;
         set
         {
             if (_targetTile == value) return;
             _targetTile = value;
-            EnemyMapLastViewedPosition = new Vector3(_targetTile.GlobalPos.x, 1f, _targetTile.GlobalPos.z);
+            EnemyMapLastViewedPosition = new Vector3(_targetTile.Stats.GlobalPos.x, 1f, _targetTile.Stats.GlobalPos.z);
         }
     }
     [SerializeField, Tooltip("ターゲット指定中タイル")]
-    public List<TileController> targetTiles { get; private set; } = new List<TileController>();
+    public List<Tile> targetTiles { get; private set; } = new List<Tile>();
     [Tooltip("最後にチェックした場所")]
     public Vector3 EnemyMapLastViewedPosition {get; private set; }
 
@@ -72,9 +66,9 @@ public class TileManager : MonoBehaviour, IInitializable
     {
         ResolveDependencies();
         EnemyMapLastViewedPosition = new Vector3(
-            _mapManager.enemyMapData[4, 4].GlobalPos.x,
+            _mapManager.enemyMapData[4, 4].Stats.GlobalPos.x,
             1,
-            _mapManager.enemyMapData[4, 4].GlobalPos.z
+            _mapManager.enemyMapData[4, 4].Stats.GlobalPos.z
         );
         await UniTask.CompletedTask;
     }
@@ -83,186 +77,144 @@ public class TileManager : MonoBehaviour, IInitializable
     {
         if (selectedTile != null)
         {
-            selectedTileController = selectedTile.GetComponent<TileController>();
             PlayerMapLastViewedPosition = new Vector3(
-                selectedTileController.GlobalPos.x,
+                selectedTile.Stats.GlobalPos.x,
                 1f,
-                selectedTileController.GlobalPos.z
+                selectedTile.Stats.GlobalPos.z
             );
         }
         else
         {
-            selectedTileController = null;
+            throw new Exception("Tileが選択されていません");
         }
     }
 
-    // public void SetTargetTile(Vector2Int pos)
-    // {
-    //     targetTile =  _mapManager.enemyMapData[pos.x, pos.y];
-    // }
-    public void SetTargetTile(TileController tileController)
+    /// <summary>
+    /// ターゲットの中心となっているタイルの登録
+    /// </summary>
+    public void SetTargetTile(Tile tile)
     {
-        targetTile = tileController;
+        targetTile = tile;
     }
 
+    /// <summary>
+    /// 指定座標のタイルを中心に、自軍ユニット攻撃範囲を照らし合わせてターゲットタイルとして一括登録する
+    /// </summary>
     public void RegisterTargetTiles(Vector2Int targetPos)
     {
-        if (!_canAccessSelectedTileController) return;
+        if (selectedTile == null) return;
 
         if (targetTiles.Count > 0)
         {
             ClearTargetTiles();
         }
 
-        if (selectedTileController.UnitAttackable == null)
+        if (selectedTile.UnitAttackable == null)
         {
-            throw new Exception("UnitControllerがありません");
+            throw new Exception("AttackUnitControllerがありません");
         }
 
-        List<Vector2Int> tilePositions = selectedTileController.UnitAttackable.Controller.GetTargetTilePositions(targetPos);
+        List<Vector2Int> tilePositions = selectedTile.UnitAttackable.Controller.GetTargetTilePositions(targetPos);
 
         foreach (Vector2Int pos in tilePositions)
         {
-            TileController tileController = _mapManager.GetEnemyTile(pos);
+            Tile tile = _mapManager.GetEnemyTile(pos);
 
-            if (tileController != null)
+            if (tile != null)
             {
                 // 新しく選択状態にする
-                tileController.isTargeted = true;
+                tile.SetTargeted(true);
                 // 配列（リスト）に保存
-                targetTiles.Add(tileController);
+                targetTiles.Add(tile);
             }
         }
     }
 
+    /// <summary>
+    /// ターゲットタイル情報をクリアにする
+    /// </summary>
     public void ClearTargetTiles()
     {
         DeactivateTargetFlags();
         targetTiles.Clear();
     }
 
+    /// <summary>
+    /// ターゲットとして登録されているタイル群のターゲットフラグを有効化する
+    /// </summary>
     public void ActivateTargetFlags()
     {
-        foreach (TileController tileController in targetTiles)
+        foreach (Tile tile in targetTiles)
         {
-            if (tileController != null)
+            if (tile != null)
             {
-                tileController.isTargeted = true;
+                tile.SetTargeted(true);
             }
         }
     } 
 
+    /// <summary>
+    /// ターゲットとして登録されているタイル群のターゲットフラグを無効化する
+    /// </summary>
     public void DeactivateTargetFlags()
     {
-        foreach (TileController tileController in targetTiles)
+        foreach (Tile tile in targetTiles)
         {
-            if (tileController != null)
+            if (tile != null)
             {
-                tileController.isTargeted = false;
+                tile.SetTargeted(false);
             }
         }
     }
 
-    // // TODO: MapManagerにするか検討する。
-    // public TileController GetPlayerTile(Vector2Int pos)
-    // {
-    //     return _mapManager.playerMapData[pos.x, pos.y];
-    // }
-
-
-    // void Update()
-    // {
-    //     if (Input.GetMouseButtonUp(0) && !CameraMovement.Instance.isDragging)
-    //     {
-    //         CheckMouseDown();
-    //     }
-    // }
-
-    // void CheckMouseDown()
-    // {
-    //     // UI要素を選択またはフォーカスしている場合は処理を進行しない
-    //     if (EventSystem.current.IsPointerOverGameObject()) return;
-
-    //     // Raycastでゲームオブジェクト接触判定
-    //     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-    //     RaycastHit hit;
-
-    //     // 接触したオブジェクトが無い場合、タイル選択状態を解除
-    //     if (Physics.Raycast(ray, out hit))
-    //     {
-    //         GameObject hitObject = hit.collider.gameObject;
-
-    //         // 接触オブジェクトがタイルまたはユニットだった場合、選択状態に更新
-    //         if (hitObject.CompareTag("Tile"))
-    //         {
-    //             // タイルを引数にして処理
-    //             SetSelectedTile(hitObject);
-    //         }
-    //         else if (hitObject.CompareTag("Unit"))
-    //         {
-    //             // ユニットの親要素であるタイルを引数にして処理
-    //             SetSelectedTile(hitObject.transform.parent.gameObject);
-    //         }
-    //         else
-    //         {
-    //             // Debug.Log("Ray判定あり & タイルではない");
-    //         }
-    //     }
-    //     else
-    //     {
-    //         // Debug.Log("Ray判定なし");
-    //         ClearSelectedTile();
-    //     }
-    // }
-
-    // タイルを選択状態に設定する
-    public void SetSelectedTile(GameObject tile)
+    /// <summary>
+    /// タイルを選択状態に設定する
+    /// </summary>
+    public void SetSelectedTile(Tile tile)
     {
         // 以前に選択されていたマスがあれば、ハイライトを解除するなどの処理
-        if (_canAccessSelectedTileController)
-        {
-            selectedTileController.isSelected = false;
+        if (selectedTile)
+        {    
+            selectedTile.SetSelected(false);
         }
-
+        // 選択中タイルの更新
         selectedTile = tile;
-
         // 新しく選択されたマスをハイライトするなどの処理
-        if (_canAccessSelectedTileController)
-        {
-            selectedTileController.isSelected = true;
-        }
+        selectedTile.SetSelected(true);
     }
 
-    // 選択中のマスを解除する
+    /// <summary>
+    /// 選択中のマスを解除する
+    /// </summary>
     public void ClearSelectedTile()
     {
         // 以前に選択されていたマスがあれば、ハイライトを解除するなどの処理
-        if (_canAccessSelectedTileController)
-        {
-            selectedTileController.isSelected = false;
-        }
-
+        selectedTile.SetSelected(false);
         selectedTile = null;
     }
 
-    // 選択中のマス上にあるユニットを消す
+    /// <summary>
+    /// 選択中のマス上にあるユニットを消す
+    /// </summary>
     public void ClearSelectedTileOnUnit()
     {
-        if (!selectedTileController.isExistUnit)
+        if (selectedTile.IsExistUnit)
         {
             Debug.Log("削除するユニットが存在しません");
             return;
         }
 
-        selectedTileController.DestroyUnit();
+        UnitSpawnManager.Instance.DespawnUnit(selectedTile);
     }
 
-    // 選択中のマス上にあるユニットのマップIDを取得
+    /// <summary>
+    /// 選択中のマス上にあるユニットのマップIDを取得
+    /// </summary>
     public MapId GetSelectedTileMapId()
     {
-        if (selectedTileController.unitObject != null)
+        if (selectedTile.unitObject != null)
         {
-            return selectedTileController.unitMapId;
+            return selectedTile.UnitBase.Stats.profile.id;
         }
         else
         {
@@ -270,9 +222,12 @@ public class TileManager : MonoBehaviour, IInitializable
         }
     }
 
+    /// <summary>
+    /// （簡易情報表示用）選択中ユニットから表示に必要な情報を取得する
+    /// </summary>
     public void GetSelectedTileUnitDetail()
     {
-        IUnit unitBase = selectedTileController.UnitBase;
+        IUnit unitBase = selectedTile.UnitBase;
         if (unitBase != null)
         {
             UnitDetailController.Instance.Open(

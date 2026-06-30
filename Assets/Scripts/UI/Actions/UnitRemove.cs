@@ -20,7 +20,7 @@ public class UnitRemove : MonoBehaviour, IButtonAction
             GameManager.Instance.IsLoading = true;
             Debug.Log($"タイル更新開始");
 
-            _unitSpawnManager.DespawnUnit(_tileManager.selectedTileController);
+            _unitSpawnManager.DespawnUnit(_tileManager.selectedTile);
 
             Debug.Log("タイル更新成功");
         }

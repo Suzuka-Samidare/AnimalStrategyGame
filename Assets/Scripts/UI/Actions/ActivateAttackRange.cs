@@ -5,11 +5,10 @@ using UnityEngine;
 public class ActivateAttackRange : MonoBehaviour, IButtonAction
 {
     [SerializeField, Tooltip("最後に攻撃元になっているタイル")]
-    private TileController lastSelectedTile;
+    private Tile lastSelectedTile;
 
     [Header("Refs")]
     private TileManager _tileManager;
-    private TileController _lastSelectedUnit;
 
     private void Start()
     {
@@ -18,10 +17,10 @@ public class ActivateAttackRange : MonoBehaviour, IButtonAction
 
     public void Execute()
     {
-        if (_tileManager.targetTile && _tileManager.selectedTileController != lastSelectedTile)
+        if (_tileManager.targetTile && _tileManager.selectedTile != lastSelectedTile)
         {
-            _tileManager.RegisterTargetTiles(_tileManager.targetTile.gridPos);
-            lastSelectedTile = _tileManager.selectedTileController;
+            _tileManager.RegisterTargetTiles(_tileManager.targetTile.Stats.GridPos);
+            lastSelectedTile = _tileManager.selectedTile;
         }
         if (_tileManager.targetTile)
         {

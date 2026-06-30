@@ -39,7 +39,7 @@ public class SquidAttackVisualizer : MonoBehaviour
         _ascentPath.start = transform.position;
         _ascentPath.start.y = 0.5f;
         // TODO: playerからenemyへの攻撃にしか対応してない（ハードコーティング）
-        _ascentPath.end = _mapManager.playerMapData[(_mapManager.playerMapData.GetLength(0) - 1) / 2, _mapManager.playerMapData.GetLength(1) - 1].GlobalPos;
+        _ascentPath.end = _mapManager.playerMapData[(_mapManager.playerMapData.GetLength(0) - 1) / 2, _mapManager.playerMapData.GetLength(1) - 1].Stats.GlobalPos;
         _ascentPath.end.y = _peakHeight;
         // _ascentDuration = Vector3.Distance(_ascentPath.start, _ascentPath.end) / _inkSpeed;
     }

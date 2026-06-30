@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using TileOwner = TileController.TileOwner;
+using TileOwner = TileStats.TileOwner;
 
 public class TimelineManager : MonoBehaviour, IInitializable
 {
@@ -14,18 +14,18 @@ public class TimelineManager : MonoBehaviour, IInitializable
     {
         public TileOwner Owner;
         public string UnitName;
-        public TileController Attacker;
-        public TileController Target;  // 攻撃対象の中心タイル
-        public List<TileController> AffectedTiles; 
+        public Tile Attacker;
+        public Tile Target;  // 攻撃対象の中心タイル
+        public List<Tile> AffectedTiles; 
         public float Damage;        // ダメージ量
         public float time; // 経過時間 + 適用必要時間
 
         public TimelineCommand(
             TileOwner owner,
             string unitName,
-            TileController attacker,
-            TileController target,
-            List<TileController> tiles,
+            Tile attacker,
+            Tile target,
+            List<Tile> tiles,
             float damage,
             float delay
         ){
@@ -119,15 +119,15 @@ public class TimelineManager : MonoBehaviour, IInitializable
     /// </summary>
     public void RegisterCommand()
     {
-        UnitProfile profile = _tileManager.selectedTileController.UnitBase.Stats.profile;
-        AttackProfile attackProfile = _tileManager.selectedTileController.UnitAttackable.Stats.profile;
+        UnitProfile profile = _tileManager.selectedTile.UnitBase.Stats.profile;
+        AttackProfile attackProfile = _tileManager.selectedTile.UnitAttackable.Stats.profile;
         // 攻撃内容を作成してキューに追加
         TimelineCommand newAttack = new TimelineCommand(
-            _tileManager.selectedTileController.owner,
+            _tileManager.selectedTile.Stats.owner,
             profile.unitName,
-            _tileManager.selectedTileController,
+            _tileManager.selectedTile,
             _tileManager.targetTile,
-            new List<TileController>(_tileManager.targetTiles),
+            new List<Tile>(_tileManager.targetTiles),
             attackProfile.power,
             attackProfile.delay
         );

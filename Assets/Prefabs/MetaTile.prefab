@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 6045812354033674645}
   - component: {fileID: 2707506754435298244}
   - component: {fileID: 4488099028958162132}
+  - component: {fileID: -1848692498303196521}
+  - component: {fileID: -2066120339780225741}
   - component: {fileID: -8795965812946985606}
   - component: {fileID: -8329108152562972926}
   m_Layer: 0
@@ -85,6 +87,41 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &-1848692498303196521
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6901446120494472406}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1383b82f7da715444b4510f2e311c6df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Stats: {fileID: 0}
+  Controller: {fileID: 0}
+  View: {fileID: 0}
+  _unitObject: {fileID: 0}
+  MapManager: {fileID: 0}
+--- !u!114 &-2066120339780225741
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6901446120494472406}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d408d8026e24ccb4daea264ba73c69b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isSelected: 0
+  _isTargeted: 0
+  isRevealed: 0
+  owner: 0
+  GlobalPos: {x: 0, y: 0, z: 0}
+  GridPos: {x: 0, y: 0}
 --- !u!114 &-8795965812946985606
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -97,16 +134,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51bac3c2b5f8f7c4ca2dac380b9bcaf4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  revealDuration: 5
-  _isSelected: 0
-  _isTargeted: 0
-  isRevealed: 0
-  owner: 0
-  GlobalPos: {x: 0, y: 0, z: 0}
-  gridPos: {x: 0, y: 0}
-  _unitObject: {fileID: 0}
-  <callingUnitController>k__BackingField: {fileID: 0}
-  mapManager: {fileID: 0}
 --- !u!114 &-8329108152562972926
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -119,6 +146,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7346bc9ba0a90e843979f431ba353e30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isAutoStripedColor: 0
   mainColor: {r: 0.6117647, g: 0.64705884, b: 1, a: 0}
   blinkAllyColor: {r: 0, g: 1, b: 0.13680005, a: 1}
   blinkEnemyColor: {r: 1, g: 0, b: 0, a: 1}

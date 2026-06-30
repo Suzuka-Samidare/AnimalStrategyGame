@@ -1,7 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using TileOwner = TileController.TileOwner;
+using TileOwner = TileStats.TileOwner;
 
 public class UnitSpawnManager : MonoBehaviour
 {
@@ -27,7 +27,7 @@ public class UnitSpawnManager : MonoBehaviour
     /// <summary>
     /// プールからユニットの呼び出し
     /// </summary>
-    public void SpawnUnit(TileController tile, UnitData unitData)
+    public void SpawnUnit(Tile tile, UnitData unitData)
     {
         // DEBUG ============================================================
         Debug.Log("SpawnUnit");
@@ -36,11 +36,11 @@ public class UnitSpawnManager : MonoBehaviour
         if (tile.unitObject != null) return;
 
         // オーナー情報からプール先の設定
-        FactionUnitPool targetPool = (tile.owner == TileOwner.Player) ? playerPool : enemyPool;
+        FactionUnitPool targetPool = (tile.Stats.owner == TileOwner.Player) ? playerPool : enemyPool;
         // スポーン処理
         Vector3 tilePosition = tile.transform.position;
         Vector3 unitPosition = new Vector3(tilePosition.x, unitData.initPos.y, tilePosition.z);
-        Quaternion unitRotation = tile.owner == TileOwner.Enemy ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
+        Quaternion unitRotation = tile.Stats.owner == TileOwner.Enemy ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
         BaseUnit unit = targetPool.Spawn(
             unitData.profile.unitType,
             unitPosition,
@@ -55,7 +55,7 @@ public class UnitSpawnManager : MonoBehaviour
         _mapManager.isDirty = true;
     }
 
-    public void SpawnUnitDelayed(TileController tile, UnitData unitData)
+    public void SpawnUnitDelayed(Tile tile, UnitData unitData)
     {
         // DEBUG ============================================================
         Debug.Log("SpawnUnitDelayed");
@@ -64,11 +64,11 @@ public class UnitSpawnManager : MonoBehaviour
         if (tile.unitObject != null) return;
 
         // オーナー情報からプール先の設定
-        FactionUnitPool targetPool = (tile.owner == TileOwner.Player) ? playerPool : enemyPool;
+        FactionUnitPool targetPool = (tile.Stats.owner == TileOwner.Player) ? playerPool : enemyPool;
         // スポーン処理
         Vector3 tilePosition = tile.transform.position;
         Vector3 unitPosition = new Vector3(tilePosition.x, 0.75f, tilePosition.z);
-        Quaternion unitRotation = tile.owner == TileOwner.Enemy ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
+        Quaternion unitRotation = tile.Stats.owner == TileOwner.Enemy ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
         BaseUnit unit = targetPool.Spawn(
             unitData.callingProfile.unitType,
             unitPosition,
@@ -101,7 +101,7 @@ public class UnitSpawnManager : MonoBehaviour
         _mapManager.isDirty = true;
     }
 
-    public void DespawnUnit(TileController tile)
+    public void DespawnUnit(Tile tile)
     {
         // DEBUG ============================================================
         Debug.Log("DespawnUnit");
@@ -113,7 +113,7 @@ public class UnitSpawnManager : MonoBehaviour
         // DEBUG ============================================================
 
         // オーナー情報からプール先の設定
-        FactionUnitPool targetPool = (tile.owner == TileOwner.Player) ? playerPool : enemyPool;
+        FactionUnitPool targetPool = (tile.Stats.owner == TileOwner.Player) ? playerPool : enemyPool;
         // プール回収するユニットタイプの取得
         UnitType unitType = tile.UnitBase.Stats.profile.unitType;
         // BaseUnitコンポーネントを取得
@@ -137,7 +137,7 @@ public class UnitSpawnManager : MonoBehaviour
         {
             for (int x = 0; x < _mapManager.mapWidth; x++)
             {
-                TileController tile = _mapManager.playerMapData[x, y];
+                Tile tile = _mapManager.playerMapData[x, y];
                 if (tile.unitObject)
                 {
                     DespawnUnit(tile);

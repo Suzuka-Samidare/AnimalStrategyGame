@@ -34,7 +34,7 @@ public class UnitController : MonoBehaviour
         }
     }
 
-    public void ApplyDamageAsync(float power, TileController tile) {
+    public void ApplyDamageAsync(float power, Tile tile) {
         // Transform tileTransform = tile.transform;
         // 更新前のHPを記録
         float previousHp = _stats.hp;
@@ -87,13 +87,12 @@ public class UnitController : MonoBehaviour
     /// <summary>
     /// 気絶処理
     /// </summary>
-    public async UniTask OnFaint(TileController tile)
+    public async UniTask OnFaint(Tile tile)
     {
         if (_animation)
         {
             await _animation.PlayOnceAsync(AnimationName.Death);
         }
-        TileController tileController = GetComponentInParent<TileController>();
         UnitSpawnManager.Instance.DespawnUnit(tile);
     }
 }

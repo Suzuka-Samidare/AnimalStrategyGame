@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
+using TileOwner = TileStats.TileOwner;
 
 public class MapManager : MonoBehaviour, IInitializable
 {
@@ -20,8 +21,8 @@ public class MapManager : MonoBehaviour, IInitializable
     private GameObject _metaTilePrefab;
 
     [Header("マップデータ")]
-    public TileController[,] playerMapData;
-    public TileController[,] enemyMapData;
+    public Tile[,] playerMapData;
+    public Tile[,] enemyMapData;
 
     [Header("生成情報")]
     [Tooltip("マップの幅")]
@@ -93,7 +94,7 @@ public class MapManager : MonoBehaviour, IInitializable
     /// </summary>
     private void GenerateAllyMapData()
     {
-        playerMapData = new TileController[mapWidth, mapHeight + _metaMapHeight];
+        playerMapData = new Tile[mapWidth, mapHeight + _metaMapHeight];
 
         for (int y = 0; y < mapHeight + _metaMapHeight; y++)
         {
@@ -102,23 +103,23 @@ public class MapManager : MonoBehaviour, IInitializable
             for (int x = 0; x < mapWidth; x++)
             {
                 // Prefabをインスタンス化
-                GameObject tile = Instantiate(
+                GameObject tileObj = Instantiate(
                     prefab,
                     new Vector3(x, 0, y),
                     Quaternion.identity
                 );
                 // 生成したタイルをMapGeneratorの子オブジェクトにする (任意、Hierarchyを整理するため)
-                tile.transform.SetParent(playerMap.transform);
+                tileObj.transform.SetParent(playerMap.transform);
                 // tile.name = $"PlayerTile_{x}_{y}";
-                tile.name = "Player" + (y < mapHeight ? "" : "Meta") + $"_{x}_{y}";
+                tileObj.name = "Player" + (y < mapHeight ? "" : "Meta") + $"_{x}_{y}";
                 // 各フィールド値の更新
-                TileController tileController = tile.GetComponent<TileController>();
-                tileController.mapManager = this;
-                tileController.GlobalPos = tile.transform.position;
-                tileController.gridPos = new Vector2Int(x, y);
-                tileController.SetOwner(TileController.TileOwner.Player);
+                Tile tile = tileObj.GetComponent<Tile>();
+                tile.MapManager = this;
+                tile.Stats.GlobalPos = tileObj.transform.position;
+                tile.Stats.GridPos = new Vector2Int(x, y);
+                tile.SetOwner(TileOwner.Player);
                 // クラスをマップデータとして格納
-                playerMapData[x, y] = tileController;
+                playerMapData[x, y] = tile;
             }
         }
     }
@@ -128,7 +129,7 @@ public class MapManager : MonoBehaviour, IInitializable
     /// </summary>
     private void GenerateEnemyMapData()
     {
-        enemyMapData = new TileController[mapWidth, mapHeight + _metaMapHeight];
+        enemyMapData = new Tile[mapWidth, mapHeight + _metaMapHeight];
 
         for (int y = 0; y < mapHeight + _metaMapHeight; y++)
         {
@@ -137,31 +138,31 @@ public class MapManager : MonoBehaviour, IInitializable
             for (int x = 0; x < mapWidth; x++)
             {
                 // Prefabをインスタンス化
-                GameObject tile = Instantiate(
+                GameObject tileObj = Instantiate(
                     prefab,
                     new Vector3(mapWidth - 1 - x, 0, mapHeight * 2 + mapDistance - y),
                     Quaternion.identity
                 );
                 // 生成したタイルをMapGeneratorの子オブジェクトにする (任意、Hierarchyを整理するため)
-                tile.transform.SetParent(enemyMap.transform);
+                tileObj.transform.SetParent(enemyMap.transform);
                 // tile.name = $"EnemyTile_{x}_{y}";
-                tile.name = "Enemy" + (y < mapHeight ? "" : "Meta") + $"_{x}_{y}";
+                tileObj.name = "Enemy" + (y < mapHeight ? "" : "Meta") + $"_{x}_{y}";
                 // 各フィールド値の更新
-                TileController tileController = tile.GetComponent<TileController>();
-                tileController.mapManager = this;
-                tileController.GlobalPos = tile.transform.position;
-                tileController.gridPos = new Vector2Int(x, y);
-                tileController.SetOwner(TileController.TileOwner.Enemy);
+                Tile tile = tileObj.GetComponent<Tile>();
+                tile.MapManager = this;
+                tile.Stats.GlobalPos = tileObj.transform.position;
+                tile.Stats.GridPos = new Vector2Int(x, y);
+                tile.SetOwner(TileOwner.Enemy);
                  // クラスをマップデータとして格納
-                enemyMapData[x, y] = tileController;
+                enemyMapData[x, y] = tile;
             }
         }
     }
 
     /// <summary>
-    /// 味方マップのTileControllerを取得する（メタタイルは取得不可）
+    /// 味方マップのTileを取得する（メタタイルは取得不可）
     /// </summary>
-    public TileController GetPlayerTile(Vector2Int pos, bool isCalculableMetaTile = false)
+    public Tile GetPlayerTile(Vector2Int pos, bool isCalculableMetaTile = false)
     {
         int heightLength =
             isCalculableMetaTile ? playerMapData.GetLength(1) : playerMapData.GetLength(1) - _metaMapHeight;
@@ -176,9 +177,9 @@ public class MapManager : MonoBehaviour, IInitializable
     }
 
     /// <summary>
-    /// 敵マップのTileControllerを取得する（メタタイルは取得不可）
+    /// 敵マップのTileを取得する（メタタイルは取得不可）
     /// </summary>
-    public TileController GetEnemyTile(Vector2Int pos, bool isCalculableMetaTile = false)
+    public Tile GetEnemyTile(Vector2Int pos, bool isCalculableMetaTile = false)
     {
         int heightLength =
             isCalculableMetaTile ? enemyMapData.GetLength(1) : enemyMapData.GetLength(1) - _metaMapHeight;
@@ -193,15 +194,15 @@ public class MapManager : MonoBehaviour, IInitializable
     }
 
     /// <summary>
-    /// 敵マップのTileControllerリストを取得する
+    /// 敵マップのTileリストを取得する
     /// </summary>
-    public List<TileController> GetEnemyTiles(List<Vector2Int> positions)
+    public List<Tile> GetEnemyTiles(List<Vector2Int> positions)
     {
-        List<TileController> result = new List<TileController>();
+        List<Tile> result = new List<Tile>();
         foreach(var pos in positions)
         {
-            TileController tileController = GetEnemyTile(pos);
-            if (tileController != null) result.Add(tileController);
+            Tile tile = GetEnemyTile(pos);
+            if (tile != null) result.Add(tile);
         }
         return result;
     }
@@ -219,7 +220,7 @@ public class MapManager : MonoBehaviour, IInitializable
     /// <summary>
     /// 指定したマップ上にある本部ユニット数を取得
     /// </summary>
-    public int CountHeadquarters(TileController[,] mapData)
+    public int CountHeadquarters(Tile[,] mapData)
     {
         int count = 0;
         // mapDataのサイズを動的に取得すれば、20x20以外にも対応できて超便利！
@@ -246,17 +247,17 @@ public class MapManager : MonoBehaviour, IInitializable
     /// <summary>
     /// 敵マップ上でユニット配置されていないタイルの取得
     /// </summary>
-    public List<TileController> GetEnemyEmptyTiles(int count)
+    public List<Tile> GetEnemyEmptyTiles(int count)
     {
-        List<TileController> emptyTiles = new List<TileController>();
-        List<TileController> resultTiles = new List<TileController>();
+        List<Tile> emptyTiles = new List<Tile>();
+        List<Tile> resultTiles = new List<Tile>();
         int rows = enemyMapData.GetLength(0);
         int cols = enemyMapData.GetLength(1);
 
         // タイルがnullでないかつユニットが配置されていない場合は、空きタイルとしてリストに追加
         ForEachTile((x, y) =>
         {
-            TileController tile = enemyMapData[x, y];
+            Tile tile = enemyMapData[x, y];
             if (tile != null && tile.unitObject == null) emptyTiles.Add(tile);
         });
 
@@ -283,9 +284,9 @@ public class MapManager : MonoBehaviour, IInitializable
     /// <summary>
     /// 味方マップ上のHerringユニットが配置されているタイルの全取得
     /// </summary>
-    public List<TileController> GetPlayerMapHerringTiles()
+    public List<Tile> GetPlayerMapHerringTiles()
     {
-        List<TileController> tiles = new List<TileController>();
+        List<Tile> tiles = new List<Tile>();
         ForEachTile((x, y) =>
         {
             if (playerMapData[x, y].unitObject != null && playerMapData[x, y].UnitBase.Stats.profile.unitType == UnitType.Herring)
@@ -300,9 +301,9 @@ public class MapManager : MonoBehaviour, IInitializable
     /// <summary>
     /// 敵マップ上Herringユニットが配置されているタイルの全取得
     /// </summary>
-    public List<TileController> GetEnemyMapHerringTiles()
+    public List<Tile> GetEnemyMapHerringTiles()
     {
-        List<TileController> tiles = new List<TileController>();
+        List<Tile> tiles = new List<Tile>();
         ForEachTile((x, y) =>
         {
             if (enemyMapData[x, y].unitObject != null && enemyMapData[x, y].UnitBase.Stats.profile.unitType == UnitType.Herring) 

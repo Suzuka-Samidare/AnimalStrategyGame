@@ -47,7 +47,7 @@ public class EnemyManager : MonoBehaviour, IInitializable
 
     private void SpawnUnitRandomTiles(UnitData unitData, int count)
     {
-        List<TileController> tiles = _mapManager.GetEnemyEmptyTiles(count);
+        List<Tile> tiles = _mapManager.GetEnemyEmptyTiles(count);
 
         if (tiles.Count < 1) throw new System.Exception("空きタイルが取得できませんでした。");
 

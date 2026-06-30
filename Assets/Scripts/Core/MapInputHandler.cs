@@ -1,13 +1,15 @@
 using UnityEngine;
-using TileOwner = TileController.TileOwner;
+using TileOwner = TileStats.TileOwner;
 
 public class MapInputHandler : MonoBehaviour
 {
+    [SerializeField]
     private TileManager _tileManager;
 
     private void Start()
     {
         _tileManager = TileManager.Instance;
+        Debug.Log(_tileManager);
     }
 
     private void OnEnable() => InputHandler.OnSelect += HandleSelection;
@@ -27,12 +29,12 @@ public class MapInputHandler : MonoBehaviour
             // 接触対象がタイルの場合
             if (hitObject.CompareTag("Tile"))
             {
-                TileController tileController = hitObject.GetComponent<TileController>();
+                Tile tile = hitObject.GetComponent<Tile>();
 
-                if (tileController.owner == TileOwner.Player)
+                if (tile.Stats.owner == TileOwner.Player)
                 {
                     // タイルを選択中オブジェクトとして設定
-                    _tileManager.SetSelectedTile(hitObject);
+                    _tileManager.SetSelectedTile(tile);
                     // ユニットアニメーション
                     UnitAnimation unitAnimation = hit.collider.GetComponentInChildren<UnitAnimation>();
                     if (unitAnimation) {
@@ -40,10 +42,10 @@ public class MapInputHandler : MonoBehaviour
                     }
                 }
 
-                if (tileController.owner == TileOwner.Enemy)
+                if (tile.Stats.owner == TileOwner.Enemy)
                 {
-                    _tileManager.SetTargetTile(tileController);
-                    _tileManager.RegisterTargetTiles(tileController.gridPos);
+                    _tileManager.SetTargetTile(tile);
+                    _tileManager.RegisterTargetTiles(tile.Stats.GridPos);
                 }
             }
 

@@ -19,7 +19,7 @@ public class UnitCallerCondition : MonoBehaviour, IButtonCondition
 
         if ( _tileManager.selectedTile == null) return false;
 
-        if (_tileManager.selectedTileController.unitObject) return false;
+        if (_tileManager.selectedTile.unitObject) return false;
 
         return true;
     }

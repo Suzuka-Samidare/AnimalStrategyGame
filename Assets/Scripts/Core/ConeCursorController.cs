@@ -28,22 +28,22 @@ public class ConeCursorController : MonoBehaviour
 
     void UpdatePosition()
     { 
-        if (_tileManager.selectedTileController != null && _gameManager.currentPhase == Phase.INIT)
+        if (_tileManager.selectedTile != null && _gameManager.currentPhase == Phase.INIT)
         {
             objectRenderer.enabled = true;
-            Vector3 selectedTilePos = _tileManager.selectedTileController.GlobalPos;
+            Vector3 selectedTilePos = _tileManager.selectedTile.Stats.GlobalPos;
             transform.position = new Vector3(selectedTilePos.x, transform.position.y, selectedTilePos.z);
         }
-        else if (_tileManager.selectedTileController != null && _gameManager.currentPhase == Phase.PREPARATION)
+        else if (_tileManager.selectedTile != null && _gameManager.currentPhase == Phase.PREPARATION)
         {
             objectRenderer.enabled = true;
-            Vector3 selectedTilePos = _tileManager.selectedTileController.GlobalPos;
+            Vector3 selectedTilePos = _tileManager.selectedTile.Stats.GlobalPos;
             transform.position = new Vector3(selectedTilePos.x, transform.position.y, selectedTilePos.z);
         }
         else if (_tileManager.targetTile != null && _gameManager.currentPhase == Phase.COMMAND)
         {
             objectRenderer.enabled = true;
-            Vector3 targetTilePos = _tileManager.targetTile.GlobalPos;
+            Vector3 targetTilePos = _tileManager.targetTile.Stats.GlobalPos;
             transform.position = new Vector3(targetTilePos.x, transform.position.y, targetTilePos.z);
         }
         else

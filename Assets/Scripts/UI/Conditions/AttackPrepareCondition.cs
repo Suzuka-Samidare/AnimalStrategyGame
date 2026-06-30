@@ -19,7 +19,7 @@ public class AttackPrepareCondition : MonoBehaviour, IButtonCondition
 
         if (_tileManager.GetSelectedTileMapId() == MapId.Headquarter) return false;
 
-        // if (!_tileManager.selectedTileController.unitStats.profile.canAttack) return false;
+        // if (!_tileManager.selectedTile.unitStats.profile.canAttack) return false;
 
         return true;
     }
