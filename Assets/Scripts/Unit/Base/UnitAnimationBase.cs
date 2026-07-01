@@ -3,10 +3,10 @@ using UnityEngine;
 
 public abstract class UnitAnimationBase : MonoBehaviour
 {
-    private bool isAnimating = false;
-    private bool isPause = false;
+    protected bool isAnimating = false;
+    protected bool isPause = false;
 
-    private Animator _animator;
+    protected Animator _animator;
 
     protected virtual void Awake()
     {

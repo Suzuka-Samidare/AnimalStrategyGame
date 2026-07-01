@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Guid = System.Guid;
 
@@ -17,10 +16,10 @@ public abstract class UnitStatsBase : MonoBehaviour
         _uuid = Guid.NewGuid().ToString();
     }
 
-    protected void Initialize(UnitProfile profile)
+    protected virtual void Initialize(UnitData unitData)
     {
         // 基本ステータスの初期化
-        this.profile = profile;
+        this.profile = unitData.profile;
         hp = profile.maxHp;
     }
 
