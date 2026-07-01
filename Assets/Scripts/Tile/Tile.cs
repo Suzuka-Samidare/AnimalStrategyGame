@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
 using TileOwner = TileStats.TileOwner;
 
@@ -15,8 +14,8 @@ public class Tile : MonoBehaviour
 
     [Header("ユニット関連")]
     [SerializeField, Tooltip("現在配置されているユニット")]
-    private Unit _unit;
-    public Unit Unit => _unit;
+    private UnitBase _unit;
+    public UnitBase Unit => _unit;
     [Tooltip("ユニットの有無")]
     // public bool IsExistUnit => Unit != null;
     public bool IsExistUnit => unitObject != null;
@@ -31,7 +30,7 @@ public class Tile : MonoBehaviour
     public void SetOwner(TileOwner owner) => Stats.owner = owner;
     public void SetTargeted(bool isTargeted) => Stats.isTargeted = isTargeted;
     public void SetSelected(bool isSelected) => Stats.isSelected = isSelected;
-    public void SetUnit(Unit unit) => _unit = unit;
+    public void SetUnit(UnitBase unit) => _unit = unit;
     public void ClearUnit() => _unit = null;
 
     
