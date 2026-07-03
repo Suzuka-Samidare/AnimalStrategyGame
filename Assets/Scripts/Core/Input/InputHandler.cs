@@ -1,7 +1,8 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
-using System;
 using PlayerActions = GameInputs.PlayerActions;
 
 public class InputHandler : MonoBehaviour
@@ -36,15 +37,18 @@ public class InputHandler : MonoBehaviour
 
     private void StartMainInteract(InputAction.CallbackContext ctx)
     {
-        if (EventSystem.current.IsPointerOverGameObject())
+        // 現在のポインタ（マウス/タッチ）の画面座標を取得
+        Vector2 currentPoint = controls.Point.ReadValue<Vector2>();
+
+        // WebGL/モバイル対応のUI接触チェック
+        if (IsPointerOverUIElement(currentPoint))
         {
             _isOverUI = true;
             return;
         }
-        // _isOverUI = false;
-        // _isDragging = false;
+
         _isPrimaryPressing = true;
-        _startPos = controls.Point.ReadValue<Vector2>();
+        _startPos = currentPoint;
     }
 
     private void EndMainInteract(InputAction.CallbackContext _)
@@ -60,7 +64,10 @@ public class InputHandler : MonoBehaviour
 
     private void StartSubInteract(InputAction.CallbackContext _)
     {
-        if (EventSystem.current.IsPointerOverGameObject())
+        // サブ操作開始時も現在の座標でUIチェック
+        Vector2 currentPoint = controls.Point.ReadValue<Vector2>();
+
+        if (IsPointerOverUIElement(currentPoint))
         {
             _isOverUI = true;
             return;
@@ -98,7 +105,6 @@ public class InputHandler : MonoBehaviour
             }
 
             // ピンチズーム計算 (モバイルのTouch1がある時だけ実行)
-            // マウスの右クリック時は Touch1Point がゼロになるので、ここでズームは走らないよ！
             Vector2 t1 = controls.Touch1Point.ReadValue<Vector2>();
             if (t1 != Vector2.zero) 
             {
@@ -125,5 +131,25 @@ public class InputHandler : MonoBehaviour
                 OnMoveUpdate?.Invoke(controls.Delta.ReadValue<Vector2>());
             }
         }
+    }
+
+    /// <summary>
+    /// WebGL・モバイル・PC全環境対応のUI接触チェック
+    /// </summary>
+    private bool IsPointerOverUIElement(Vector2 screenPosition)
+    {
+        if (EventSystem.current == null) return false;
+
+        // 標準関数も併せてチェック（PCなどで確実に弾くため）
+        if (EventSystem.current.IsPointerOverGameObject()) return true;
+
+        // 指定座標に直接UIレイを飛ばして多重チェック（WebGL/モバイルのタイムラグ対策）
+        PointerEventData eventData = new PointerEventData(EventSystem.current);
+        eventData.position = screenPosition;
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+        
+        return results.Count > 0;
     }
 }
