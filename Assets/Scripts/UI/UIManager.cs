@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using Phase = GameManager.Phase;
@@ -13,6 +11,7 @@ public class UIManager : MonoBehaviour
 
     [Header("MainView")]
     public VisibilityController Timeline;
+    public VisibilityController Overlay;
 
     // インスペクターから各パネルを登録
     [Header("Sidebar")]

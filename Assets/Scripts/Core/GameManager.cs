@@ -98,6 +98,7 @@ public class GameManager : MonoBehaviour, IInitializable
 
         if (playerHqCount == _mapManager.maxHqCount)
         {
+            _uiManager.Overlay.Show();
             _infomationController.Close();
             _dialogController.Open(
                 isConfirm: true,
@@ -108,12 +109,14 @@ public class GameManager : MonoBehaviour, IInitializable
                     // アクションイベントの後片付け
                     _mapManager.OnHqCountChanged -= ValidateAndShowDialog;
                     _uiManager.Timeline.Show();
+                    _uiManager.Overlay.Hide();
                     EnterPreparationPhase();
                 },
                 onCancel: () =>
                 {
                     UnitSpawnManager.Instance.DespawnAllUnit();
                     _infomationController.Open(initMessage);
+                    _uiManager.Overlay.Hide();
                 }
             ); 
         }
