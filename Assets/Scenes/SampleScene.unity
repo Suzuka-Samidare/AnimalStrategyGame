@@ -5294,22 +5294,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   setupDataList:
   - Type: 1
-    Prefab: {fileID: 1190618585395214496, guid: 92dc80f1626e93a4eae8bab981ec7155,
+    Prefab: {fileID: -5594603691623578443, guid: 92dc80f1626e93a4eae8bab981ec7155,
       type: 3}
     DefaultCapacity: 2
     MaxSize: 2
   - Type: 4
-    Prefab: {fileID: -128537897075245654, guid: 4aa01f1d5c72d4e47a8c44e612a6b6fc,
+    Prefab: {fileID: 2285418008865584719, guid: 4aa01f1d5c72d4e47a8c44e612a6b6fc,
       type: 3}
     DefaultCapacity: 5
     MaxSize: 10
   - Type: 8
-    Prefab: {fileID: -7254113830022568613, guid: 818c5a1ba0d9810439f11299463f2294,
+    Prefab: {fileID: -5195728058516223896, guid: 818c5a1ba0d9810439f11299463f2294,
       type: 3}
     DefaultCapacity: 5
     MaxSize: 10
   - Type: 0
-    Prefab: {fileID: 3063954503545261255, guid: f62d4831da787274cba79bba3a15b301,
+    Prefab: {fileID: -1463504445097435376, guid: f62d4831da787274cba79bba3a15b301,
       type: 3}
     DefaultCapacity: 5
     MaxSize: 10
@@ -8428,22 +8428,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   setupDataList:
   - Type: 1
-    Prefab: {fileID: 1190618585395214496, guid: 92dc80f1626e93a4eae8bab981ec7155,
+    Prefab: {fileID: -5594603691623578443, guid: 92dc80f1626e93a4eae8bab981ec7155,
       type: 3}
     DefaultCapacity: 2
     MaxSize: 2
   - Type: 4
-    Prefab: {fileID: -128537897075245654, guid: 4aa01f1d5c72d4e47a8c44e612a6b6fc,
+    Prefab: {fileID: 2285418008865584719, guid: 4aa01f1d5c72d4e47a8c44e612a6b6fc,
       type: 3}
     DefaultCapacity: 5
     MaxSize: 10
   - Type: 8
-    Prefab: {fileID: -7254113830022568613, guid: 818c5a1ba0d9810439f11299463f2294,
+    Prefab: {fileID: -5195728058516223896, guid: 818c5a1ba0d9810439f11299463f2294,
       type: 3}
     DefaultCapacity: 5
     MaxSize: 10
   - Type: 0
-    Prefab: {fileID: 3063954503545261255, guid: f62d4831da787274cba79bba3a15b301,
+    Prefab: {fileID: -1463504445097435376, guid: f62d4831da787274cba79bba3a15b301,
       type: 3}
     DefaultCapacity: 5
     MaxSize: 10
@@ -8481,7 +8481,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.00036621094, y: 0.000061035156}
+  m_AnchoredPosition: {x: -0.00036621094, y: 0}
   m_SizeDelta: {x: -0.00036621094, y: 242.97998}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &1225274904
@@ -9805,7 +9805,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.5, y: -0.000061035156}
+  m_AnchoredPosition: {x: 0.5, y: 0}
   m_SizeDelta: {x: -1, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1403509048

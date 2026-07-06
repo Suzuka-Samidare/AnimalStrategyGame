@@ -73,7 +73,7 @@ public class AttackManager : MonoBehaviour
         // ===================================================
         // 防錆成功 => 攻撃が迎撃される演出のみ
         // 防衛失敗 => 攻撃ヒット及びユニットの気絶演出
-        if (command.Attacker.unitObject.TryGetComponent<SquidAttackVisualizer>(out var squidAttackVisualizer))
+        if (command.Attacker.Unit.TryGetComponent<SquidAttackVisualizer>(out var squidAttackVisualizer))
         {
             if (isSuccessDefence)
             {
@@ -104,7 +104,7 @@ public class AttackManager : MonoBehaviour
         {
             if (tile.IsExistUnit)
             {
-                tile.UnitBase.Controller.ApplyDamageAsync(command.Damage, tile);
+                tile.Unit.Stats.ApplyDamageAsync(command.Damage, tile);
                 // UniTask damageTask = tile.UnitBase.Controller.ApplyDamageAsync(command.Damage, tile);
                 // // あとで一括待機するためにリストに入れておく
                 // applyTask.Add(damageTask);
@@ -143,8 +143,8 @@ public class AttackManager : MonoBehaviour
         foreach (Tile tile in command.AffectedTiles)
         {
             // 気絶している場合は、アニメーション
-            if (tile.UnitBase != null && tile.UnitBase.Stats.IsFaint) {
-                UniTask faint = tile.UnitBase.Controller.OnFaint(tile);
+            if (tile.Unit != null && tile.Unit.Stats.IsFaint) {
+                UniTask faint = tile.Unit.OnFaint(tile);
                 animationTasks.Add(faint);
             }
         }
@@ -194,13 +194,15 @@ public class AttackManager : MonoBehaviour
         // 各Herringユニットごとに防衛処理
         foreach (var herringTile in herringTiles)
         {
+            HerringUnit herringUnit = herringTile.Unit as HerringUnit;
             // Herringユニットの左右防衛幅
-            int horizonRange = herringTile.UnitDefendable.Stats.profile.range.max;
+            int horizonRange = herringUnit.Stats.defenceProfile.range.max;
+            // int horizonRange = herringTile.UnitDefendable.Stats.profile.range.max;
             // ターゲットのx座標がHerringユニットの防衛幅に入らない場合はスキップ
             if (tgtPos.x < herringTile.Stats.GridPos.x - horizonRange || tgtPos.x > herringTile.Stats.GridPos.x + horizonRange) continue;
 
             // Herringユニットの防衛座標リストを取得
-            List<Vector2Int> defencePositions = herringTile.UnitDefendable.Controller.GetDefensiveRangePos(herringTile.Stats.GridPos);
+            List<Vector2Int> defencePositions = herringUnit.Controller.GetDefensiveRangePos(herringTile.Stats.GridPos);
             // 有効な防衛タイル数の集計
             int overlapCount = 0;
 
@@ -239,12 +241,12 @@ public class AttackManager : MonoBehaviour
             // 今回の防衛ユニット攻撃の命中率
             float attackerEvasionRate = Random.value;
             // 防衛ユニットのy座標の防衛距離
-            int verticalRange = herringTile.UnitDefendable.Controller.VerticalRange;
+            int verticalRange = herringUnit.Stats.VerticalRange;
             // 防衛数分の判定処理を実行
             for (int i = 0; i < overlapCount; i++)
             {
                 // 防衛判定結果を受け取る
-                bool result = herringTile.UnitDefendable.Controller.IsIntercepted(attackerEvasionRate, i, distanceX);
+                bool result = herringUnit.Controller.IsIntercepted(attackerEvasionRate, i, distanceX);
 
                 // 防衛成功判定を受け取った場合は、迎撃できたポジションを返す
                 if (result)

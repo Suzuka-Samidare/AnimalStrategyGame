@@ -4,7 +4,7 @@ public abstract class AttackerStatsBase : UnitStatsBase
 {
     [Tooltip("攻撃ステータス")] public AttackProfile attackProfile;
 
-    protected override void Initialize(UnitData unitData)
+    public override void Initialize(UnitData unitData)
     {
         base.Initialize(unitData);
         

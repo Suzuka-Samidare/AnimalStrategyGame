@@ -102,31 +102,29 @@ public class TileManager : MonoBehaviour, IInitializable
     /// </summary>
     public void RegisterTargetTiles(Vector2Int targetPos)
     {
-        if (selectedTile == null) return;
+        if (selectedTile == null ||
+            selectedTile.Unit is not AttackerUnitBase attackerUnit)
+        {
+            throw new InvalidOperationException("攻撃処理を開始できません：有効な攻撃ユニットが選択されていません。");
+        }
 
         if (targetTiles.Count > 0)
         {
             ClearTargetTiles();
         }
 
-        if (selectedTile.UnitAttackable == null)
-        {
-            throw new Exception("AttackUnitControllerがありません");
-        }
-
-        List<Vector2Int> tilePositions = selectedTile.UnitAttackable.Controller.GetTargetTilePositions(targetPos);
+        List<Vector2Int> tilePositions = attackerUnit.Controller.GetTargetTilePositions(targetPos);
 
         foreach (Vector2Int pos in tilePositions)
         {
             Tile tile = _mapManager.GetEnemyTile(pos);
 
-            if (tile != null)
-            {
-                // 新しく選択状態にする
-                tile.SetTargeted(true);
-                // 配列（リスト）に保存
-                targetTiles.Add(tile);
-            }
+            if (tile == null) continue;
+
+            // 新しく選択状態にする
+            tile.SetTargeted(true);
+            // 配列（リスト）に保存
+            targetTiles.Add(tile);
         }
     }
 
@@ -146,10 +144,9 @@ public class TileManager : MonoBehaviour, IInitializable
     {
         foreach (Tile tile in targetTiles)
         {
-            if (tile != null)
-            {
-                tile.SetTargeted(true);
-            }
+            if (tile == null) continue;
+
+            tile.SetTargeted(true);
         }
     } 
 
@@ -160,10 +157,9 @@ public class TileManager : MonoBehaviour, IInitializable
     {
         foreach (Tile tile in targetTiles)
         {
-            if (tile != null)
-            {
-                tile.SetTargeted(false);
-            }
+            if (tile == null) continue;
+            
+            tile.SetTargeted(false);
         }
     }
 
@@ -212,9 +208,9 @@ public class TileManager : MonoBehaviour, IInitializable
     /// </summary>
     public MapId GetSelectedTileMapId()
     {
-        if (selectedTile.unitObject != null)
+        if (selectedTile.Unit != null)
         {
-            return selectedTile.UnitBase.Stats.profile.id;
+            return selectedTile.Unit.Stats.profile.id;
         }
         else
         {
@@ -227,14 +223,14 @@ public class TileManager : MonoBehaviour, IInitializable
     /// </summary>
     public void GetSelectedTileUnitDetail()
     {
-        IUnit unitBase = selectedTile.UnitBase;
-        if (unitBase != null)
+        UnitBase unit = selectedTile.Unit;
+        if (unit != null)
         {
             UnitDetailController.Instance.Open(
-                unitBase.Stats.profile.unitName,
-                unitBase.Stats.profile.maxHp,
-                unitBase.Stats.hp,
-                unitBase.Stats.profile.id == MapId.Calling
+                unit.Stats.profile.unitName,
+                unit.Stats.profile.maxHp,
+                unit.Stats.hp,
+                unit.Stats.profile.id == MapId.Calling
             );
         }
         else

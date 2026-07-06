@@ -7,14 +7,14 @@ public class FactionUnitPool : MonoBehaviour
     public struct PoolSetupData
     {
         public UnitType Type;
-        public BaseUnit Prefab;
+        public UnitBase Prefab;
         public int DefaultCapacity;
         public int MaxSize;
     }
 
     [SerializeField] private List<PoolSetupData> setupDataList;
     
-    private Dictionary<UnitType, ComponentPool<BaseUnit>> _poolDictionary = new();
+    private Dictionary<UnitType, ComponentPool<UnitBase>> _poolDictionary = new();
 
     private void Awake()
     {
@@ -25,7 +25,7 @@ public class FactionUnitPool : MonoBehaviour
             poolObj.transform.SetParent(this.transform);
             
             // C#クラスとしてプールを new する（AddComponent は不要に！）
-            var unitPool = new ComponentPool<BaseUnit>(
+            var unitPool = new ComponentPool<UnitBase>(
                 prefab: data.Prefab,
                 parent: poolObj.transform,
                 defaultCapacity: data.DefaultCapacity > 0 ? data.DefaultCapacity : 5,
@@ -36,11 +36,11 @@ public class FactionUnitPool : MonoBehaviour
         }
     }
 
-    public BaseUnit Spawn(UnitType type, Vector3 position, Quaternion rotation)
+    public UnitBase Spawn(UnitType type, Vector3 position, Quaternion rotation)
     {
         if (_poolDictionary.TryGetValue(type, out var pool))
         {
-            BaseUnit unit = pool.Get();
+            UnitBase unit = pool.Get();
             unit.transform.SetPositionAndRotation(position, rotation);
             return unit;
         }
@@ -48,7 +48,7 @@ public class FactionUnitPool : MonoBehaviour
         return null;
     }
 
-    public void Despawn(UnitType type, BaseUnit unit)
+    public void Despawn(UnitType type, UnitBase unit)
     {
         if (_poolDictionary.TryGetValue(type, out var pool))
         {

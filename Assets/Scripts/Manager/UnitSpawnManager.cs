@@ -33,7 +33,7 @@ public class UnitSpawnManager : MonoBehaviour
         Debug.Log("SpawnUnit");
         // DEBUG ============================================================
 
-        if (tile.unitObject != null) return;
+        if (tile.Unit != null) return;
 
         // オーナー情報からプール先の設定
         FactionUnitPool targetPool = (tile.Stats.owner == TileOwner.Player) ? playerPool : enemyPool;
@@ -41,16 +41,17 @@ public class UnitSpawnManager : MonoBehaviour
         Vector3 tilePosition = tile.transform.position;
         Vector3 unitPosition = new Vector3(tilePosition.x, unitData.initPos.y, tilePosition.z);
         Quaternion unitRotation = tile.Stats.owner == TileOwner.Enemy ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
-        BaseUnit unit = targetPool.Spawn(
+        UnitBase unit = targetPool.Spawn(
             unitData.profile.unitType,
             unitPosition,
             unitRotation
         );
         // タイルにユニットオブジェクトを紐づけ
-        tile.unitObject = unit.gameObject;
+        tile.SetUnit(unit);
         // ユニット情報の初期化
-        tile.UnitBase.Stats.InitializeBaseStats(unitData.profile);
-        tile.UnitBase.Stats.InitializeRollStats(unitData);
+        tile.Unit.Setup(unitData);
+        // tile.UnitBase.Stats.InitializeBaseStats(unitData.profile);
+        // tile.UnitBase.Stats.InitializeRollStats(unitData);
         // マップデータの更新を促す
         _mapManager.isDirty = true;
     }
@@ -61,7 +62,7 @@ public class UnitSpawnManager : MonoBehaviour
         Debug.Log("SpawnUnitDelayed");
         // DEBUG ============================================================
 
-        if (tile.unitObject != null) return;
+        if (tile.Unit != null) return;
 
         // オーナー情報からプール先の設定
         FactionUnitPool targetPool = (tile.Stats.owner == TileOwner.Player) ? playerPool : enemyPool;
@@ -69,21 +70,22 @@ public class UnitSpawnManager : MonoBehaviour
         Vector3 tilePosition = tile.transform.position;
         Vector3 unitPosition = new Vector3(tilePosition.x, 0.75f, tilePosition.z);
         Quaternion unitRotation = tile.Stats.owner == TileOwner.Enemy ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
-        BaseUnit unit = targetPool.Spawn(
+        UnitBase unit = targetPool.Spawn(
             unitData.callingProfile.unitType,
             unitPosition,
             unitRotation
         );
         // タイルにユニットオブジェクトを紐づけ
-        tile.unitObject = unit.gameObject;
+        tile.SetUnit(unit);
         // ユニット情報の初期化
-        tile.UnitBase.Stats.InitializeBaseStats(unitData.callingProfile);
+        tile.Unit.Setup(unitData);
+        // tile.UnitBase.Stats.InitializeBaseStats(unitData.callingProfile);
         // 呼び出し完了時の処理
         Action onCompleteCallback = () =>
         {
             // DEBUG ============================================================
             Debug.Log("onCompleteCallback");
-            if (tile.unitObject == null)
+            if (tile.Unit == null)
             {
                 Debug.LogError($"???????????");
                 // return;
@@ -96,7 +98,10 @@ public class UnitSpawnManager : MonoBehaviour
             SpawnUnit(tile, unitData);
         };
         // 呼び出しタイマー開始
-        tile.UnitCallable.Controller.StartTimer(unitData.callTime, onCompleteCallback);
+        if (unit is CallUnit callUnit && callUnit.Controller is CallController callController)
+        {    
+            callController.StartTimer(unitData.callTime, onCompleteCallback);
+        }
         // マップデータの更新を促す
         _mapManager.isDirty = true;
     }
@@ -105,7 +110,7 @@ public class UnitSpawnManager : MonoBehaviour
     {
         // DEBUG ============================================================
         Debug.Log("DespawnUnit");
-        if (tile.UnitBase.Stats == null)
+        if (tile.Unit.Stats == null)
         {
             Debug.LogError($"タイルのユニットデータが足りないよ！");
             return;
@@ -115,20 +120,26 @@ public class UnitSpawnManager : MonoBehaviour
         // オーナー情報からプール先の設定
         FactionUnitPool targetPool = (tile.Stats.owner == TileOwner.Player) ? playerPool : enemyPool;
         // プール回収するユニットタイプの取得
-        UnitType unitType = tile.UnitBase.Stats.profile.unitType;
-        // BaseUnitコンポーネントを取得
-        if (tile.unitObject.TryGetComponent<BaseUnit>(out var unit))
-        {   
-            // デスポーン処理
-            targetPool.Despawn(unitType, unit);
-            tile.unitObject = null;
-            // マップデータの更新を促す
-            _mapManager.isDirty = true;
-        }
-        else
-        {
-            throw new Exception("BaseUnitコンポーネントがアタッチされていないため、Despawn処理を中止します。");
-        }
+        UnitType unitType = tile.Unit.Stats.profile.unitType;
+        // デスポーン処理
+        targetPool.Despawn(unitType, tile.Unit);
+        tile.ClearUnit();
+        // マップデータの更新を促す
+        _mapManager.isDirty = true;
+
+        // // BaseUnitコンポーネントを取得
+        // if (tile.unitObject.TryGetComponent<BaseUnit>(out var unit))
+        // {   
+        //     // デスポーン処理
+        //     targetPool.Despawn(unitType, unit);
+        //     tile.unitObject = null;
+        //     // マップデータの更新を促す
+        //     _mapManager.isDirty = true;
+        // }
+        // else
+        // {
+        //     throw new Exception("BaseUnitコンポーネントがアタッチされていないため、Despawn処理を中止します。");
+        // }
     }
 
     public void DespawnAllUnit()
@@ -138,7 +149,7 @@ public class UnitSpawnManager : MonoBehaviour
             for (int x = 0; x < _mapManager.mapWidth; x++)
             {
                 Tile tile = _mapManager.playerMapData[x, y];
-                if (tile.unitObject)
+                if (tile.Unit)
                 {
                     DespawnUnit(tile);
                 }

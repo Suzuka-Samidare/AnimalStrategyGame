@@ -8,15 +8,22 @@ public abstract class UnitStatsBase : MonoBehaviour
     [Tooltip("基本ステータス")] public UnitProfile profile;
 
     [Header("動的ステータス")]
-    [Tooltip("気絶フラグ")] public bool isFaint = false;
-    [Tooltip("耐久値")] public float hp { get; protected set; }
+    [Tooltip("気絶フラグ")] public bool IsFaint = false;
+    [Tooltip("耐久値"), SerializeField]
+    private float _hp;
+    public float hp
+    {
+        get => _hp;
+        protected set => _hp = value;
+    }
+    // [Tooltip("耐久値")] public float hp { get; protected set; }
 
     protected virtual void Awake()
     {
         _uuid = Guid.NewGuid().ToString();
     }
 
-    protected virtual void Initialize(UnitData unitData)
+    public virtual void Initialize(UnitData unitData)
     {
         // 基本ステータスの初期化
         this.profile = unitData.profile;
@@ -41,6 +48,6 @@ public abstract class UnitStatsBase : MonoBehaviour
         UpdateHp(-power);
 
         // HPが0以下の場合、気絶フラグを立てる
-        if (hp <= 0) isFaint = true;
+        if (hp <= 0) IsFaint = true;
     }
 }

@@ -119,8 +119,13 @@ public class TimelineManager : MonoBehaviour, IInitializable
     /// </summary>
     public void RegisterCommand()
     {
-        UnitProfile profile = _tileManager.selectedTile.UnitBase.Stats.profile;
-        AttackProfile attackProfile = _tileManager.selectedTile.UnitAttackable.Stats.profile;
+        if (_tileManager.selectedTile.Unit is not AttackerUnitBase attackerUnit)
+        {
+            throw new System.InvalidOperationException("コマンドを登録できません：有効な攻撃ユニットが設置されていません。");
+        }
+
+        UnitProfile profile = attackerUnit.Stats.profile;
+        AttackProfile attackProfile = attackerUnit.Stats.attackProfile;
         // 攻撃内容を作成してキューに追加
         TimelineCommand newAttack = new TimelineCommand(
             _tileManager.selectedTile.Stats.owner,

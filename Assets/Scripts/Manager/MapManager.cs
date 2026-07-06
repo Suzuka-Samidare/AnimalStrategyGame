@@ -3,6 +3,7 @@ using UnityEngine;
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using TileOwner = TileStats.TileOwner;
+using Unity.VisualScripting;
 
 public class MapManager : MonoBehaviour, IInitializable
 {
@@ -170,7 +171,7 @@ public class MapManager : MonoBehaviour, IInitializable
         if (pos.x < 0 || pos.x >= playerMapData.GetLength(0) || 
             pos.y < 0 || pos.y >= heightLength)
         {
-            Debug.LogWarning($"マップ範囲外へのアクセスを検知: {pos}");
+            // Debug.LogWarning($"マップ範囲外へのアクセスを検知: {pos}");
             return null;
         }
         return playerMapData[pos.x, pos.y];
@@ -187,8 +188,8 @@ public class MapManager : MonoBehaviour, IInitializable
         if (pos.x < 0 || pos.x >= enemyMapData.GetLength(0) || 
             pos.y < 0 || pos.y >= heightLength)
         {
-            Debug.LogWarning($"マップ範囲外へのアクセスを検知: {pos}");
-            return null; // 安全にnullを返す
+            // Debug.LogWarning($"マップ範囲外へのアクセスを検知: {pos}");
+            return null;
         }
         return enemyMapData[pos.x, pos.y];
     }
@@ -231,9 +232,9 @@ public class MapManager : MonoBehaviour, IInitializable
         {
             for (int x = 0; x < mapWidth; x++)
             {
-                IUnit unitBase = mapData[x, y].UnitBase;
+                UnitBase unit = mapData[x, y].Unit;
 
-                if (unitBase != null && unitBase.Stats.profile.id == MapId.Headquarter)
+                if (unit != null && unit.Stats.profile.id == MapId.Headquarter)
                 {
                     count++;
                 }
@@ -258,7 +259,7 @@ public class MapManager : MonoBehaviour, IInitializable
         ForEachTile((x, y) =>
         {
             Tile tile = enemyMapData[x, y];
-            if (tile != null && tile.unitObject == null) emptyTiles.Add(tile);
+            if (tile != null && tile.Unit == null) emptyTiles.Add(tile);
         });
 
         if (emptyTiles.Count == 0)
@@ -289,7 +290,8 @@ public class MapManager : MonoBehaviour, IInitializable
         List<Tile> tiles = new List<Tile>();
         ForEachTile((x, y) =>
         {
-            if (playerMapData[x, y].unitObject != null && playerMapData[x, y].UnitBase.Stats.profile.unitType == UnitType.Herring)
+            UnitBase unit = playerMapData[x, y].Unit;
+            if (unit != null && unit.Stats.profile.unitType == UnitType.Herring)
             {
                 tiles.Add(playerMapData[x, y]);
             }
@@ -306,7 +308,8 @@ public class MapManager : MonoBehaviour, IInitializable
         List<Tile> tiles = new List<Tile>();
         ForEachTile((x, y) =>
         {
-            if (enemyMapData[x, y].unitObject != null && enemyMapData[x, y].UnitBase.Stats.profile.unitType == UnitType.Herring) 
+            UnitBase unit = enemyMapData[x, y].Unit;
+            if (unit != null && unit.Stats.profile.unitType == UnitType.Herring) 
             {
                 tiles.Add(enemyMapData[x, y]);
             }

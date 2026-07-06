@@ -25,11 +25,11 @@ public class SquidAttackVisualizer : MonoBehaviour
     [Header("Refs")]
     private MapManager _mapManager;
     private ParticleManager _particleManager;
-    private UnitAnimation _unitAnimation;
+    private SquidAnimation _sqiudAnimation;
 
     private void Awake()
     {
-        _unitAnimation = GetComponent<UnitAnimation>();
+        _sqiudAnimation = GetComponent<SquidAnimation>();
     }
 
     private void Start()
@@ -59,7 +59,7 @@ public class SquidAttackVisualizer : MonoBehaviour
             descentFinishPos.y = 0.5f;
 
             await CameraMovement.Instance.MoveToAsync(transform.position);
-            await _unitAnimation.PlayOnceAsync(AnimationName.Attack);
+            await _sqiudAnimation.PlayOnceAsync(AnimationName.Attack);
             await parabolicMover.AscendAsync(_ascentPath);
             CameraMovement.Instance.Follow(
                 ink.transform,
@@ -100,7 +100,7 @@ public class SquidAttackVisualizer : MonoBehaviour
         float delayBeforeLaunch = totalTimeToIntercept - herringSchoolDuration;
 
         await CameraMovement.Instance.MoveToAsync(transform.position);
-        await _unitAnimation.PlayOnceAsync(AnimationName.Attack);
+        await _sqiudAnimation.PlayOnceAsync(AnimationName.Attack);
 
         // 6. 二つの移動処理を並列で実行
         UniTask inkTask = UniTask.Create(async () =>

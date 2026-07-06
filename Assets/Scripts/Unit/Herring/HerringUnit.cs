@@ -1,18 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class HerringUnit : MonoBehaviour
+[RequireComponent(typeof(HerringStats))]
+[RequireComponent(typeof(HerringStats))]
+[RequireComponent(typeof(HerringStats))]
+public class HerringUnit : DefencerUnitBase<HerringStats, HerringController>
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    // [SerializeField] private HerringStats _stats;
+    // [SerializeField] private HerringController _controller;
+    // [SerializeField] private HerringAnimation _animation;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    // // 抽象プロパティを自分のコンポーネントで上書きして外部に公開
+    // public override UnitStatsBase Stats => _stats;
+    // public override UnitControllerBase Controller => _controller;
+    // public override UnitAnimationBase Animation => _animation;
 }

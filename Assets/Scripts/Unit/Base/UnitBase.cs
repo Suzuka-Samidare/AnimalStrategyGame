@@ -5,18 +5,21 @@ public abstract class UnitBase : MonoBehaviour
 {
     // 外部から「.Stats」「.Controller」「.Animation」でアクセスするためのプロパティ
     // ※ 派生クラス（SquidやHerring）がそれぞれの具象コンポーネントを返すように抽象化します
-    public abstract UnitStatsBase Stats { get; }
-    public abstract UnitControllerBase Controller { get; }
-    public abstract UnitAnimationBase Animation { get; }
+    public virtual UnitStatsBase Stats { get; protected set; }
+    public virtual UnitControllerBase Controller { get; protected set; }
+    public virtual UnitAnimationBase Animation { get; protected set; }
 
-
-    // 全unitで共通して利用できる処理（共通メソッド）
-    protected virtual void Start()
+    protected virtual void Awake()
     {
-        if (Controller != null)
-        {
-            Controller.Initialize(this);
-        }
+        Stats = GetComponent<UnitStatsBase>();
+        Controller = GetComponent<UnitControllerBase>();
+        Animation = GetComponent<UnitAnimationBase>();
+    }
+
+    public virtual void Setup(UnitData unitData)
+    {
+        if (Stats != null) Stats.Initialize(unitData);
+        if (Controller != null) Controller.Initialize(this);
     }
 
     /// <summary>
