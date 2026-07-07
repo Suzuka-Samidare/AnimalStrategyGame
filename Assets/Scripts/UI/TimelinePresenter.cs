@@ -40,7 +40,7 @@ public class TimelinePresenter : MonoBehaviour
             // カードの中にあるテキストとかを書き換える処理をここに書く
             cardObj.GetComponent<Image>().color = command.Owner == TileOwner.Player ? PlayerCommandColor : EnemyCommandColor;
             cardObj.GetComponent<PanelView>().UpdateText(
-                $"{command.UnitName} / {command.Target.Stats.GridPos} / {command.time}"
+                $"{command.UnitName} / {command.TargetTile.Stats.GridPos} / {command.time}"
             );
         }
     }

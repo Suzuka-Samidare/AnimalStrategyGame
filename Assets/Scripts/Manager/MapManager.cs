@@ -161,7 +161,7 @@ public class MapManager : MonoBehaviour, IInitializable
     }
 
     /// <summary>
-    /// 味方マップのTileを取得する（メタタイルは取得不可）
+    /// 味方マップのTileを取得する（メタタイルもオプション指定で取得可能）
     /// </summary>
     public Tile GetPlayerTile(Vector2Int pos, bool isCalculableMetaTile = false)
     {
@@ -178,7 +178,21 @@ public class MapManager : MonoBehaviour, IInitializable
     }
 
     /// <summary>
-    /// 敵マップのTileを取得する（メタタイルは取得不可）
+    /// プレイヤーマップのTileリストを取得する
+    /// </summary>
+    public List<Tile> GetPlayerTiles(List<Vector2Int> positions, bool isCalculableMetaTile = false)
+    {
+        List<Tile> result = new List<Tile>();
+        foreach(var pos in positions)
+        {
+            Tile tile = GetPlayerTile(pos, isCalculableMetaTile);
+            if (tile != null) result.Add(tile);
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// 敵マップのTileを取得する（メタタイルもオプション指定で取得可能）
     /// </summary>
     public Tile GetEnemyTile(Vector2Int pos, bool isCalculableMetaTile = false)
     {
@@ -197,17 +211,20 @@ public class MapManager : MonoBehaviour, IInitializable
     /// <summary>
     /// 敵マップのTileリストを取得する
     /// </summary>
-    public List<Tile> GetEnemyTiles(List<Vector2Int> positions)
+    public List<Tile> GetEnemyTiles(List<Vector2Int> positions, bool isCalculableMetaTile = false)
     {
         List<Tile> result = new List<Tile>();
         foreach(var pos in positions)
         {
-            Tile tile = GetEnemyTile(pos);
+            Tile tile = GetEnemyTile(pos, isCalculableMetaTile);
             if (tile != null) result.Add(tile);
         }
         return result;
     }
 
+    /// <summary>
+    /// マップデータ更新、集計
+    /// </summary>
     private void UpdateMapData()
     {
         PlayerHqCount = CountHeadquarters(playerMapData);
@@ -314,6 +331,23 @@ public class MapManager : MonoBehaviour, IInitializable
                 tiles.Add(enemyMapData[x, y]);
             }
         });
+
+        return tiles;
+    }
+
+    /// <summary>
+    /// 攻撃物がターゲットに着弾するまでに通過するタイルの取得（メタタイルを含む）
+    /// </summary>
+    public List<Tile> GetTrajectoryTiles(Tile target)
+    {
+        Tile[,] mapData = target.Stats.owner == TileOwner.Player ? playerMapData : enemyMapData;
+        List<Tile> tiles = new List<Tile>();
+
+        for (int y = target.Stats.GridPos.y; y < mapHeight + _metaMapHeight; y++)
+        {
+            int x = target.Stats.GridPos.x;
+            if (mapData[x, y] != null) tiles.Add(mapData[x, y]);
+        }
 
         return tiles;
     }

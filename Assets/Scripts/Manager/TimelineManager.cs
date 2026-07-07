@@ -14,8 +14,8 @@ public class TimelineManager : MonoBehaviour, IInitializable
     {
         public TileOwner Owner;
         public string UnitName;
-        public Tile Attacker;
-        public Tile Target;  // 攻撃対象の中心タイル
+        public Tile AttackerTile;
+        public Tile TargetTile;  // 攻撃対象の中心タイル
         public List<Tile> AffectedTiles; 
         public float Damage;        // ダメージ量
         public float time; // 経過時間 + 適用必要時間
@@ -23,16 +23,16 @@ public class TimelineManager : MonoBehaviour, IInitializable
         public TimelineCommand(
             TileOwner owner,
             string unitName,
-            Tile attacker,
-            Tile target,
+            Tile attackerTile,
+            Tile targetTile,
             List<Tile> tiles,
             float damage,
             float delay
         ){
             Owner = owner;
             UnitName = unitName;
-            Attacker = attacker;
-            Target = target;
+            AttackerTile = attackerTile;
+            TargetTile = targetTile;
             AffectedTiles = tiles;
             Damage = damage;
             time = delay;
@@ -110,6 +110,8 @@ public class TimelineManager : MonoBehaviour, IInitializable
     /// </summary>
     private async UniTask ExecuteCommandAsync(TimelineCommand command)
     {
+        // TODO: コマンド内容に応じて条件分岐させたい
+        
         // 迎撃プロセスの実行
         await _attackManager.ProcessInkInterceptAttempt(command);
     }
