@@ -17,12 +17,12 @@ public class UnitCaller : MonoBehaviour, IButtonAction {
     public void Execute() {
         if (unitData.callTime > 0)
         {
-            Debug.Log("SpawnUnitOnSelectedUnit: 待ち時間ありのユニットです。");
+            // Debug.Log("SpawnUnitOnSelectedUnit: 待ち時間ありのユニットです。");
             _unitSpawnManager.SpawnUnitDelayed(_tileManager.selectedTile, unitData);
         }
         else
         {
-            Debug.Log("SpawnUnitOnSelectedUnit: 待ち時間なしのユニットです。");
+            // Debug.Log("SpawnUnitOnSelectedUnit: 待ち時間なしのユニットです。");
             _unitSpawnManager.SpawnUnit(_tileManager.selectedTile, unitData);
         }
     }

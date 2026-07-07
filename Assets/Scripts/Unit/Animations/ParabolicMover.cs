@@ -16,7 +16,7 @@ public class ParabolicMover : MonoBehaviour
     /// </summary>
     public async UniTask AscendAsync(MovementPath ascentPath)
     {
-        Debug.Log("[[[AscendAsync]]]");
+        // Debug.Log("[[[AscendAsync]]]");
 
         // 移動処理中の場合は中止
         if (_isAnimating) return;
@@ -57,7 +57,7 @@ public class ParabolicMover : MonoBehaviour
     /// </summary>
     public async UniTask DescentAsync(MovementPath descentPath)
     {
-        Debug.Log("[[[DescentAsync]]]");
+        // Debug.Log("[[[DescentAsync]]]");
 
         if (_isAnimating) return;
         _isAnimating = true;
@@ -103,7 +103,7 @@ public class ParabolicMover : MonoBehaviour
         InterceptTargetInfo interceptInfo,
         Func<Vector3, UniTask> onBlockedAction)
     {
-        Debug.Log("[[[DescentWithInterruptAsync]]]");
+        // Debug.Log("[[[DescentWithInterruptAsync]]]");
 
         if (_isAnimating) return;
         _isAnimating = true;

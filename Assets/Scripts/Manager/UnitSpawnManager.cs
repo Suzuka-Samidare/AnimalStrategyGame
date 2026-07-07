@@ -30,7 +30,7 @@ public class UnitSpawnManager : MonoBehaviour
     public void SpawnUnit(Tile tile, UnitData unitData)
     {
         // DEBUG ============================================================
-        Debug.Log("SpawnUnit");
+        // Debug.Log("SpawnUnit");
         // DEBUG ============================================================
 
         if (tile.Unit != null) return;
@@ -59,7 +59,7 @@ public class UnitSpawnManager : MonoBehaviour
     public void SpawnUnitDelayed(Tile tile, UnitData unitData)
     {
         // DEBUG ============================================================
-        Debug.Log("SpawnUnitDelayed");
+        // Debug.Log("SpawnUnitDelayed");
         // DEBUG ============================================================
 
         if (tile.Unit != null) return;
@@ -84,12 +84,11 @@ public class UnitSpawnManager : MonoBehaviour
         Action onCompleteCallback = () =>
         {
             // DEBUG ============================================================
-            Debug.Log("onCompleteCallback");
-            if (tile.Unit == null)
-            {
-                Debug.LogError($"???????????");
-                // return;
-            }
+            // Debug.Log("onCompleteCallback");
+            // if (tile.Unit == null)
+            // {
+            //     Debug.LogError($"???????????");
+            // }
             // DEBUG ============================================================
 
             // 仮ユニットの除去
@@ -109,12 +108,12 @@ public class UnitSpawnManager : MonoBehaviour
     public void DespawnUnit(Tile tile)
     {
         // DEBUG ============================================================
-        Debug.Log("DespawnUnit");
-        if (tile.Unit.Stats == null)
-        {
-            Debug.LogError($"タイルのユニットデータが足りないよ！");
-            return;
-        }
+        // Debug.Log("DespawnUnit");
+        // if (tile.Unit.Stats == null)
+        // {
+        //     Debug.LogError($"タイルのユニットデータが足りないよ！");
+        //     return;
+        // }
         // DEBUG ============================================================
 
         // オーナー情報からプール先の設定

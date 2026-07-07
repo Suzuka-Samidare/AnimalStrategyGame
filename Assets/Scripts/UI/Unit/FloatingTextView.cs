@@ -70,8 +70,6 @@ public class FloatingTextView : MonoBehaviour
         _fadeRoutine = StartCoroutine(FullFadeRoutine());
 
         await UniTask.WaitUntil(() => _isRoutineFinished == true);
-
-        Debug.Log("演出が完全に終わったよ！✨");
     }
 
     private IEnumerator FullFadeRoutine()

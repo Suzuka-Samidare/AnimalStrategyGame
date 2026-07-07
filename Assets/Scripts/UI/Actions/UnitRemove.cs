@@ -18,11 +18,7 @@ public class UnitRemove : MonoBehaviour, IButtonAction
         try
         {
             GameManager.Instance.IsLoading = true;
-            Debug.Log($"タイル更新開始");
-
             _unitSpawnManager.DespawnUnit(_tileManager.selectedTile);
-
-            Debug.Log("タイル更新成功");
         }
         catch (Exception ex)
         {
@@ -32,9 +28,8 @@ public class UnitRemove : MonoBehaviour, IButtonAction
         }
         finally
         {
-            // 3. JSのfinallyと同じ：成否に関わらず必ず状態を戻す
             GameManager.Instance.IsLoading = false;
-            Debug.Log("タイル更新処理終了（後片付け完了）");
+            // Debug.Log("タイル更新処理終了（後片付け完了）");
         }
     }
 }
