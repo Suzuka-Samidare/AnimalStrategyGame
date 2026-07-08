@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using TileOwner = TileStats.TileOwner;
@@ -121,7 +120,8 @@ public class TimelineManager : MonoBehaviour, IInitializable
     /// </summary>
     public TimelineCommand CreatePlayerCommand()
     {
-        if (_tileManager.selectedTile.Unit is not AttackerUnitBase attackerUnit)
+        if (_tileManager.selectedTile.Unit == null ||
+            _tileManager.selectedTile.Unit is not AttackerUnitBase attackerUnit)
         {
             throw new System.InvalidOperationException("コマンドを登録できません：有効な攻撃ユニットが設置されていません。");
         }
@@ -137,6 +137,42 @@ public class TimelineManager : MonoBehaviour, IInitializable
             _tileManager.targetTiles,
             attackProfile.power,
             attackProfile.delay
+        );
+    }
+
+    /// <summary>
+    /// コマンドを作成する（エネミー用）
+    /// </summary>
+    public TimelineCommand CreateEnemyCommand()
+    {
+        Tile selectedTile = _mapManager.enemyMapData[0, 0];
+        Tile targetTile = _mapManager.playerMapData[4, 4];
+
+        if (selectedTile.Unit == null ||
+            selectedTile.Unit is not AttackerUnitBase attackerUnit)
+        {
+            throw new System.InvalidOperationException("コマンドを登録できません：有効な攻撃ユニットが設置されていません。");
+        }
+
+        List<Tile> affectedTiles = new List<Tile>();
+        List<Vector2Int> affectedPositions = attackerUnit.Controller.GetTargetTilePositions(targetTile.Stats.GridPos);
+        foreach (Vector2Int pos in affectedPositions)
+        {
+            Tile tile = _mapManager.GetPlayerTile(pos);
+
+            if (tile == null) continue;
+            // 配列（リスト）に保存
+            affectedTiles.Add(tile);
+        }
+
+        return new TimelineCommand(
+            TileOwner.Enemy,
+            attackerUnit.Stats.profile.unitName,
+            selectedTile,
+            targetTile,
+            affectedTiles,
+            attackerUnit.Stats.attackProfile.power,
+            attackerUnit.Stats.attackProfile.delay
         );
     }
 

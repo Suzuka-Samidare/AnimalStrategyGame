@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using TimelineCommand = TimelineManager.TimelineCommand;
 
 public class EnemyManager : MonoBehaviour, IInitializable
 {
@@ -11,10 +11,13 @@ public class EnemyManager : MonoBehaviour, IInitializable
     private UnitData _hqData;
     [SerializeField, Tooltip("Herringデータ")]
     private UnitData _herringData;
+    [SerializeField, Tooltip("Squidデータ")]
+    private UnitData _squidData;
 
     [Header("Refs")]
     private UnitSpawnManager _unitSpawnManager;
     private MapManager _mapManager;
+    private TimelineManager _timelineManager;
 
     private void Awake()
     {
@@ -33,15 +36,22 @@ public class EnemyManager : MonoBehaviour, IInitializable
     {
         _mapManager = MapManager.Instance;
         _unitSpawnManager = UnitSpawnManager.Instance;
+        _timelineManager = TimelineManager.Instance;
     }
 
     public async UniTask Initialize()
     {
         ResolveDependencies();
+
+        _unitSpawnManager.SpawnUnit(_mapManager.enemyMapData[3, 9], _herringData);
+        _unitSpawnManager.SpawnUnit(_mapManager.enemyMapData[5, 4], _herringData);
+        _unitSpawnManager.SpawnUnit(_mapManager.enemyMapData[0, 0], _squidData);
+
         SpawnUnitRandomTiles(_hqData, _mapManager.maxHqCount);
-         _unitSpawnManager.SpawnUnit(_mapManager.enemyMapData[3, 9], _herringData);
-         _unitSpawnManager.SpawnUnit(_mapManager.enemyMapData[5, 4], _herringData);
-        // SpawnUnitRandomTiles(_herringData, 2);
+
+        TimelineCommand command = _timelineManager.CreateEnemyCommand();
+        _timelineManager.RegisterCommand(command);
+
         await UniTask.CompletedTask;
     }
 
