@@ -110,9 +110,13 @@ public class TimelineManager : MonoBehaviour, IInitializable
     private async UniTask ExecuteCommandAsync(TimelineCommand command)
     {
         // TODO: コマンド内容に応じて条件分岐させたい
-        
-        // 迎撃プロセスの実行
-        await _attackManager.ProcessInkInterceptAttempt(command);
+        switch (command.AttackerTile.Unit.Stats.profile.unitType)
+        {
+            case UnitType.Squid:
+                // 迎撃プロセスの実行
+                await _attackManager.ProcessInkInterceptAttempt(command);
+                break;
+        }
     }
 
     /// <summary>
