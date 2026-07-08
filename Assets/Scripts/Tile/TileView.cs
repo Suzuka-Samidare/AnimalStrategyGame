@@ -102,7 +102,7 @@ public class TileView : MonoBehaviour
     {
         if (_tileStats.isSelected) return;
 
-        // if (_tileStats.owner == TileStats.TileOwner.Enemy && !_tileStats.isRevealed)
+        // if (_tileStats.owner == TileStats.Owner.Enemy && !_tileStats.isRevealed)
         // {
         //     currentBaseColor = invisibleColor;
         //     currentTopColor = invisibleColor;
@@ -123,7 +123,7 @@ public class TileView : MonoBehaviour
         float time = Mathf.PingPong(Time.time, 1.0f);
 
         // Color normalColor;
-        // if (_tileStats.owner == TileStats.TileOwner.Enemy && !_tileStats.isRevealed)
+        // if (_tileStats.owner == TileStats.Owner.Enemy && !_tileStats.isRevealed)
         // {
         //     normalColor = invisibleColor;
         // }

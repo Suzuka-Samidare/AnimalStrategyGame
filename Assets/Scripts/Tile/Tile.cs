@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using TileOwner = TileStats.TileOwner;
 
 [RequireComponent(typeof(TileStats))]
 [RequireComponent(typeof(TileController))]
@@ -27,7 +26,7 @@ public class Tile : MonoBehaviour
         View = GetComponent<TileView>();
     }
 
-    public void SetOwner(TileOwner owner) => Stats.owner = owner;
+    public void SetOwner(Owner owner) => Stats.owner = owner;
     public void SetTargeted(bool isTargeted) => Stats.isTargeted = isTargeted;
     public void SetSelected(bool isSelected) => Stats.isSelected = isSelected;
     public void SetUnit(UnitBase unit) => _unit = unit;

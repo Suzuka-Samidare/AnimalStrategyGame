@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using TileOwner = TileStats.TileOwner;
 using TimelineCommand = TimelineManager.TimelineCommand;
 
 public class AttackManager : MonoBehaviour
@@ -75,7 +74,7 @@ public class AttackManager : MonoBehaviour
         Vector2Int interceptedGridPos;
 
         isSuccessDefence = GetHerringDefenceResult(command, out interceptedGridPos);
-        Tile interceptedTile = command.Owner == TileOwner.Player
+        Tile interceptedTile = command.Owner == Owner.Player
             ? _mapManager.GetEnemyTile(interceptedGridPos, true)
             : _mapManager.GetPlayerTile(interceptedGridPos, true);
         Vector3 interceptedPos = interceptedTile.Stats.GlobalPos;
@@ -83,7 +82,7 @@ public class AttackManager : MonoBehaviour
         // // 迎撃完了座標（グローバル）
         // Vector3 interceptedPos = Vector3.zero;
         // // 防衛処理
-        // if (command.Owner == TileOwner.Player)
+        // if (command.Owner == Owner.Player)
         // {
         //     isSuccessDefence = GetHerringDefenceResult(command, out interceptedGridPos);
         //     Tile interceptedTile = _mapManager.GetEnemyTile(interceptedGridPos, true);
@@ -263,7 +262,7 @@ public class AttackManager : MonoBehaviour
         // 攻撃が着弾するまでに通過するタイル
         List<Tile> trajectoryTiles = _mapManager.GetTrajectoryTiles(command.TargetTile);
         // Herringユニットがいるタイル
-        List<Tile> herringTiles = command.Owner == TileOwner.Player
+        List<Tile> herringTiles = command.Owner == Owner.Player
             ? _mapManager.GetEnemyMapHerringTiles()
             : _mapManager.GetPlayerMapHerringTiles();
         // y座標値が高い順に並べ替え
@@ -289,7 +288,7 @@ public class AttackManager : MonoBehaviour
             // マップ内の防衛座標の集計
             // ====================================================
             // マップ内で有効な防衛座標リストを取得
-            List<Tile> defenceTiles = herringTile.Stats.owner == TileOwner.Player
+            List<Tile> defenceTiles = herringTile.Stats.owner == Owner.Player
                 ? _mapManager.GetPlayerTiles(defencePositions, true)
                 : _mapManager.GetEnemyTiles(defencePositions, true);
             // 有効な防衛座標がある場合、攻撃の軌道になっているタイルと重複している分をカウントする

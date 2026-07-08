@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using TileOwner = TileStats.TileOwner;
 
 public class TimelineManager : MonoBehaviour, IInitializable
 {
@@ -11,7 +10,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
     [System.Serializable]
     public class TimelineCommand
     {
-        public TileOwner Owner;
+        public Owner Owner;
         public string UnitName;
         public Tile AttackerTile;
         public Tile TargetTile;  // 攻撃対象の中心タイル
@@ -20,7 +19,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
         public float Time; // 経過時間 + 適用必要時間
 
         public TimelineCommand(
-            TileOwner owner,
+            Owner owner,
             string unitName,
             Tile attackerTile,
             Tile targetTile,
@@ -134,7 +133,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
         AttackProfile attackProfile = attackerUnit.Stats.attackProfile;
 
         return new TimelineCommand(
-            TileOwner.Player,
+            Owner.Player,
             profile.unitName,
             _tileManager.selectedTile,
             _tileManager.targetTile,
@@ -170,7 +169,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
         }
 
         return new TimelineCommand(
-            TileOwner.Enemy,
+            Owner.Enemy,
             attackerUnit.Stats.profile.unitName,
             selectedTile,
             targetTile,

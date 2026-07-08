@@ -1,5 +1,4 @@
 using UnityEngine;
-using TileOwner = TileStats.TileOwner;
 
 public class MapInputHandler : MonoBehaviour
 {
@@ -31,7 +30,7 @@ public class MapInputHandler : MonoBehaviour
             {
                 Tile tile = hitObject.GetComponent<Tile>();
 
-                if (tile.Stats.owner == TileOwner.Player)
+                if (tile.Stats.owner == Owner.Player)
                 {
                     // タイルを選択中オブジェクトとして設定
                     _tileManager.SetSelectedTile(tile);
@@ -42,7 +41,7 @@ public class MapInputHandler : MonoBehaviour
                     }
                 }
 
-                if (tile.Stats.owner == TileOwner.Enemy)
+                if (tile.Stats.owner == Owner.Enemy)
                 {
                     _tileManager.SetTargetTile(tile);
                     _tileManager.RegisterTargetTiles(tile.Stats.GridPos);

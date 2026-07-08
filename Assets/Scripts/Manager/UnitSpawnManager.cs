@@ -1,7 +1,6 @@
 using System;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using TileOwner = TileStats.TileOwner;
 
 public class UnitSpawnManager : MonoBehaviour
 {
@@ -36,11 +35,11 @@ public class UnitSpawnManager : MonoBehaviour
         if (tile.Unit != null) return;
 
         // オーナー情報からプール先の設定
-        FactionUnitPool targetPool = (tile.Stats.owner == TileOwner.Player) ? playerPool : enemyPool;
+        FactionUnitPool targetPool = (tile.Stats.owner == Owner.Player) ? playerPool : enemyPool;
         // スポーン処理
         Vector3 tilePosition = tile.transform.position;
         Vector3 unitPosition = new Vector3(tilePosition.x, unitData.initPos.y, tilePosition.z);
-        Quaternion unitRotation = tile.Stats.owner == TileOwner.Enemy ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
+        Quaternion unitRotation = tile.Stats.owner == Owner.Enemy ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
         UnitBase unit = targetPool.Spawn(
             unitData.profile.unitType,
             unitPosition,
@@ -65,11 +64,11 @@ public class UnitSpawnManager : MonoBehaviour
         if (tile.Unit != null) return;
 
         // オーナー情報からプール先の設定
-        FactionUnitPool targetPool = (tile.Stats.owner == TileOwner.Player) ? playerPool : enemyPool;
+        FactionUnitPool targetPool = (tile.Stats.owner == Owner.Player) ? playerPool : enemyPool;
         // スポーン処理
         Vector3 tilePosition = tile.transform.position;
         Vector3 unitPosition = new Vector3(tilePosition.x, 0.75f, tilePosition.z);
-        Quaternion unitRotation = tile.Stats.owner == TileOwner.Enemy ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
+        Quaternion unitRotation = tile.Stats.owner == Owner.Enemy ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
         UnitBase unit = targetPool.Spawn(
             unitData.callingProfile.unitType,
             unitPosition,
@@ -117,7 +116,7 @@ public class UnitSpawnManager : MonoBehaviour
         // DEBUG ============================================================
 
         // オーナー情報からプール先の設定
-        FactionUnitPool targetPool = (tile.Stats.owner == TileOwner.Player) ? playerPool : enemyPool;
+        FactionUnitPool targetPool = (tile.Stats.owner == Owner.Player) ? playerPool : enemyPool;
         // プール回収するユニットタイプの取得
         UnitType unitType = tile.Unit.Stats.profile.unitType;
         // デスポーン処理

@@ -2,8 +2,6 @@ using System;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
-using TileOwner = TileStats.TileOwner;
-using Unity.VisualScripting;
 
 public class MapManager : MonoBehaviour, IInitializable
 {
@@ -118,7 +116,7 @@ public class MapManager : MonoBehaviour, IInitializable
                 tile.MapManager = this;
                 tile.Stats.GlobalPos = tileObj.transform.position;
                 tile.Stats.GridPos = new Vector2Int(x, y);
-                tile.SetOwner(TileOwner.Player);
+                tile.SetOwner(Owner.Player);
                 // クラスをマップデータとして格納
                 playerMapData[x, y] = tile;
             }
@@ -153,7 +151,7 @@ public class MapManager : MonoBehaviour, IInitializable
                 tile.MapManager = this;
                 tile.Stats.GlobalPos = tileObj.transform.position;
                 tile.Stats.GridPos = new Vector2Int(x, y);
-                tile.SetOwner(TileOwner.Enemy);
+                tile.SetOwner(Owner.Enemy);
                  // クラスをマップデータとして格納
                 enemyMapData[x, y] = tile;
             }
@@ -340,7 +338,7 @@ public class MapManager : MonoBehaviour, IInitializable
     /// </summary>
     public List<Tile> GetTrajectoryTiles(Tile target)
     {
-        Tile[,] mapData = target.Stats.owner == TileOwner.Player ? playerMapData : enemyMapData;
+        Tile[,] mapData = target.Stats.owner == Owner.Player ? playerMapData : enemyMapData;
         List<Tile> tiles = new List<Tile>();
 
         for (int y = target.Stats.GridPos.y; y < mapHeight + _metaMapHeight; y++)

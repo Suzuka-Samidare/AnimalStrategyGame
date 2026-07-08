@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TimelineCommand = TimelineManager.TimelineCommand;
-using TileOwner = TileStats.TileOwner;
 
 public class TimelinePresenter : MonoBehaviour
 {
@@ -38,7 +37,7 @@ public class TimelinePresenter : MonoBehaviour
         {
             GameObject cardObj = Instantiate(cardPrefab, contentParent);
             // カードの中にあるテキストとかを書き換える処理をここに書く
-            cardObj.GetComponent<Image>().color = command.Owner == TileOwner.Player ? PlayerCommandColor : EnemyCommandColor;
+            cardObj.GetComponent<Image>().color = command.Owner == Owner.Player ? PlayerCommandColor : EnemyCommandColor;
             cardObj.GetComponent<PanelView>().UpdateText(
                 $"{command.UnitName} / {command.TargetTile.Stats.GridPos} / {command.Time}"
             );

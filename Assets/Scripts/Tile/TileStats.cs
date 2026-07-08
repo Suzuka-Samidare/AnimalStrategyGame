@@ -2,8 +2,6 @@ using UnityEngine;
 
 public class TileStats : MonoBehaviour
 {
-    public enum TileOwner { Player, Enemy }
-
     [Header("タイルステータス")]
     [SerializeField, Tooltip("選択状態の有無")]
     private bool _isSelected;
@@ -34,7 +32,7 @@ public class TileStats : MonoBehaviour
     [Tooltip("敵から視認可能か")]
     public bool isRevealed = false;
     [Tooltip("タイルの陣地種別")]
-    public TileOwner owner;
+    public Owner owner;
 
     [Header("タイル座標情報")]
     [Tooltip("ワールド座標")]
