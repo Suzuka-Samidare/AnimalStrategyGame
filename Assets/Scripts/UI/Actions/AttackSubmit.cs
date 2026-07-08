@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
+using TimelineCommand = TimelineManager.TimelineCommand;
 
 public class AttackSubmit : MonoBehaviour, IButtonAction
 {
@@ -15,6 +13,7 @@ public class AttackSubmit : MonoBehaviour, IButtonAction
 
     public void Execute()
     {
-        _timelineManager.RegisterCommand();
+        TimelineCommand command = _timelineManager.CreatePlayerCommand();
+        _timelineManager.RegisterCommand(command);
     }
 }

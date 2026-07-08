@@ -18,24 +18,24 @@ public class TimelineManager : MonoBehaviour, IInitializable
         public Tile TargetTile;  // 攻撃対象の中心タイル
         public List<Tile> AffectedTiles; 
         public float Damage;        // ダメージ量
-        public float time; // 経過時間 + 適用必要時間
+        public float Time; // 経過時間 + 適用必要時間
 
         public TimelineCommand(
             TileOwner owner,
             string unitName,
             Tile attackerTile,
             Tile targetTile,
-            List<Tile> tiles,
+            List<Tile> affectedTiles,
             float damage,
-            float delay
+            float time
         ){
             Owner = owner;
             UnitName = unitName;
             AttackerTile = attackerTile;
             TargetTile = targetTile;
-            AffectedTiles = tiles;
+            AffectedTiles = affectedTiles;
             Damage = damage;
-            time = delay;
+            Time = time;
         }
     }
 
@@ -117,9 +117,9 @@ public class TimelineManager : MonoBehaviour, IInitializable
     }
 
     /// <summary>
-    /// コマンドを予約する（外部から呼ぶ）
+    /// コマンドを作成する（プレイヤー用）
     /// </summary>
-    public void RegisterCommand()
+    public TimelineCommand CreatePlayerCommand()
     {
         if (_tileManager.selectedTile.Unit is not AttackerUnitBase attackerUnit)
         {
@@ -128,20 +128,56 @@ public class TimelineManager : MonoBehaviour, IInitializable
 
         UnitProfile profile = attackerUnit.Stats.profile;
         AttackProfile attackProfile = attackerUnit.Stats.attackProfile;
-        // 攻撃内容を作成してキューに追加
-        TimelineCommand newAttack = new TimelineCommand(
-            _tileManager.selectedTile.Stats.owner,
+
+        return new TimelineCommand(
+            TileOwner.Player,
             profile.unitName,
             _tileManager.selectedTile,
             _tileManager.targetTile,
-            new List<Tile>(_tileManager.targetTiles),
+            _tileManager.targetTiles,
             attackProfile.power,
             attackProfile.delay
         );
-        _timeline.Add(newAttack);
-        _timeline.Sort((a, b) => b.time.CompareTo(a.time));
+    }
+
+    /// <summary>
+    /// コマンドを予約する
+    /// </summary>
+    public void RegisterCommand(TimelineCommand command)
+    {
+        // 攻撃内容をキューに追加
+        _timeline.Add(command);
+        // 時間の小さい順にする
+        _timeline.Sort((a, b) => b.Time.CompareTo(a.Time));
+        // タイムラインUIの更新
         _timelinePresenter.UpdateTimeline(_timeline);
         
         Debug.Log($"攻撃予約完了！");
     }
+
+    // public void RegisterCommand()
+    // {
+    //     if (_tileManager.selectedTile.Unit is not AttackerUnitBase attackerUnit)
+    //     {
+    //         throw new System.InvalidOperationException("コマンドを登録できません：有効な攻撃ユニットが設置されていません。");
+    //     }
+
+    //     UnitProfile profile = attackerUnit.Stats.profile;
+    //     AttackProfile attackProfile = attackerUnit.Stats.attackProfile;
+    //     // 攻撃内容を作成してキューに追加
+    //     TimelineCommand newAttack = new TimelineCommand(
+    //         _tileManager.selectedTile.Stats.owner,
+    //         profile.unitName,
+    //         _tileManager.selectedTile,
+    //         _tileManager.targetTile,
+    //         new List<Tile>(_tileManager.targetTiles),
+    //         attackProfile.power,
+    //         attackProfile.delay
+    //     );
+    //     _timeline.Add(newAttack);
+    //     _timeline.Sort((a, b) => b.time.CompareTo(a.time));
+    //     _timelinePresenter.UpdateTimeline(_timeline);
+        
+    //     Debug.Log($"攻撃予約完了！");
+    // }
 }
