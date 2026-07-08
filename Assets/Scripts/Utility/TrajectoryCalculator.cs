@@ -2,10 +2,10 @@ using UnityEngine;
 
 [System.Serializable]
 public struct MovementPath
-    {
-        public Vector3 start;  // 始点
-        public Vector3 end;   // 頂点
-    }
+{
+    public Vector3 start;  // 始点
+    public Vector3 end;   // 頂点
+}
 
 public struct InterceptTargetInfo
 {
