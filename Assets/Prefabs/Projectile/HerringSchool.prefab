@@ -3310,6 +3310,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4256404665475024945}
+  - component: {fileID: -1165432672509312291}
   - component: {fileID: 6899399540737388971}
   m_Layer: 0
   m_Name: HerringSchool
@@ -3342,6 +3343,19 @@ Transform:
   - {fileID: 6531729010076726128}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-1165432672509312291
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4670089757983615095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b68a34f75bbc844089848d11fadabcd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Type: 1
 --- !u!114 &6899399540737388971
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3354,14 +3368,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa3e419edba909244acc85a958a711df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _ascentPath:
-    start: {x: 0, y: 0, z: 0}
-    end: {x: 0, y: 0, z: 0}
-  _ascentDuration: 1
-  _descentPath:
-    start: {x: 0, y: 0, z: 0}
-    end: {x: 0, y: 0, z: 0}
-  _descentDuration: 1
   _speed: 7
 --- !u!1 &4684195896126281474
 GameObject:

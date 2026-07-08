@@ -25,6 +25,7 @@ public class SquidAttackVisualizer : MonoBehaviour
     [Header("Refs")]
     private MapManager _mapManager;
     private ParticleManager _particleManager;
+    private ProjectileManager _projectileManager;
     private SquidAnimation _sqiudAnimation;
 
     private void Awake()
@@ -48,11 +49,12 @@ public class SquidAttackVisualizer : MonoBehaviour
     {
         _mapManager = MapManager.Instance;
         _particleManager = ParticleManager.Instance;
+        _projectileManager = ProjectileManager.Instance;
     }
 
     public async UniTask AttackInkSuccess(Vector3 descentFinishPos)
     {
-        GameObject ink = Instantiate(_inkPrefab, _ascentPath.start, transform.rotation);
+        ProjectlieBase ink = _projectileManager.SpawnProjectile(ProjectileType.Ink, _ascentPath.start, transform.rotation);
         if (ink != null && ink.TryGetComponent<ParabolicMover>(out var parabolicMover))
         {
             Vector3 descentStartPos = new Vector3(descentFinishPos.x, _peakHeight, descentFinishPos.z - 10);
@@ -66,7 +68,7 @@ public class SquidAttackVisualizer : MonoBehaviour
                 () => Vector3.Distance(ink.transform.position, descentFinishPos) < 0.1f
             );
             await parabolicMover.DescentAsync(new MovementPath { start = descentStartPos, end = descentFinishPos });
-            Destroy(ink);
+            _projectileManager.DespawnProjectile(ink);
         }
         else
         {
@@ -81,8 +83,14 @@ public class SquidAttackVisualizer : MonoBehaviour
         descentFinishPos.y = _groundHeight;
         MovementPath descentPath = new MovementPath { start = descentStartPos, end = descentFinishPos };
         // 各発射物オブジェクトの生成
-        GameObject ink = Instantiate(_inkPrefab, _ascentPath.start, transform.rotation);
-        GameObject herringSchool = Instantiate(_herringSchoolPrefab, interceptUnitPos, transform.rotation);
+        ProjectlieBase ink = _projectileManager.SpawnProjectile(
+            ProjectileType.Ink,
+            _ascentPath.start,
+            transform.rotation);
+        ProjectlieBase herringSchool = _projectileManager.SpawnProjectile(
+            ProjectileType.HerringSchool,
+            interceptUnitPos,
+            transform.rotation);
         // インクの上昇時間
         float inkDuration = Vector3.Distance(_ascentPath.start, _ascentPath.end) / _inkSpeed;
         // 下降開始から、迎撃Z地点に届くまでの情報を計算
@@ -119,7 +127,7 @@ public class SquidAttackVisualizer : MonoBehaviour
                     interceptInfo,
                     async (pos) =>
                     {
-                        Destroy(ink);
+                        _projectileManager.DespawnProjectile(ink);
                         await _particleManager.PerformFireExplosionAsync(pos, Quaternion.identity);
                         await UniTask.CompletedTask;
                     }
@@ -140,7 +148,7 @@ public class SquidAttackVisualizer : MonoBehaviour
         await UniTask.WhenAll(inkTask, interceptorTask);
     }
 
-    private async UniTask LaunchFishSchoolWithDelayAsync(GameObject herringSchool, MovementPath ascentPath, float delay)
+    private async UniTask LaunchFishSchoolWithDelayAsync(ProjectlieBase herringSchool, MovementPath ascentPath, float delay)
     {
         if (delay > 0)
         {
@@ -156,7 +164,7 @@ public class SquidAttackVisualizer : MonoBehaviour
             await herringSchoolMover.AscendAsync(ascentPath);
             // 到着したら消失
             await herringSchoolMover.DescentAsync(descentPath);
-            Destroy(herringSchoolMover.gameObject);
+            _projectileManager.DespawnProjectile(herringSchool);
         }
         else
         {
