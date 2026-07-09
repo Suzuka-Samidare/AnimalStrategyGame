@@ -32,6 +32,8 @@ public class MapManager : MonoBehaviour, IInitializable
     public int mapDistance = 10;
     [Tooltip("操作不可マップの高さ"), SerializeField]
     private int _metaMapHeight = 5;
+    [Tooltip("陣営ごとの最終的なマップの高さ")]
+    public int TotalMapHeight => mapHeight + _metaMapHeight;
 
     [Header("管理ステータス")]
     public bool isDirty;
