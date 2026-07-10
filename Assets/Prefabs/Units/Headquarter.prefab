@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 1294688600762405301}
   - component: {fileID: -5594603691623578443}
   - component: {fileID: -830775312661119902}
+  - component: {fileID: 7664009667320357813}
   m_Layer: 0
   m_Name: Headquarter
   m_TagString: Untagged
@@ -103,7 +104,7 @@ CapsuleCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Radius: 0.5000001
   m_Height: 2
@@ -121,7 +122,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6fafc5192556724f8143f5e674a2978, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stats: {fileID: 0}
 --- !u!114 &-830775312661119902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -139,4 +139,17 @@ MonoBehaviour:
     unitType: 0
     unitName: 
     maxHp: 0
-  isFaint: 0
+  IsFaint: 0
+  _hp: 0
+--- !u!114 &7664009667320357813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9160871832150813489}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7956db2057341514aad57e12a16dbe77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

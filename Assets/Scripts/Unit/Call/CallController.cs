@@ -6,6 +6,8 @@ public class CallController : UnitControllerBase
     [Header("タイマー")]
     private Timer _timer = new Timer();
 
+    private Action _activeTimerHandler;
+
     private void Update()
     {
         // タイマーを進める
@@ -27,17 +29,29 @@ public class CallController : UnitControllerBase
 
     public void StartTimer(float callTime, Action onCompleteCallback)
     {
-        // ローカル変数で宣言して、ラムダ式内でイベント解除するActionを参照できるようにする
-        Action wrapperHandler = null;
+        ClearActiveTimer();
+
         // 本来の処理及びイベント解除を合わせたラッパー
-        wrapperHandler = () =>
+        _activeTimerHandler = () =>
         {
             onCompleteCallback?.Invoke();
-            _timer.OnTimerComplete -= wrapperHandler;
-            _timer.Reset();
+            ClearActiveTimer();
         };
         // イベントの登録
-        _timer.OnTimerComplete += wrapperHandler;
+        _timer.OnTimerComplete += _activeTimerHandler;
         _timer.Start(callTime);
+    }
+
+    /// <summary>
+    /// 現在アクティブなタイマーのイベント解除とリセットを行う
+    /// </summary>
+    public void ClearActiveTimer()
+    {
+        if (_activeTimerHandler != null)
+        {
+            _timer.OnTimerComplete -= _activeTimerHandler;
+            _activeTimerHandler = null;
+        }
+        _timer.Reset(); // Timerクラス側に Stop() や時間を0にする処理があると想定
     }
 }

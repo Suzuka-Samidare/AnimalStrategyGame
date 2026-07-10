@@ -120,6 +120,10 @@ public class UnitSpawnManager : MonoBehaviour
         // プール回収するユニットタイプの取得
         UnitType unitType = tile.Unit.Stats.profile.unitType;
         // デスポーン処理
+        if (tile.Unit is CallUnit callUnit)
+        {
+            callUnit.Controller.ClearActiveTimer();
+        }
         targetPool.Despawn(unitType, tile.Unit);
         tile.ClearUnit();
         // マップデータの更新を促す
