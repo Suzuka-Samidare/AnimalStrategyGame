@@ -19,6 +19,8 @@ public class GameManager : MonoBehaviour, IInitializable
     public int Turn = 0;
     [Tooltip("経過時間タイマー")]
     public Timer _elapsedTimer = new Timer();
+    [Tooltip("ターンの制限時間")]
+    private float _timeLimit = 60.0f;
 
     [Header("操作管理")]
     [Tooltip("操作可否")]
@@ -156,7 +158,7 @@ public class GameManager : MonoBehaviour, IInitializable
         // アナウンスパネル表示
         await _uiManager.BannerView.PlayAnnouncement("PREPARATION");
         // タイマー開始
-        _elapsedTimer.Start(180.0f);
+        _elapsedTimer.Start(_timeLimit);
         // 操作制限解除
         IsInputLocked = false;
     }
