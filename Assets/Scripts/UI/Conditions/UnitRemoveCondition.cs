@@ -15,9 +15,9 @@ public class UnitRemoveCondition : MonoBehaviour, IButtonCondition
     {
         if (_tileManager.selectedTile == null) return false;
 
-        if (_tileManager.GetSelectedTileMapId() == MapId.Empty) return false;
+        if (_tileManager.selectedTile.Unit == null) return false;
 
-        if (_tileManager.GetSelectedTileMapId() == MapId.Headquarter) return false;
+        if (_tileManager.selectedTile.Unit.Stats.profile.unitType == UnitType.Headquarter) return false;
 
         return true;
     }

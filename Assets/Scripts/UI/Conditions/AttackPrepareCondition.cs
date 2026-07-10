@@ -15,11 +15,7 @@ public class AttackPrepareCondition : MonoBehaviour, IButtonCondition
     {
         if (_tileManager.selectedTile == null) return false;
 
-        if (_tileManager.GetSelectedTileMapId() == MapId.Empty) return false;
-
-        if (_tileManager.GetSelectedTileMapId() == MapId.Headquarter) return false;
-
-        // if (!_tileManager.selectedTile.unitStats.profile.canAttack) return false;
+        if (_tileManager.selectedTile.Unit is not AttackerUnitBase _) return false;
 
         return true;
     }
