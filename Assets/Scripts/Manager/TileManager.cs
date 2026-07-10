@@ -83,10 +83,6 @@ public class TileManager : MonoBehaviour, IInitializable
                 selectedTile.Stats.GlobalPos.z
             );
         }
-        else
-        {
-            throw new Exception("Tileが選択されていません");
-        }
     }
 
     /// <summary>
