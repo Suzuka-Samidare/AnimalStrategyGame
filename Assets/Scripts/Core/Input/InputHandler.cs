@@ -37,23 +37,24 @@ public class InputHandler : MonoBehaviour
 
     private void StartMainInteract(InputAction.CallbackContext ctx)
     {
+        // 操作ロック中の場合は処理を行わない
+        if (GameManager.Instance.IsInputLocked) return;
+
         // 現在のポインタ（マウス/タッチ）の画面座標を取得
         Vector2 currentPoint = controls.Point.ReadValue<Vector2>();
-
         // WebGL/モバイル対応のUI接触チェック
         if (IsPointerOverUIElement(currentPoint))
         {
             _isOverUI = true;
             return;
         }
-
         _isPrimaryPressing = true;
         _startPos = currentPoint;
     }
 
     private void EndMainInteract(InputAction.CallbackContext _)
     {
-        if (!_isOverUI && !_isDragging)
+        if (!GameManager.Instance.IsInputLocked && !_isOverUI && !_isDragging)
         {
             OnSelect?.Invoke(controls.Point.ReadValue<Vector2>());
         }

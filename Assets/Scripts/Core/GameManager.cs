@@ -1,6 +1,7 @@
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 using UnityEngine.SceneManagement;
+using System;
 
 public class GameManager : MonoBehaviour, IInitializable
 {
@@ -124,77 +125,183 @@ public class GameManager : MonoBehaviour, IInitializable
         }
     }
 
-    private async void EnterInitPhase()
+    private async UniTask EnterPhase(Phase phase, Func<UniTask> openingEvents, Func<UniTask> closedEvents)
     {
         // 操作制限有効化
         IsInputLocked = true;
-        // INITフェーズ時に条件満たした際に実行する処理の登録
-        _mapManager.OnHqCountChanged += ValidateAndShowDialog;
-        // アナウンスパネル表示
-        await _uiManager.BannerView.PlayAnnouncement("INIT");
-        // インフォメーションの表示
-        _infomationController.Open(initMessage);
-        // メニューの初期化
-        _uiManager.SwitchMenu(currentPhase);
-        // サイドバーの表示
-        _uiManager.Sidebar.Show();
-        // 準備時間終了後の処理を登録
-        _elapsedTimer.OnTimerComplete += EnterActionPhase;
+
+        await UniTask.Delay(TimeSpan.FromSeconds(0.7f));
+
+        // アナウンスパネルオープン処理
+        _uiManager.BannerView.PlayOpenAnimationAsync(phase.ToString()).Forget();
+        // パネルなイベント処理の実行
+        if (openingEvents == null) throw new Exception("フェーズ処理が未登録です。");
+        UniTask eventTask = openingEvents.Invoke();
+        UniTask delayTask = UniTask.Delay(TimeSpan.FromSeconds(2.0f));
+        await UniTask.WhenAll(eventTask, delayTask);
+
+        // アナウンスパネルクローズ処理
+        await _uiManager.BannerView.PlayCloseAnimationAsync();
+        // パネルなイベント処理の実行
+        if (closedEvents == null) throw new Exception("フェーズ処理が未登録です。");
+        await closedEvents.Invoke();
+
         // 操作制限解除
         IsInputLocked = false;
     }
+
+    private async void EnterInitPhase()
+    {
+        Func<UniTask> openingEvents = () =>
+        {
+            // INITフェーズ時に条件満たした際に実行する処理の登録
+            _mapManager.OnHqCountChanged += ValidateAndShowDialog;
+            return UniTask.CompletedTask;
+        };
+        Func<UniTask> closedEvents = () =>
+        {
+            // インフォメーションの表示
+            _infomationController.Open(initMessage);
+            // メニューの初期化
+            _uiManager.SwitchMenu(Phase.INIT);
+            // サイドバーの表示
+            _uiManager.Sidebar.Show();
+            // 準備時間終了後の処理を登録
+            _elapsedTimer.OnTimerComplete += EnterActionPhase;
+            return UniTask.CompletedTask;
+        };
+        await EnterPhase(Phase.INIT, openingEvents, closedEvents);
+    } 
+
+    // private async void EnterInitPhase()
+    // {
+    //     // 操作制限有効化
+    //     IsInputLocked = true;
+    //     // INITフェーズ時に条件満たした際に実行する処理の登録
+    //     _mapManager.OnHqCountChanged += ValidateAndShowDialog;
+    //     // アナウンスパネル表示
+    //     await _uiManager.BannerView.PlayAnnouncement("INIT");
+    //     // インフォメーションの表示
+    //     _infomationController.Open(initMessage);
+    //     // メニューの初期化
+    //     _uiManager.SwitchMenu(currentPhase);
+    //     // サイドバーの表示
+    //     _uiManager.Sidebar.Show();
+    //     // 準備時間終了後の処理を登録
+    //     _elapsedTimer.OnTimerComplete += EnterActionPhase;
+    //     // 操作制限解除
+    //     IsInputLocked = false;
+    // }
 
     private async void EnterPreparationPhase()
     {
-        // 操作制限有効化
-        IsInputLocked = true;
-        // ターン数の加算とUI更新
-        Turn++;
-        _uiManager.UpdateTurn(Turn);
-        // ステータスのリジェネ開始
-        _playerManager.StartRegen();
-        // フェーズステータス更新
-        SwitchPhase(Phase.PREPARATION);
-        // アナウンスパネル表示
-        await _uiManager.BannerView.PlayAnnouncement("PREPARATION");
-        // タイマー開始
-        _elapsedTimer.Start(_timeLimit);
-        // 操作制限解除
-        IsInputLocked = false;
+        Func<UniTask> openingEvents = () =>
+        {
+            // ターン数の加算とUI更新
+            Turn++;
+            _uiManager.UpdateTurn(Turn);
+            // ステータスのリジェネ開始
+            _playerManager.StartRegen();
+            return UniTask.CompletedTask;
+        };
+        Func<UniTask> closedEvents = () =>
+        {
+            // フェーズステータス更新
+            SwitchPhase(Phase.PREPARATION);
+            // タイマー開始
+            _elapsedTimer.Start(_timeLimit);
+            return UniTask.CompletedTask;
+        };
+        await EnterPhase(Phase.PREPARATION, openingEvents, closedEvents);
     }
+
+    // private async void EnterPreparationPhase()
+    // {
+    //     // 操作制限有効化
+    //     IsInputLocked = true;
+    //     // ターン数の加算とUI更新
+    //     Turn++;
+    //     _uiManager.UpdateTurn(Turn);
+    //     // ステータスのリジェネ開始
+    //     _playerManager.StartRegen();
+    //     // フェーズステータス更新
+    //     SwitchPhase(Phase.PREPARATION);
+    //     // アナウンスパネル表示
+    //     await _uiManager.BannerView.PlayAnnouncement("PREPARATION");
+    //     // タイマー開始
+    //     _elapsedTimer.Start(_timeLimit);
+    //     // 操作制限解除
+    //     IsInputLocked = false;
+    // }
 
     private async void EnterActionPhase()
     {
-        // 操作制限有効化
-        IsInputLocked = true;
-        // リジェネ停止
-        _playerManager.StopRegen();
-        // タイマーリセット
-        _elapsedTimer.Reset();
-        // フェーズステータス更新
-        SwitchPhase(Phase.ACTION);
-        // アナウンスパネル表示
-        await _uiManager.BannerView.PlayAnnouncement("ACTION");
-
-        if (_timelineManager.TimelineCount > 0)
+        Func<UniTask> openingEvents = () =>
         {
-            await _timelineManager.ProcessTimeline();
-            if (IsGameOver) {
-                EnterGameOver();
-                return;
-            };
-            _infomationController.Open("All attacks processed.");
-        }
-        else
+            // リジェネ停止
+            _playerManager.StopRegen();
+            // タイマーリセット
+            _elapsedTimer.Reset();
+            return UniTask.CompletedTask;
+        };
+        Func<UniTask> closedEvents = async () =>
         {
-            _infomationController.Open("No pending attacks.");
-        }
+            // フェーズステータス更新
+            SwitchPhase(Phase.ACTION);
+            if (_timelineManager.TimelineCount > 0)
+            {
+                await _timelineManager.ProcessTimeline();
+                if (IsGameOver) {
+                    EnterGameOver();
+                    return;
+                };
+                _infomationController.Open("All attacks processed.");
+            }
+            else
+            {
+                _infomationController.Open("No pending attacks.");
+            }
 
-        await UniTask.Delay(2000);
-        _infomationController.Close();
-        CameraMovement.Instance.MoveTo(TileManager.Instance.PlayerMapLastViewedPosition);
-        EnterPreparationPhase();
+            await UniTask.Delay(2000);
+            _infomationController.Close();
+            CameraMovement.Instance.MoveTo(TileManager.Instance.PlayerMapLastViewedPosition);
+            EnterPreparationPhase();
+        };
+        await EnterPhase(Phase.ACTION, openingEvents, closedEvents);
     }
+
+    // private async void EnterActionPhase()
+    // {
+    //     // 操作制限有効化
+    //     IsInputLocked = true;
+    //     // リジェネ停止
+    //     _playerManager.StopRegen();
+    //     // タイマーリセット
+    //     _elapsedTimer.Reset();
+    //     // フェーズステータス更新
+    //     SwitchPhase(Phase.ACTION);
+    //     // アナウンスパネル表示
+    //     await _uiManager.BannerView.PlayAnnouncement("ACTION");
+
+    //     if (_timelineManager.TimelineCount > 0)
+    //     {
+    //         await _timelineManager.ProcessTimeline();
+    //         if (IsGameOver) {
+    //             EnterGameOver();
+    //             return;
+    //         };
+    //         _infomationController.Open("All attacks processed.");
+    //     }
+    //     else
+    //     {
+    //         _infomationController.Open("No pending attacks.");
+    //     }
+
+    //     await UniTask.Delay(2000);
+    //     _infomationController.Close();
+    //     CameraMovement.Instance.MoveTo(TileManager.Instance.PlayerMapLastViewedPosition);
+    //     EnterPreparationPhase();
+    // }
 
     public async void EnterGameOver()
     {

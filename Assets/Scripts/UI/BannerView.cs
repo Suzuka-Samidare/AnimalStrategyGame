@@ -14,6 +14,7 @@ public class BannerView : MonoBehaviour
         _bannerText = GetComponentInChildren<TextMeshProUGUI>();
         _animator = GetComponent<Animator>();
         _visibility = GetComponent<VisibilityController>();
+        _visibility.Show();
 
         if (_bannerText == null || _animator == null || _visibility == null)
         {
@@ -30,6 +31,27 @@ public class BannerView : MonoBehaviour
 
         await UniTask.WaitUntil(() => IsAnimationFinished("Close"));
 
+        _animator.Rebind();
+        _animator.Update(0f);
+    }
+
+    public async UniTask PlayOpenAnimationAsync(string text)
+    {
+        // テキストの更新
+        _bannerText.text = text;
+        // Playトリガーの発火
+        _animator.SetTrigger("Open");
+        // Openステートの完了を待つ
+        await UniTask.WaitUntil(() => IsAnimationFinished("Banner_Open"));
+    }
+
+    public async UniTask PlayCloseAnimationAsync()
+    {
+        // Closeトリガーの発火
+        _animator.SetTrigger("Close");
+        // Closeステートの完了を待つ
+        await UniTask.WaitUntil(() => IsAnimationFinished("Banner_Close"));
+        // 初期化処理
         _animator.Rebind();
         _animator.Update(0f);
     }
