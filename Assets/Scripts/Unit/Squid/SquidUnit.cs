@@ -13,4 +13,16 @@ public class SquidUnit : AttackerUnitBase<SquidStats, SquidController>
     // public override UnitStatsBase Stats => _stats;
     // public override UnitControllerBase Controller => _controller;
     // public override UnitAnimationBase Animation => _animation;
+
+    [ContextMenu("Visible")]
+    public void TestVisible()
+    {
+        this.SetVisible(true);
+    }
+
+    [ContextMenu("Invisible")]
+    public void TestInvisible()
+    {
+        this.SetVisible(false);
+    }
 }

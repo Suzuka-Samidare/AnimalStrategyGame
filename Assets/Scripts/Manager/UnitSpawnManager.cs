@@ -34,11 +34,12 @@ public class UnitSpawnManager : MonoBehaviour
 
         if (tile.Unit != null) return;
 
+        Owner tileOwner = tile.Stats.owner;
         // オーナー情報からプール先の設定
         FactionUnitPool targetPool = (tile.Stats.owner == Owner.Player) ? playerPool : enemyPool;
         // スポーン処理
         Vector3 tilePosition = tile.transform.position;
-        Vector3 unitPosition = new Vector3(tilePosition.x, unitData.initPos.y, tilePosition.z);
+        Vector3 unitPosition  = tilePosition + unitData.initPos;
         Quaternion unitRotation = tile.Stats.owner == Owner.Enemy ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
         UnitBase unit = targetPool.Spawn(
             unitData.profile.unitType,
@@ -48,9 +49,7 @@ public class UnitSpawnManager : MonoBehaviour
         // タイルにユニットオブジェクトを紐づけ
         tile.SetUnit(unit);
         // ユニット情報の初期化
-        tile.Unit.Setup(unitData);
-        // tile.UnitBase.Stats.InitializeBaseStats(unitData.profile);
-        // tile.UnitBase.Stats.InitializeRollStats(unitData);
+        tile.Unit.Setup(tileOwner, unitData);
         // マップデータの更新を促す
         _mapManager.isDirty = true;
     }
@@ -67,7 +66,7 @@ public class UnitSpawnManager : MonoBehaviour
         FactionUnitPool targetPool = (tile.Stats.owner == Owner.Player) ? playerPool : enemyPool;
         // スポーン処理
         Vector3 tilePosition = tile.transform.position;
-        Vector3 unitPosition = new Vector3(tilePosition.x, 0.75f, tilePosition.z);
+        Vector3 unitPosition = tilePosition + unitData.initPos;
         Quaternion unitRotation = tile.Stats.owner == Owner.Enemy ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
         UnitBase unit = targetPool.Spawn(
             unitData.callingProfile.unitType,
@@ -77,8 +76,7 @@ public class UnitSpawnManager : MonoBehaviour
         // タイルにユニットオブジェクトを紐づけ
         tile.SetUnit(unit);
         // ユニット情報の初期化
-        tile.Unit.Setup(unitData);
-        // tile.UnitBase.Stats.InitializeBaseStats(unitData.callingProfile);
+        tile.Unit.Setup(tile.Stats.owner, unitData);
         // 呼び出し完了時の処理
         Action onCompleteCallback = () =>
         {

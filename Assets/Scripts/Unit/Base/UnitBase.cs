@@ -14,12 +14,32 @@ public abstract class UnitBase : MonoBehaviour
         Stats = GetComponent<UnitStatsBase>();
         Controller = GetComponent<UnitControllerBase>();
         Animation = GetComponent<UnitAnimationBase>();
+
+        // 開発中にアタッチ忘れを即座に気づかせる
+        Debug.Assert(Stats != null, $"{gameObject.name} に UnitStatsBase がアタッチされていません。", this);
+        Debug.Assert(Controller != null, $"{gameObject.name} に ControllerBase がアタッチされていません。", this);
     }
 
-    public virtual void Setup(UnitData unitData)
+    /// <summary>
+    /// ユニット内コンポーネントの初期化処理
+    /// </summary>
+    public virtual void Setup(Owner owner, UnitData unitData)
     {
-        if (Stats != null) Stats.Initialize(unitData);
-        if (Controller != null) Controller.Initialize(this);
+        Stats.Initialize(unitData);
+        Stats.Owner = owner;
+
+        Controller.Initialize(this);
+
+        SetVisible(false);
+    }
+
+    /// <summary>
+    /// 可視状態の更新
+    /// </summary>
+    public void SetVisible(bool value)
+    {
+        Stats.IsVisible = value;
+        Controller.UpdateVisibility();
     }
 
     /// <summary>

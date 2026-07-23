@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using UnityEngine;
 using Guid = System.Guid;
 
@@ -6,6 +7,8 @@ public abstract class UnitStatsBase : MonoBehaviour
     [Header("静的ステータス")]
     [Tooltip("UID")] private string _uuid;
     [Tooltip("基本ステータス")] public UnitProfile profile;
+    [Tooltip("オーナー情報")] public Owner Owner;
+    
 
     [Header("動的ステータス")]
     [Tooltip("気絶フラグ")] public bool IsFaint = false;
@@ -16,7 +19,17 @@ public abstract class UnitStatsBase : MonoBehaviour
         get => _hp;
         protected set => _hp = value;
     }
-    // [Tooltip("耐久値")] public float hp { get; protected set; }
+    [Tooltip("敵から視認可能か"), SerializeField]
+    private bool _isVisible;
+    public bool IsVisible
+    {
+        get => _isVisible;
+        set
+        {
+            if (_isVisible == value) return;
+            _isVisible = value;
+        }
+    }
 
     protected virtual void Awake()
     {

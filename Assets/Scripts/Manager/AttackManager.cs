@@ -68,13 +68,54 @@ public class AttackManager : MonoBehaviour
         bool isSuccessDefence;
         // 迎撃したユニットのタイル（いなければnull）
         Tile interceptingUnitTile;
-        // 迎撃完了座標（グリッド）
+        // 迎撃された座標（グリッド座標）
         Vector2Int interceptGridPos;
+        // 着弾までに通過する予定のタイル群
+        List<Tile> trajectoryTiles = _mapManager.GetTrajectoryTiles(command.TargetTile);
         // 迎撃結果の取得
-        isSuccessDefence = GetHerringDefenceResult(command, out interceptingUnitTile, out interceptGridPos);
-        Vector3 interceptedPos = command.Owner == Owner.Player
-            ? _mapManager.GetEnemyTile(interceptGridPos, true).Stats.GlobalPos
-            : _mapManager.GetPlayerTile(interceptGridPos, true).Stats.GlobalPos;
+        isSuccessDefence = GetHerringDefenceResult(command, trajectoryTiles, out interceptingUnitTile, out interceptGridPos);
+        // 迎撃されたタイル
+        Tile interceptedTile = command.Owner == Owner.Player
+            ? _mapManager.GetEnemyTile(interceptGridPos, true)
+            : _mapManager.GetPlayerTile(interceptGridPos, true);
+        Vector3 interceptedPos = interceptedTile.Stats.GlobalPos;
+
+        // 着弾までに実際に通過したタイル群（最前線で迎撃されてもメタタイルも含めるので、必ず1つ以上ある）
+        List<Tile> actualTrajectoryTiles = trajectoryTiles.FindAll(tile => tile.Stats.GridPos.y >= interceptedTile.Stats.GridPos.y);
+
+        // 実際に通過したタイルから最奥タイル（グリッドのy座標が最小のタイル）を取得する
+        Tile actualTrajectoryEndTile = actualTrajectoryTiles[0];
+        if (actualTrajectoryTiles.Count > 0)
+        {
+            foreach (Tile tile in actualTrajectoryTiles)
+            {
+                if (tile.Stats.GridPos.y < actualTrajectoryEndTile.Stats.GridPos.y)
+                {
+                    actualTrajectoryEndTile = tile;
+                }
+            }
+        }
+
+        // 最奥タイルのさらに2マス分のグリッド座標の生成
+        List<Vector2Int> scoutedGridPos = new List<Vector2Int> {
+            actualTrajectoryEndTile.Stats.GridPos + new Vector2Int(0, -1),
+            actualTrajectoryEndTile.Stats.GridPos + new Vector2Int(0, -2)
+        };
+        // 生成した座標を元に、偵察で視認が出来たタイルとして取得する
+        List<Tile> scoutedTiles = command.Owner == Owner.Player
+            ? _mapManager.GetEnemyTiles(scoutedGridPos, true)
+            : _mapManager.GetPlayerTiles(scoutedGridPos, true);
+        // 着弾までに実際に通過したタイルを偵察で視認出来たタイルとして追加する
+        scoutedTiles.AddRange(actualTrajectoryTiles);
+        // 偵察で視認出来たタイルと、これを基点にした左右の隣接タイルも最終的な視認可能タイルとして登録する
+        List<Tile> visibleTiles = new List<Tile>(scoutedTiles);
+        visibleTiles.AddRange(_mapManager.GetFlankingTiles(command.TargetTile.Stats.owner, scoutedTiles));
+        // リストにあるタイルを視認可能状態に更新する
+        foreach (Tile tile in visibleTiles)
+        {
+            if (tile.IsExistUnit) tile.Unit.SetVisible(true);
+        }
+
 
         Debug.Log($"isSuccessDefence: {isSuccessDefence}");
         // 防衛に失敗している場合、内部的なダメージの反映（見た目に反映されないAPI通信に近い更新）
@@ -140,12 +181,16 @@ public class AttackManager : MonoBehaviour
     /// <summary>
     /// 攻撃に対する防衛判定
     /// </summary>
-    public bool GetHerringDefenceResult(TimelineCommand command, out Tile interceptingUnitTile, out Vector2Int interceptGridPos)
+    public bool GetHerringDefenceResult(
+        TimelineCommand command,
+        List<Tile> trajectoryTiles,
+        out Tile interceptingUnitTile,
+        out Vector2Int interceptGridPos)
     {
         // ターゲットの座標
         Vector2Int tgtPos = command.TargetTile.Stats.GridPos;
         // 攻撃が着弾するまでに通過するタイル
-        List<Tile> trajectoryTiles = _mapManager.GetTrajectoryTiles(command.TargetTile);
+        // List<Tile> trajectoryTiles = _mapManager.GetTrajectoryTiles(command.TargetTile);
         // Herringユニットがいるタイル
         List<Tile> herringTiles = command.Owner == Owner.Player
             ? _mapManager.GetEnemyMapHerringTiles()

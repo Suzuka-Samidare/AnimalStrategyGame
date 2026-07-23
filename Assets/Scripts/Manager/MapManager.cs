@@ -353,6 +353,70 @@ public class MapManager : MonoBehaviour, IInitializable
     }
 
     /// <summary>
+    /// 指定したタイルの両脇（X軸）に隣接するタイルを取得する
+    /// </summary>
+    // public List<Tile> GetFlankingTiles(Owner mapOwner, Vector2Int gridPos)
+    // {
+    //     List<Tile> result = new List<Tile>();
+    //     if (mapOwner == Owner.Player)
+    //     {
+    //         Tile leftTile = GetPlayerTile(gridPos + Vector2Int.left);
+    //         Tile rightTile = GetPlayerTile(gridPos + Vector2Int.right);
+    //         if (leftTile != null) result.Add(leftTile);
+    //         if (rightTile != null) result.Add(rightTile);
+    //     }
+    //     else
+    //     {
+    //         Tile leftTile = GetEnemyTile(gridPos + Vector2Int.left);
+    //         Tile rightTile = GetEnemyTile(gridPos + Vector2Int.right);
+    //         if (leftTile != null) result.Add(leftTile);
+    //         if (rightTile != null) result.Add(rightTile);
+    //     }
+        
+    //     return result;
+    // }
+
+    /// <summary>
+    /// 指定したタイルの両脇（X軸）に隣接するタイルを取得する
+    /// </summary>
+    public List<Tile> GetFlankingTiles(Owner mapOwner, Tile tile)
+    {
+        List<Tile> result = new List<Tile>();
+        if (mapOwner == Owner.Player)
+        {
+            Tile leftTile = GetPlayerTile(tile.Stats.GridPos + Vector2Int.left);
+            Tile rightTile = GetPlayerTile(tile.Stats.GridPos + Vector2Int.right);
+            if (leftTile != null) result.Add(leftTile);
+            if (rightTile != null) result.Add(rightTile);
+        }
+        else
+        {
+            Tile leftTile = GetEnemyTile(tile.Stats.GridPos + Vector2Int.left);
+            Tile rightTile = GetEnemyTile(tile.Stats.GridPos + Vector2Int.right);
+            if (leftTile != null) result.Add(leftTile);
+            if (rightTile != null) result.Add(rightTile);
+        }
+        
+        return result;
+    }
+
+    public List<Tile> GetFlankingTiles(Owner mapOwner, List<Tile> tiles)
+    {
+        List<Tile> result = new List<Tile>();
+        
+        foreach (Tile tile in tiles)
+        {
+            List<Tile> flankingTiles = GetFlankingTiles(mapOwner, tile);
+            foreach (Tile fTile in flankingTiles)
+            {
+                if (!result.Contains(fTile) && !tiles.Contains(fTile)) result.Add(fTile);
+            }
+        }
+        
+        return result;
+    }
+
+    /// <summary>
     /// マップ検索処理汎用メソッド
     /// </summary>
     private void ForEachTile(Action<int, int> action)

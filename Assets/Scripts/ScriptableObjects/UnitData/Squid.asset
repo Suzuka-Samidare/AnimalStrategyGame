@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Squid
   m_EditorClassIdentifier: 
   prefab: {fileID: 7511180232019162148, guid: 818c5a1ba0d9810439f11299463f2294, type: 3}
-  initPos: {x: 0, y: 0.5, z: 0}
   callingPrefab: {fileID: 7977106843427714197, guid: f62d4831da787274cba79bba3a15b301,
     type: 3}
-  cost: 0
+  initPos: {x: 0, y: 0.5, z: 0}
+  cost: 10
   callTime: 3
   profile:
     id: 8

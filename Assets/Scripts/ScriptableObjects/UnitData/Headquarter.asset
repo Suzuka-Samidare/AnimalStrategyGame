@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Headquarter
   m_EditorClassIdentifier: 
   prefab: {fileID: 9160871832150813489, guid: 92dc80f1626e93a4eae8bab981ec7155, type: 3}
-  initPos: {x: 0, y: 0.5, z: 0}
   callingPrefab: {fileID: 7977106843427714197, guid: f62d4831da787274cba79bba3a15b301,
     type: 3}
+  initPos: {x: 0, y: 0.5, z: 0}
   cost: 0
   callTime: 0
   profile:

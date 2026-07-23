@@ -29,8 +29,6 @@ public class TileStats : MonoBehaviour
             if (_tileView != null) _tileView.RefreshVisual();
         }
     }
-    [Tooltip("敵から視認可能か")]
-    public bool isRevealed = false;
     [Tooltip("タイルの陣地種別")]
     public Owner owner;
 
@@ -47,8 +45,4 @@ public class TileStats : MonoBehaviour
     {
         _tileView = GetComponent<TileView>();
     }
-
-    // [Tooltip("敵から視認可能か")]
-    // public bool isRevealed = false;
 }
-// 

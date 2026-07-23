@@ -39,13 +39,6 @@ public struct UnitProfile
     [Tooltip("ユニットID")] public UnitType unitType;
     [Tooltip("ユニット名")] public string unitName;
     [Tooltip("最大耐久値")] public float maxHp;
-
-    // TODO: 後で消す
-    // [Tooltip("攻撃力")] public float power;
-    // [Tooltip("攻撃消費エネルギー")] public int energy;
-    // [Tooltip("タイムラインへの影響速度")] public float atkDelay;
-    // [Tooltip("攻撃の種類")] public AttackType atkType;
-    // [Tooltip("範囲攻撃の距離")] public AttackRange atkRange;
 }
 
 
@@ -55,8 +48,8 @@ public class UnitData : ScriptableObject
 {
     [Header("外見設定")]
     [Tooltip("本体オブジェクト")] public GameObject prefab;
-    [Tooltip("本体オブジェクトの位置設定")] public Vector3 initPos;
     [Tooltip("呼出待ちオブジェクト")] public GameObject callingPrefab;
+    [Tooltip("本体オブジェクトの位置設定")] public Vector3 initPos;
 
     [Header("呼出設定")]
     [Tooltip("コスト")] public int cost;

@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Herring
   m_EditorClassIdentifier: 
   prefab: {fileID: 0}
-  initPos: {x: 0, y: 0.5, z: 0}
   callingPrefab: {fileID: 0}
-  cost: 0
-  callTime: 0
+  initPos: {x: 0, y: 0.5, z: 0}
+  cost: 15
+  callTime: 3
   profile:
     id: 4
     unitType: 4
