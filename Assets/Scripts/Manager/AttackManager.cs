@@ -80,9 +80,11 @@ public class AttackManager : MonoBehaviour
             : _mapManager.GetPlayerTile(interceptGridPos, true);
         Vector3 interceptedPos = interceptedTile.Stats.GlobalPos;
 
+        // =====================================================
+        // ユニットの視認状態の更新
+        // =====================================================
         // 着弾までに実際に通過したタイル群（最前線で迎撃されてもメタタイルも含めるので、必ず1つ以上ある）
         List<Tile> actualTrajectoryTiles = trajectoryTiles.FindAll(tile => tile.Stats.GridPos.y >= interceptedTile.Stats.GridPos.y);
-
         // 実際に通過したタイルから最奥タイル（グリッドのy座標が最小のタイル）を取得する
         Tile actualTrajectoryEndTile = actualTrajectoryTiles[0];
         if (actualTrajectoryTiles.Count > 0)
@@ -95,7 +97,6 @@ public class AttackManager : MonoBehaviour
                 }
             }
         }
-
         // 最奥タイルのさらに2マス分のグリッド座標の生成
         List<Vector2Int> scoutedGridPos = new List<Vector2Int> {
             actualTrajectoryEndTile.Stats.GridPos + new Vector2Int(0, -1),

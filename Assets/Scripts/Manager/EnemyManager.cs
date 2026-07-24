@@ -48,7 +48,7 @@ public class EnemyManager : MonoBehaviour, IInitializable
         _unitSpawnManager.SpawnUnit(_mapManager.enemyMapData[0, 0], _squidData);
 
         SpawnUnitRandomTiles(_hqData, _mapManager.maxHqCount);
-        SpawnUnitRandomTiles(_squidData, 30);
+        SpawnUnitRandomTiles(_herringData, 30);
 
         TimelineCommand command = _timelineManager.CreateEnemyCommand();
         _timelineManager.RegisterCommand(command);

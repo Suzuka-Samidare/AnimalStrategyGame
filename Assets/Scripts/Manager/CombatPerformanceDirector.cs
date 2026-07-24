@@ -43,6 +43,9 @@ public class CombatPerformanceDirector : MonoBehaviour
         return ascentPath;
     }
 
+    /// <summary>
+    /// 発射物下降時の放物線軌道の始点及び終点座標の取得
+    /// </summary>
     private MovementPath GetDescentPath(Tile targetTile)
     {
         Vector3 tgtTileGlobalPos = targetTile.Stats.GlobalPos;
@@ -64,6 +67,9 @@ public class CombatPerformanceDirector : MonoBehaviour
     /// </summary>
     public async UniTask AttackInkSuccess(TimelineCommand command)
     {
+        bool isVisibleAttacker = command.AttackerTile.Unit.Stats.IsVisible;
+        if (!isVisibleAttacker) command.AttackerTile.Unit.SetVisible(true);
+
         if (command.AttackerTile.Unit is not SquidUnit squid)
         {
             throw new System.InvalidOperationException("攻撃演出を実行できません：登録されているユニットはSquidではありません。");
@@ -95,6 +101,8 @@ public class CombatPerformanceDirector : MonoBehaviour
             await parabolicMover.DescentAsync(descentPath);
             _projectileManager.DespawnProjectile(ink);
         }
+
+        if (!isVisibleAttacker) command.AttackerTile.Unit.SetVisible(false);
     }
 
     /// <summary>
@@ -102,6 +110,9 @@ public class CombatPerformanceDirector : MonoBehaviour
     /// </summary>
     public async UniTask AttackInkFailed(TimelineCommand command, Vector3 interceptingUnitTilePos, Vector3 interceptedPos)
     {
+        bool isVisibleAttacker = command.AttackerTile.Unit.Stats.IsVisible;
+        if (!isVisibleAttacker) command.AttackerTile.Unit.SetVisible(true);
+
         if (command.AttackerTile.Unit is not SquidUnit squid)
         {
             throw new System.InvalidOperationException("攻撃演出を実行できません：登録されているユニットはSquidではありません。");
@@ -182,6 +193,8 @@ public class CombatPerformanceDirector : MonoBehaviour
 
         // 両方の移動・演出が終わるまで待機
         await UniTask.WhenAll(inkTask, interceptorTask);
+
+        if (!isVisibleAttacker) command.AttackerTile.Unit.SetVisible(false);
     }
 
     /// <summary>
