@@ -9,8 +9,8 @@ public class PlayerManager : MonoBehaviour
     public static PlayerManager Instance;
 
     [Header("オブジェクト関連")]
-    public TextMeshProUGUI fpText;
-    public TextMeshProUGUI energyText;
+    public TextMeshProUGUI _fpText;
+    public TextMeshProUGUI _energyText;
 
     [Header("アニマルポイント関連")]
     [SerializeField, Tooltip("所持アニマルポイント")]
@@ -20,10 +20,10 @@ public class PlayerManager : MonoBehaviour
         get { return _animalPoint; }
         set { _animalPoint = Mathf.Clamp(value, 0, 999); }
     }
-    [SerializeField, Tooltip("アニマルポイント回復値")]
-    private float apRegenValue = 10.0f;
-    [SerializeField, Tooltip("アニマルポイント回復速度")]
-    private float apRegenRate = 2.0f;
+    [SerializeField, Tooltip("アニマルポイント基礎回復値")]
+    private float _apRegenValue = 1.0f;
+    [SerializeField, Tooltip("アニマルポイント回復速度（秒）")]
+    private float _apRegenRate = 1.5f;
 
     [Header("エネルギー関連")]
     [SerializeField, Tooltip("所持エネルギー")]
@@ -33,10 +33,10 @@ public class PlayerManager : MonoBehaviour
         get { return _energy; }
         set { _energy = Mathf.Clamp(value, 0, 999); }
     }
-    [SerializeField, Tooltip("エネルギー回復値")]
-    private float energyRegenValue = 4.0f;
-    [SerializeField, Tooltip("エネルギー回復速度")]
-    private float energyRegenRate = 2.0f;
+    [SerializeField, Tooltip("エネルギー基礎回復値")]
+    private float _energyRegenValue = 1.0f;
+    [SerializeField, Tooltip("エネルギー回復速度（秒）")]
+    private float _energyRegenRate = 1.5f;
 
     [Header("コルーチン参照用")]
     private IEnumerator _increaseEnergy;
@@ -47,8 +47,8 @@ public class PlayerManager : MonoBehaviour
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 
-        _increaseAnimalPoint = IncreaseStatus(apRegenRate, apRegenValue, AddAnimalPoint);
-        _increaseEnergy = IncreaseStatus(energyRegenRate, energyRegenValue, AddEnergy);
+        _increaseAnimalPoint = IncreaseStatus(_apRegenRate, _apRegenValue, AddAnimalPoint);
+        _increaseEnergy = IncreaseStatus(_energyRegenRate, _energyRegenValue, AddEnergy);
     }
 
     void Update()
@@ -110,9 +110,9 @@ public class PlayerManager : MonoBehaviour
 
     private void UpdateAnimalPointText()
     {
-        if (fpText != null)
+        if (_fpText != null)
         {
-            fpText.text = animalPoint.ToString();
+            _fpText.text = animalPoint.ToString();
         }
         else
         {
@@ -122,9 +122,9 @@ public class PlayerManager : MonoBehaviour
 
     private void UpdateEnergyText()
     {
-        if (energyText != null)
+        if (_energyText != null)
         {
-            energyText.text = energy.ToString();
+            _energyText.text = energy.ToString();
         }
         else
         {

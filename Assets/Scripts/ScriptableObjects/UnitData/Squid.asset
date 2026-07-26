@@ -22,15 +22,15 @@ MonoBehaviour:
     id: 8
     unitType: 8
     unitName: Squid
-    maxHp: 10
+    maxHp: 20
   callingProfile:
     id: 99
     unitType: 0
     unitName: Squid
     maxHp: 10
   attackProfile:
-    power: 5
-    energy: 0
+    power: 35
+    energy: 4
     delay: 0
     style: 1
     range:

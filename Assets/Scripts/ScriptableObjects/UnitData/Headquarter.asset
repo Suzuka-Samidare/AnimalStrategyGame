@@ -22,7 +22,7 @@ MonoBehaviour:
     id: 1
     unitType: 1
     unitName: Headquarter
-    maxHp: 5
+    maxHp: 180
   callingProfile:
     id: 99
     unitType: 0
