@@ -2,6 +2,7 @@ using UnityEngine;
 using Cysharp.Threading.Tasks;
 using UnityEngine.SceneManagement;
 using System;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour, IInitializable
 {
@@ -44,6 +45,9 @@ public class GameManager : MonoBehaviour, IInitializable
     private DialogController _dialogController;
     private InfomationController _infomationController;
     private PlayerManager _playerManager;
+
+    [SerializeField]
+    private List<Tile> CallingTiles;
 
     private void Awake()
     {
@@ -122,6 +126,25 @@ public class GameManager : MonoBehaviour, IInitializable
                     _uiManager.Overlay.Hide();
                 }
             ); 
+        }
+    }
+
+    private void SetCallUnitTimersPaused(bool isPaused)
+    {
+        // List<Tile> CallingTiles = _mapManager.GetCallingTiles(Owner.Player);
+        // CallingTiles.AddRange(_mapManager.GetCallingTiles(Owner.Enemy));
+
+        List<Tile> CallingTiles = _mapManager.GetCallingTiles(Owner.Player);
+        CallingTiles.AddRange(_mapManager.GetCallingTiles(Owner.Enemy));
+
+        foreach (Tile tile in CallingTiles)
+        {
+            if (tile.Unit is not CallUnit callUnit)
+            {
+                throw new InvalidOperationException("タイマー処理を実行できません：登録されているユニットはCallではありません。");
+            }
+            if (isPaused) callUnit.Controller.PauseTimer();
+            else callUnit.Controller.ResumeTimer();
         }
     }
 
@@ -210,6 +233,8 @@ public class GameManager : MonoBehaviour, IInitializable
             SwitchPhase(Phase.PREPARATION);
             // タイマー開始
             _elapsedTimer.Start(_timeLimit);
+            // 呼出中ユニットのタイマーを再開
+            SetCallUnitTimersPaused(false);
             return UniTask.CompletedTask;
         };
         await EnterPhase(Phase.PREPARATION, openingEvents, closedEvents);
@@ -238,6 +263,8 @@ public class GameManager : MonoBehaviour, IInitializable
     {
         Func<UniTask> openingEvents = () =>
         {
+            // 呼出中ユニットのタイマーを一時停止
+            SetCallUnitTimersPaused(true);
             // リジェネ停止
             _playerManager.StopRegen();
             // タイマーリセット

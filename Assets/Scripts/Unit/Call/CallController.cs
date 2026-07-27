@@ -42,6 +42,16 @@ public class CallController : UnitControllerBase
         _timer.Start(callTime);
     }
 
+    public void ResumeTimer()
+    {
+        _timer.Start();
+    }
+
+    public void PauseTimer()
+    {
+        _timer.Pause();
+    }
+
     /// <summary>
     /// 現在アクティブなタイマーのイベント解除とリセットを行う
     /// </summary>

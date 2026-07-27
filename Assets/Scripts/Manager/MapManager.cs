@@ -336,6 +336,44 @@ public class MapManager : MonoBehaviour, IInitializable
     }
 
     /// <summary>
+    /// 敵マップ上Callingユニットが配置されているタイルの全取得
+    /// </summary>
+    public List<Tile> GetCallingTiles(Owner owner)
+    {
+        Tile[,] mapData = owner == Owner.Player ? playerMapData : enemyMapData;
+        List<Tile> tiles = new List<Tile>();
+        ForEachTile((x, y) =>
+        {
+            UnitBase unit = mapData[x, y].Unit;
+            if (unit != null && unit.Stats.profile.unitType == UnitType.Calling) 
+            {
+                tiles.Add(mapData[x, y]);
+            }
+        });
+
+        return tiles;
+    }
+
+    // /// <summary>
+    // /// 敵マップ上Callingユニットが配置されているタイルの全取得
+    // /// </summary>
+    // public List<CallUnit> GetCallingTiles(Owner owner)
+    // {
+    //     Tile[,] mapData = owner == Owner.Player ? playerMapData : enemyMapData;
+    //     List<CallUnit> callUnits = new List<CallUnit>();
+    //     ForEachTile((x, y) =>
+    //     {
+    //         UnitBase unit = mapData[x, y].Unit;
+    //         if (unit != null && unit is CallUnit callUnit) 
+    //         {
+    //             callUnits.Add(callUnit);
+    //         }
+    //     });
+
+    //     return callUnits;
+    // }
+
+    /// <summary>
     /// 攻撃物がターゲットに着弾するまでに通過するタイルの取得（メタタイルを含む）
     /// </summary>
     public List<Tile> GetTrajectoryTiles(Tile target)
@@ -351,30 +389,6 @@ public class MapManager : MonoBehaviour, IInitializable
 
         return tiles;
     }
-
-    /// <summary>
-    /// 指定したタイルの両脇（X軸）に隣接するタイルを取得する
-    /// </summary>
-    // public List<Tile> GetFlankingTiles(Owner mapOwner, Vector2Int gridPos)
-    // {
-    //     List<Tile> result = new List<Tile>();
-    //     if (mapOwner == Owner.Player)
-    //     {
-    //         Tile leftTile = GetPlayerTile(gridPos + Vector2Int.left);
-    //         Tile rightTile = GetPlayerTile(gridPos + Vector2Int.right);
-    //         if (leftTile != null) result.Add(leftTile);
-    //         if (rightTile != null) result.Add(rightTile);
-    //     }
-    //     else
-    //     {
-    //         Tile leftTile = GetEnemyTile(gridPos + Vector2Int.left);
-    //         Tile rightTile = GetEnemyTile(gridPos + Vector2Int.right);
-    //         if (leftTile != null) result.Add(leftTile);
-    //         if (rightTile != null) result.Add(rightTile);
-    //     }
-        
-    //     return result;
-    // }
 
     /// <summary>
     /// 指定したタイルの両脇（X軸）に隣接するタイルを取得する
@@ -400,6 +414,9 @@ public class MapManager : MonoBehaviour, IInitializable
         return result;
     }
 
+    /// <summary>
+    /// 指定した複数タイルの両脇（X軸）に隣接するタイルを取得する
+    /// </summary>
     public List<Tile> GetFlankingTiles(Owner mapOwner, List<Tile> tiles)
     {
         List<Tile> result = new List<Tile>();
