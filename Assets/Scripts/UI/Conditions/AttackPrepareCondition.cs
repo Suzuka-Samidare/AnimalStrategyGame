@@ -15,7 +15,9 @@ public class AttackPrepareCondition : MonoBehaviour, IButtonCondition
     {
         if (_tileManager.selectedTile == null) return false;
 
-        if (_tileManager.selectedTile.Unit is not AttackerUnitBase _) return false;
+        if (_tileManager.selectedTile.Unit is not AttackerUnitBase attackerUnit) return false;
+
+        if (attackerUnit.Stats.IsAttackScheduled) return false;
 
         return true;
     }

@@ -108,12 +108,18 @@ public class TimelineManager : MonoBehaviour, IInitializable
     /// </summary>
     private async UniTask ExecuteCommandAsync(TimelineCommand command)
     {
+        if (command.AttackerTile.Unit is not AttackerUnitBase attackerUnit)
+        {
+            throw new System.InvalidOperationException("コマンドを実行できません：有効な攻撃ユニットが登録されていません。");
+        }
+
         // TODO: コマンド内容に応じて条件分岐させたい
-        switch (command.AttackerTile.Unit.Stats.profile.unitType)
+        switch (attackerUnit.Stats.profile.unitType)
         {
             case UnitType.Squid:
                 // 迎撃プロセスの実行
                 await _attackManager.ProcessInkInterceptAttempt(command);
+                attackerUnit.NotifyAttackScheduleCleared();
                 break;
         }
     }
