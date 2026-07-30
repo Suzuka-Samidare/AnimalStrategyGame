@@ -43,7 +43,7 @@ public abstract class UnitBase : MonoBehaviour
     }
 
     /// <summary>
-    /// 気絶処理
+    /// 気絶処理（Destroy）
     /// </summary>
     public async UniTask OnFaint(Tile tile)
     {

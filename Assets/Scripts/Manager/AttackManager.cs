@@ -118,31 +118,27 @@ public class AttackManager : MonoBehaviour
         }
 
 
-        Debug.Log($"isSuccessDefence: {isSuccessDefence}");
-        // 防衛に失敗している場合、内部的なダメージの反映（見た目に反映されないAPI通信に近い更新）
-        if (!isSuccessDefence)
-        {
-            ApplyDamage(command);
-        }
-
-        // ===================================================
-        // 見た目の演出
-        // ===================================================
+        // =====================================================
+        // ダメージ反映及び演出
         // 防錆成功 => 攻撃が迎撃される演出のみ
         // 防衛失敗 => 攻撃ヒット及びユニットの気絶演出
+        // =====================================================
+        Debug.Log($"isSuccessDefence: {isSuccessDefence}");
+        // 迎撃結果に応じて処理を分岐
         if (isSuccessDefence)
         {
+            // インクが迎撃される演出
             await _combatPerformanceDirector.AttackInkFailed(command, interceptingUnitTile.Stats.GlobalPos, interceptedPos);
         }
         else
         {
+            // 内部的なダメージの反映（見た目に反映されないAPI通信に近い更新）
+            ApplyDamage(command);
+            // インク攻撃が着弾する演出
             await _combatPerformanceDirector.AttackInkSuccess(command);
-        }
-
-        // 防衛に失敗している場合は、攻撃ヒット及びユニットの気絶演出
-        if (!isSuccessDefence)
-        {
+            // TODO: AttackHitEffectsをAttackInkSuccessに統合する
             await AttackHitEffects(command);
+            // TODO: CombatPerformanceDirectorに移行する
             await FaintEffects(command);
         }
     }

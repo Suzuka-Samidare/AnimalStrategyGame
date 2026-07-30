@@ -18,7 +18,7 @@ public class AttackSubmit : MonoBehaviour, IButtonAction
         
         if (command.AttackerTile.Unit is AttackerUnitBase attackerUnit)
         {
-            attackerUnit.NotifyAttackScheduled();
+            attackerUnit.EnableAttackSchedule();
         }
             
     }

@@ -5,14 +5,14 @@ public abstract class AttackerUnitBase : UnitBase
     public new AttackerStatsBase Stats => base.Stats as AttackerStatsBase;
     public new AttackerControllerBase Controller => base.Controller as AttackerControllerBase;
 
-    public void NotifyAttackScheduled()
+    public void EnableAttackSchedule()
     {
         if (Stats.IsAttackScheduled) return;
         Stats.IsAttackScheduled = true;
         Animation.Play(AnimationName.Sit);
     }
 
-    public void NotifyAttackScheduleCleared()
+    public void DisableAttackSchedule()
     {
         if (!Stats.IsAttackScheduled) return;
         Stats.IsAttackScheduled = false;

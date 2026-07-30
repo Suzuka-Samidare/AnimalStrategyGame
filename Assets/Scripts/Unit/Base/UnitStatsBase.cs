@@ -11,7 +11,17 @@ public abstract class UnitStatsBase : MonoBehaviour
     
 
     [Header("動的ステータス")]
-    [Tooltip("気絶フラグ")] public bool IsFaint = false;
+    [Tooltip("気絶フラグ"), SerializeField]
+    private bool _isFaint;
+    public bool IsFaint
+    {
+        get => _isFaint;
+        private set
+        {
+            if (_isFaint == value) return;
+            _isFaint = value;
+        }
+    }
     [Tooltip("耐久値"), SerializeField]
     private float _hp;
     public float hp
@@ -41,6 +51,7 @@ public abstract class UnitStatsBase : MonoBehaviour
         // 基本ステータスの初期化
         this.profile = unitData.profile;
         hp = profile.maxHp;
+        IsFaint = false;
     }
 
     /// <summary>
@@ -59,7 +70,6 @@ public abstract class UnitStatsBase : MonoBehaviour
     {
         // HP更新
         UpdateHp(-power);
-
         // HPが0以下の場合、気絶フラグを立てる
         if (hp <= 0) IsFaint = true;
     }

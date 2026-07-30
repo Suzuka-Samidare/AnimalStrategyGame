@@ -11,6 +11,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
     public class TimelineCommand
     {
         public Owner Owner;
+        public AttackerUnitBase AttackerUnit;
         public string UnitName;
         public Tile AttackerTile;
         public Tile TargetTile;  // 攻撃対象の中心タイル
@@ -20,20 +21,19 @@ public class TimelineManager : MonoBehaviour, IInitializable
 
         public TimelineCommand(
             Owner owner,
-            string unitName,
+            AttackerUnitBase attackerUnit,
             Tile attackerTile,
             Tile targetTile,
-            List<Tile> affectedTiles,
-            float damage,
-            float time
+            List<Tile> affectedTiles
         ){
             Owner = owner;
-            UnitName = unitName;
+            AttackerUnit = attackerUnit;
+            UnitName = attackerUnit.Stats.profile.unitName;
             AttackerTile = attackerTile;
             TargetTile = targetTile;
             AffectedTiles = affectedTiles;
-            Damage = damage;
-            Time = time;
+            Damage = attackerUnit.Stats.attackProfile.power;
+            Time = attackerUnit.Stats.attackProfile.delay;
         }
     }
 
@@ -99,7 +99,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
             }
         }
 
-        // タイムラインの中身を完全クリアにする（おまじない）
+        // タイムラインの中身を完全クリアにする（一応）
         _timeline.Clear();
     }
 
@@ -108,18 +108,16 @@ public class TimelineManager : MonoBehaviour, IInitializable
     /// </summary>
     private async UniTask ExecuteCommandAsync(TimelineCommand command)
     {
-        if (command.AttackerTile.Unit is not AttackerUnitBase attackerUnit)
-        {
-            throw new System.InvalidOperationException("コマンドを実行できません：有効な攻撃ユニットが登録されていません。");
-        }
-
         // TODO: コマンド内容に応じて条件分岐させたい
-        switch (attackerUnit.Stats.profile.unitType)
+        switch (command.AttackerUnit.Stats.profile.unitType)
         {
             case UnitType.Squid:
                 // 迎撃プロセスの実行
                 await _attackManager.ProcessInkInterceptAttempt(command);
-                attackerUnit.NotifyAttackScheduleCleared();
+                // タイムラインのコマンド有効性チェック
+                CheckCommandValidity();
+                // 攻撃予約済みフラグを解除する
+                command.AttackerUnit.DisableAttackSchedule();
                 break;
         }
     }
@@ -140,12 +138,10 @@ public class TimelineManager : MonoBehaviour, IInitializable
 
         return new TimelineCommand(
             Owner.Player,
-            profile.unitName,
+            attackerUnit,
             _tileManager.selectedTile,
             _tileManager.targetTile,
-            _tileManager.targetTiles,
-            attackProfile.power,
-            attackProfile.delay
+            _tileManager.targetTiles
         );
     }
 
@@ -176,12 +172,10 @@ public class TimelineManager : MonoBehaviour, IInitializable
 
         return new TimelineCommand(
             Owner.Enemy,
-            attackerUnit.Stats.profile.unitName,
+            attackerUnit,
             selectedTile,
             targetTile,
-            affectedTiles,
-            attackerUnit.Stats.attackProfile.power,
-            attackerUnit.Stats.attackProfile.delay
+            affectedTiles
         );
     }
 
@@ -190,39 +184,38 @@ public class TimelineManager : MonoBehaviour, IInitializable
     /// </summary>
     public void RegisterCommand(TimelineCommand command)
     {
-        // 攻撃内容をキューに追加
+        // コマンド内容をキューに追加
         _timeline.Add(command);
         // 時間の小さい順にする
         _timeline.Sort((a, b) => b.Time.CompareTo(a.Time));
         // タイムラインUIの更新
         _timelinePresenter.UpdateTimeline(_timeline);
-        
-        Debug.Log($"攻撃予約完了！");
     }
 
-    // public void RegisterCommand()
-    // {
-    //     if (_tileManager.selectedTile.Unit is not AttackerUnitBase attackerUnit)
-    //     {
-    //         throw new System.InvalidOperationException("コマンドを登録できません：有効な攻撃ユニットが設置されていません。");
-    //     }
+    /// <summary>
+    /// コマンドを除外する
+    /// </summary>
+    private void RemoveCommand(int index)
+    {
+        // 指定コマンドをキューから除外
+        _timeline.RemoveAt(index);
+        // 時間の小さい順にする
+        _timeline.Sort((a, b) => b.Time.CompareTo(a.Time));
+        // タイムラインUIの更新
+        _timelinePresenter.UpdateTimeline(_timeline);
+    }
 
-    //     UnitProfile profile = attackerUnit.Stats.profile;
-    //     AttackProfile attackProfile = attackerUnit.Stats.attackProfile;
-    //     // 攻撃内容を作成してキューに追加
-    //     TimelineCommand newAttack = new TimelineCommand(
-    //         _tileManager.selectedTile.Stats.owner,
-    //         profile.unitName,
-    //         _tileManager.selectedTile,
-    //         _tileManager.targetTile,
-    //         new List<Tile>(_tileManager.targetTiles),
-    //         attackProfile.power,
-    //         attackProfile.delay
-    //     );
-    //     _timeline.Add(newAttack);
-    //     _timeline.Sort((a, b) => b.time.CompareTo(a.time));
-    //     _timelinePresenter.UpdateTimeline(_timeline);
-        
-    //     Debug.Log($"攻撃予約完了！");
-    // }
+    /// <summary>
+    /// コマンドの有効性をチェックし、有効なコマンド以外を除外する。
+    /// </summary>
+    public void CheckCommandValidity()
+    {
+        for (int i = _timeline.Count - 1; i > 0; i--)
+        {
+            if (_timeline[i].AttackerUnit.Stats.IsFaint)
+            {
+                RemoveCommand(i);
+            }
+        }
+    }
 }
