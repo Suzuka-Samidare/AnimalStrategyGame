@@ -19,8 +19,8 @@ public class GameManager : MonoBehaviour, IInitializable
         GAMEOVER,
     };
     public int Turn = 0;
-    [Tooltip("経過時間タイマー")]
-    public Timer _elapsedTimer = new Timer();
+    [Tooltip("フェーズタイマー")]
+    private Timer _phaseTimer = new Timer();
     [Tooltip("ターンの制限時間")]
     private float _timeLimit = 60.0f;
 
@@ -31,9 +31,6 @@ public class GameManager : MonoBehaviour, IInitializable
     public bool IsLoading;
     [Tooltip("ゲームオーバー状態")]
     public bool IsGameOver;
-    
-    // [Tooltip("メインビュー操作可否")]
-    // public bool isMainViewEnabled = true;
 
     // 準備フェーズ共通メッセージ
     private string initMessage => "Please place the remaining " + (_mapManager.maxHqCount - _mapManager.PlayerHqCount) + " headquarters units.";
@@ -62,11 +59,29 @@ public class GameManager : MonoBehaviour, IInitializable
             EnterActionPhase();
         }
         
-        if (_elapsedTimer.IsRunning)
+        if (_phaseTimer.IsRunning)
         {
-            _elapsedTimer.UpdateTick(Time.deltaTime);
-            _uiManager.UpdateElapsedTime(_elapsedTimer.RemainingTimeStr);
+            _phaseTimer.UpdateTick(Time.deltaTime);
+            _uiManager.UpdateElapsedTime(_phaseTimer.RemainingTimeStr);
         }
+    }
+
+    private void OnDestroy()
+    {
+        //  経過時間取得処理のイベント解除
+        if (_timelineManager != null) _timelineManager.OnRequestPhaseElapsedTime -= GetPhaseElapsedTime;
+    }
+
+    public async UniTask Initialize()
+    {
+        // 依存関係処理
+        ResolveDependencies();
+        // 初期化フェーズへ移行
+        EnterInitPhase();
+        // 経過時間取得処理をタイムラインマネージャーにイベントとして登録
+        if (_timelineManager != null) _timelineManager.OnRequestPhaseElapsedTime += GetPhaseElapsedTime;
+
+        await UniTask.CompletedTask;
     }
 
     private void ResolveDependencies()
@@ -79,13 +94,9 @@ public class GameManager : MonoBehaviour, IInitializable
         _playerManager = PlayerManager.Instance;
     }
 
-    public async UniTask Initialize()
+    private float GetPhaseElapsedTime()
     {
-        // 依存関係処理
-        ResolveDependencies();
-        EnterInitPhase();
-
-        await UniTask.CompletedTask;
+        return _phaseTimer.ElapsedTime;
     }
 
     private void ValidateAndShowDialog(int playerHqCount)
@@ -191,7 +202,7 @@ public class GameManager : MonoBehaviour, IInitializable
             // サイドバーの表示
             _uiManager.Sidebar.Show();
             // 準備時間終了後の処理を登録
-            _elapsedTimer.OnTimerComplete += EnterActionPhase;
+            _phaseTimer.OnTimerComplete += EnterActionPhase;
             return UniTask.CompletedTask;
         };
         await EnterPhase(Phase.INIT, openingEvents, closedEvents);
@@ -213,7 +224,7 @@ public class GameManager : MonoBehaviour, IInitializable
             // フェーズステータス更新
             SwitchPhase(Phase.PREPARATION);
             // タイマー開始
-            _elapsedTimer.Start(_timeLimit);
+            _phaseTimer.Start(_timeLimit);
             // 呼出中ユニットのタイマーを再開
             SetCallUnitTimersPaused(false);
             return UniTask.CompletedTask;
@@ -230,7 +241,7 @@ public class GameManager : MonoBehaviour, IInitializable
             // リジェネ停止
             _playerManager.StopRegen();
             // タイマーリセット
-            _elapsedTimer.Reset();
+            _phaseTimer.Reset();
             // タイムラインの集計
             _timelineManager.SortAndCombineTimelines();
             return UniTask.CompletedTask;

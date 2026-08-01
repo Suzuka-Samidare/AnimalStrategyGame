@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -24,7 +25,8 @@ public class TimelineManager : MonoBehaviour, IInitializable
             AttackerUnitBase attackerUnit,
             Tile attackerTile,
             Tile targetTile,
-            List<Tile> affectedTiles
+            List<Tile> affectedTiles,
+            float elapsedTime
         ){
             Owner = owner;
             AttackerUnit = attackerUnit;
@@ -33,7 +35,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
             TargetTile = targetTile;
             AffectedTiles = affectedTiles;
             Damage = attackerUnit.Stats.attackProfile.power;
-            Time = attackerUnit.Stats.attackProfile.delay;
+            Time = elapsedTime + attackerUnit.Stats.attackProfile.delay;
         }
     }
 
@@ -45,6 +47,9 @@ public class TimelineManager : MonoBehaviour, IInitializable
     private List<TimelineCommand> _timeline = new List<TimelineCommand>();
     [Tooltip("全体タイムラインのコマンド数")]
     public int TimelineCount => _timeline.Count;
+
+    // Actions系
+    public event Func<float> OnRequestPhaseElapsedTime;
 
     [Header("Refs")]
     private GameManager _gameManager;
@@ -166,18 +171,18 @@ public class TimelineManager : MonoBehaviour, IInitializable
         if (_tileManager.selectedTile.Unit == null ||
             _tileManager.selectedTile.Unit is not AttackerUnitBase attackerUnit)
         {
-            throw new System.InvalidOperationException("コマンドを登録できません：有効な攻撃ユニットが設置されていません。");
+            throw new InvalidOperationException("コマンドを登録できません：有効な攻撃ユニットが設置されていません。");
         }
 
-        UnitProfile profile = attackerUnit.Stats.profile;
-        AttackProfile attackProfile = attackerUnit.Stats.attackProfile;
+        float elapsedTime = OnRequestPhaseElapsedTime.Invoke();
 
         return new TimelineCommand(
             Owner.Player,
             attackerUnit,
             _tileManager.selectedTile,
             _tileManager.targetTile,
-            _tileManager.targetTiles
+            _tileManager.targetTiles,
+            elapsedTime
         );
     }
 
@@ -192,7 +197,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
         if (selectedTile.Unit == null ||
             selectedTile.Unit is not AttackerUnitBase attackerUnit)
         {
-            throw new System.InvalidOperationException("コマンドを登録できません：有効な攻撃ユニットが設置されていません。");
+            throw new InvalidOperationException("コマンドを登録できません：有効な攻撃ユニットが設置されていません。");
         }
 
         List<Tile> affectedTiles = new List<Tile>();
@@ -206,12 +211,15 @@ public class TimelineManager : MonoBehaviour, IInitializable
             affectedTiles.Add(tile);
         }
 
+        float elapsedTime = UnityEngine.Random.Range(1.0f, 60.0f);
+
         return new TimelineCommand(
             Owner.Enemy,
             attackerUnit,
             selectedTile,
             targetTile,
-            affectedTiles
+            affectedTiles,
+            elapsedTime
         );
     }
 
@@ -278,7 +286,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
         // 指定コマンドをキューから除外
         _timeline.RemoveAt(index);
         // 時間の小さい順にする
-        _timeline.Sort((a, b) => b.Time.CompareTo(a.Time));
+        _timeline.Sort(CompareCommands);
         // タイムラインUIの更新
         _timelinePresenter.UpdateTimeline(_timeline);
     }
@@ -288,6 +296,6 @@ public class TimelineManager : MonoBehaviour, IInitializable
     /// </summary>
     private int CompareCommands(TimelineCommand a, TimelineCommand b)
     {
-        return b.Time.CompareTo(a.Time);
+        return a.Time.CompareTo(b.Time);
     }
 }
