@@ -37,8 +37,13 @@ public class TimelineManager : MonoBehaviour, IInitializable
         }
     }
 
-    [SerializeField, Tooltip("攻撃タイムライン")]
+    [SerializeField, Tooltip("プレイヤー用タイムライン")]
+    private List<TimelineCommand> _playerTimeline = new List<TimelineCommand>();
+    [SerializeField, Tooltip("エネミー用タイムライン")]
+    private List<TimelineCommand> _enemyTimeline = new List<TimelineCommand>();
+    [SerializeField, Tooltip("マスタータイムライン")]
     private List<TimelineCommand> _timeline = new List<TimelineCommand>();
+    [Tooltip("全体タイムラインのコマンド数")]
     public int TimelineCount => _timeline.Count;
 
     [Header("Refs")]
@@ -80,6 +85,8 @@ public class TimelineManager : MonoBehaviour, IInitializable
     /// </summary>
     public async UniTask ProcessTimeline()
     {
+        _timelinePresenter.UpdateTimeline(_timeline);
+
         while (_timeline.Count > 0)
         {
             Debug.Log("++++++++++++++++++++++++++++++++++++++++++++++");
@@ -99,26 +106,55 @@ public class TimelineManager : MonoBehaviour, IInitializable
             }
         }
 
-        // タイムラインの中身を完全クリアにする（一応）
+        // 各タイムラインの中身を完全クリアにする
         _timeline.Clear();
+        _playerTimeline.Clear();
+        _enemyTimeline.Clear();
     }
 
     /// <summary>
-    /// コマンドの実行
+    /// タイムラインの集計処理（タイムライン結合・ソート）
     /// </summary>
-    private async UniTask ExecuteCommandAsync(TimelineCommand command)
+    public void SortAndCombineTimelines()
     {
-        // TODO: コマンド内容に応じて条件分岐させたい
-        switch (command.AttackerUnit.Stats.profile.unitType)
+        // 1. それぞれのリストを個別にソート (要素数が少ない状態でソートするため高速)
+        _playerTimeline.Sort(CompareCommands);
+        _enemyTimeline.Sort(CompareCommands);
+
+        // 2. 結合後のジャストサイズでリストを生成 (GC Alloc / メモリ再確保のスパイクを完全に防止)
+        int totalCount = _playerTimeline.Count + _enemyTimeline.Count;
+
+        int ptrA = 0;
+        int ptrB = 0;
+
+        // 3. マージ処理：両方のリストを比較しながら、小さい順に結合リストへ詰める
+        while (ptrA < _playerTimeline.Count && ptrB < _enemyTimeline.Count)
         {
-            case UnitType.Squid:
-                // 迎撃プロセスの実行
-                await _attackManager.ProcessInkInterceptAttempt(command);
-                // タイムラインのコマンド有効性チェック
-                CheckCommandValidity();
-                // 攻撃予約済みフラグを解除する
-                command.AttackerUnit.DisableAttackSchedule();
-                break;
+            int compare = CompareCommands(_playerTimeline[ptrA], _enemyTimeline[ptrB]);
+
+            // _playerTimelineの要素の方が時間が早い（または同じ）場合
+            if (compare <= 0)
+            {
+                _timeline.Add(_playerTimeline[ptrA]);
+                ptrA++;
+            }
+            else
+            {
+                _timeline.Add(_enemyTimeline[ptrB]);
+                ptrB++;
+            }
+        }
+
+        // 4. 残った要素をすべて流し込む (ソート済みなのでそのまま追加)
+        while (ptrA < _playerTimeline.Count)
+        {
+            _timeline.Add(_playerTimeline[ptrA]);
+            ptrA++;
+        }
+        while (ptrB < _enemyTimeline.Count)
+        {
+            _timeline.Add(_enemyTimeline[ptrB]);
+            ptrB++;
         }
     }
 
@@ -180,16 +216,58 @@ public class TimelineManager : MonoBehaviour, IInitializable
     }
 
     /// <summary>
-    /// コマンドを予約する
+    /// プレイヤーのコマンドを予約する
     /// </summary>
-    public void RegisterCommand(TimelineCommand command)
+    public void RegisterPlayerCommand(TimelineCommand command)
     {
         // コマンド内容をキューに追加
-        _timeline.Add(command);
+        _playerTimeline.Add(command);
         // 時間の小さい順にする
-        _timeline.Sort((a, b) => b.Time.CompareTo(a.Time));
+        _playerTimeline.Sort((a, b) => b.Time.CompareTo(a.Time));
         // タイムラインUIの更新
-        _timelinePresenter.UpdateTimeline(_timeline);
+        _timelinePresenter.UpdateTimeline(_playerTimeline);
+    }
+
+    /// <summary>
+    /// エネミーのコマンドを予約する
+    /// </summary>
+    public void RegisterEnemyCommand(TimelineCommand command)
+    {
+        // コマンド内容をキューに追加
+        _enemyTimeline.Add(command);
+    }
+
+    /// <summary>
+    /// コマンドの有効性をチェックし、有効なコマンド以外を除外する。
+    /// </summary>
+    public void CheckCommandValidity()
+    {
+        for (int i = _timeline.Count - 1; i > 0; i--)
+        {
+            if (_timeline[i].AttackerUnit.Stats.IsFaint)
+            {
+                RemoveCommand(i);
+            }
+        }
+    }
+
+    /// <summary>
+    /// コマンドの実行
+    /// </summary>
+    private async UniTask ExecuteCommandAsync(TimelineCommand command)
+    {
+        // TODO: コマンド内容に応じて条件分岐させたい
+        switch (command.AttackerUnit.Stats.profile.unitType)
+        {
+            case UnitType.Squid:
+                // 迎撃プロセスの実行
+                await _attackManager.ProcessInkInterceptAttempt(command);
+                // タイムラインのコマンド有効性チェック
+                CheckCommandValidity();
+                // 攻撃予約済みフラグを解除する
+                command.AttackerUnit.DisableAttackSchedule();
+                break;
+        }
     }
 
     /// <summary>
@@ -206,16 +284,10 @@ public class TimelineManager : MonoBehaviour, IInitializable
     }
 
     /// <summary>
-    /// コマンドの有効性をチェックし、有効なコマンド以外を除外する。
+    /// コマンドの比較用メソッド
     /// </summary>
-    public void CheckCommandValidity()
+    private int CompareCommands(TimelineCommand a, TimelineCommand b)
     {
-        for (int i = _timeline.Count - 1; i > 0; i--)
-        {
-            if (_timeline[i].AttackerUnit.Stats.IsFaint)
-            {
-                RemoveCommand(i);
-            }
-        }
+        return b.Time.CompareTo(a.Time);
     }
 }

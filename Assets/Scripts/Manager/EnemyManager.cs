@@ -51,7 +51,7 @@ public class EnemyManager : MonoBehaviour, IInitializable
         SpawnUnitRandomTiles(_herringData, 30);
 
         TimelineCommand command = _timelineManager.CreateEnemyCommand();
-        _timelineManager.RegisterCommand(command);
+        _timelineManager.RegisterEnemyCommand(command);
 
         await UniTask.CompletedTask;
     }

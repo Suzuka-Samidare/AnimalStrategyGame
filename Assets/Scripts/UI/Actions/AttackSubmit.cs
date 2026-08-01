@@ -14,7 +14,7 @@ public class AttackSubmit : MonoBehaviour, IButtonAction
     public void Execute()
     {
         TimelineCommand command = _timelineManager.CreatePlayerCommand();
-        _timelineManager.RegisterCommand(command);
+        _timelineManager.RegisterPlayerCommand(command);
         
         if (command.AttackerTile.Unit is AttackerUnitBase attackerUnit)
         {
