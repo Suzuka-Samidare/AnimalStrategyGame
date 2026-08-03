@@ -180,7 +180,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
             attackerUnit,
             _tileManager.selectedTile,
             _tileManager.targetTile,
-            _tileManager.targetTiles,
+            new List<Tile>(_tileManager.targetTiles),
             elapsedTime
         );
     }
