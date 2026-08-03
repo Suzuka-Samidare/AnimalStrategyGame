@@ -285,34 +285,37 @@ public class GameManager : MonoBehaviour, IInitializable
 
     private async void EnterGameOver()
     {
-        // 操作制限有効化（念のため）
-        IsInputLocked = true;
-        // フェーズステータス更新
-        SwitchPhase(Phase.GAMEOVER);
         // UIの非表示
         _uiManager.Sidebar.Hide();
         _uiManager.SidebarWrapper.Hide();
         _uiManager.Timeline.Hide();
-        // ゲームオーバー表示
-        await _uiManager.BannerView.PlayAnnouncement("GAME OVER");
-        // サイドバーの背景のみ表示
-        _uiManager.Sidebar.Show();
-        // ダイアログ表示
-        _dialogController.Open(
-            isConfirm: true,
-            title: "Thank you for playing!",
-            message: "Retry?",
-            onConfirm: () =>
-            {
-                string currentSceneName = SceneManager.GetActiveScene().name;
-                SceneManager.LoadScene(currentSceneName);
-            },
-            onCancel: () =>
-            {
-                Debug.Log("CANCEL");
-            }
-        );
 
+        Func<UniTask> openingEvents = () => UniTask.CompletedTask;
+        Func<UniTask> closedEvents = () =>
+        {
+            // フェーズステータス更新
+            SwitchPhase(Phase.GAMEOVER);
+            // 画面全体のオーバーレイ表示
+            _uiManager.Overlay.Show();
+            _uiManager.Sidebar.Show();
+            // ダイアログ表示
+            _dialogController.Open(
+                isConfirm: true,
+                title: "Thank you for playing!",
+                message: "Retry?",
+                onConfirm: () =>
+                {
+                    string currentSceneName = SceneManager.GetActiveScene().name;
+                    SceneManager.LoadScene(currentSceneName);
+                },
+                onCancel: () =>
+                {
+                    Debug.Log("CANCEL");
+                }
+            );
+            return UniTask.CompletedTask;
+        };
+        await EnterPhase(Phase.GAMEOVER, openingEvents, closedEvents);
     }
 
     public void SwitchPhase(Phase phase)
