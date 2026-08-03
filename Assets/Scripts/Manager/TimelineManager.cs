@@ -50,9 +50,9 @@ public class TimelineManager : MonoBehaviour, IInitializable
 
     // Actions系
     public event Func<float> OnRequestPhaseElapsedTime;
+    public event Action OnGameOverConditionMet;
 
     [Header("Refs")]
-    private GameManager _gameManager;
     private MapManager _mapManager;
     private TileManager _tileManager;
     private AttackManager _attackManager;
@@ -72,7 +72,6 @@ public class TimelineManager : MonoBehaviour, IInitializable
 
     private void ResolveDependencies()
     {
-        _gameManager = GameManager.Instance;
         _mapManager = MapManager.Instance;
         _tileManager = TileManager.Instance;
         _attackManager = AttackManager.Instance;
@@ -103,10 +102,10 @@ public class TimelineManager : MonoBehaviour, IInitializable
 
             // マップデータ処理完了待ち
             await UniTask.WaitUntil(() => _mapManager.isDirty == false);
-            // 双方どちらかの本部ユニット数が0の場合ゲームオーバーに
+            // 双方どちらかの本部ユニット数が0の場合は、ゲームオーバー状態であることを伝達する
             if (_mapManager.PlayerHqCount < 1 || _mapManager.EnemyHqCount < 1)
             {
-                _gameManager.IsGameOver = true;
+                OnGameOverConditionMet.Invoke();
                 break;
             }
         }
@@ -231,7 +230,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
         // コマンド内容をキューに追加
         _playerTimeline.Add(command);
         // 時間の小さい順にする
-        _playerTimeline.Sort((a, b) => b.Time.CompareTo(a.Time));
+        _playerTimeline.Sort(CompareCommands);
         // タイムラインUIの更新
         _timelinePresenter.UpdateTimeline(_playerTimeline);
     }

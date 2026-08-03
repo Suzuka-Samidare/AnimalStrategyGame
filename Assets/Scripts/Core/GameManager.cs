@@ -69,17 +69,23 @@ public class GameManager : MonoBehaviour, IInitializable
     private void OnDestroy()
     {
         //  経過時間取得処理のイベント解除
-        if (_timelineManager != null) _timelineManager.OnRequestPhaseElapsedTime -= GetPhaseElapsedTime;
+        if (_timelineManager != null) {
+            _timelineManager.OnRequestPhaseElapsedTime -= GetPhaseElapsedTime;
+            _timelineManager.OnGameOverConditionMet -= NotifyGameOver;
+        }
     }
 
     public async UniTask Initialize()
     {
         // 依存関係処理
         ResolveDependencies();
+        // 経過時間取得処理をタイムラインマネージャーにイベントとして登録
+        if (_timelineManager != null) {
+            _timelineManager.OnRequestPhaseElapsedTime += GetPhaseElapsedTime;
+            _timelineManager.OnGameOverConditionMet += NotifyGameOver;
+        }
         // 初期化フェーズへ移行
         EnterInitPhase();
-        // 経過時間取得処理をタイムラインマネージャーにイベントとして登録
-        if (_timelineManager != null) _timelineManager.OnRequestPhaseElapsedTime += GetPhaseElapsedTime;
 
         await UniTask.CompletedTask;
     }
@@ -92,6 +98,11 @@ public class GameManager : MonoBehaviour, IInitializable
         _dialogController = DialogController.Instance;
         _infomationController = InfomationController.Instance;
         _playerManager = PlayerManager.Instance;
+    }
+
+    private void NotifyGameOver()
+    {
+        IsGameOver = true;
     }
 
     private float GetPhaseElapsedTime()
@@ -272,7 +283,7 @@ public class GameManager : MonoBehaviour, IInitializable
         await EnterPhase(Phase.ACTION, openingEvents, closedEvents);
     }
 
-    public async void EnterGameOver()
+    private async void EnterGameOver()
     {
         // 操作制限有効化（念のため）
         IsInputLocked = true;
