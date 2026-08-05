@@ -4,11 +4,12 @@ public class MapInputHandler : MonoBehaviour
 {
     [SerializeField]
     private TileManager _tileManager;
+    private UnitDetailController _unitDetailController;
 
     private void Start()
     {
         _tileManager = TileManager.Instance;
-        Debug.Log(_tileManager);
+        _unitDetailController = UnitDetailController.Instance;
     }
 
     private void OnEnable() => InputHandler.OnSelect += HandleSelection;
@@ -34,17 +35,27 @@ public class MapInputHandler : MonoBehaviour
                 {
                     // タイルを選択中オブジェクトとして設定
                     _tileManager.SetSelectedTile(tile);
-                    // ユニットアニメーション
-                    UnitAnimation unitAnimation = hit.collider.GetComponentInChildren<UnitAnimation>();
-                    if (unitAnimation) {
-                        unitAnimation.PlayOnce(AnimationName.Clicked);
-                    }
+                    // // ユニットアニメーション
+                    // UnitAnimationBase animation = _tileManager.selectedTile.Unit.Animation;
+                    // if (animation) animation.PlayOnce(AnimationName.Clicked);
                 }
-
-                if (tile.Stats.owner == Owner.Enemy)
+                else
                 {
                     _tileManager.SetTargetTile(tile);
                     _tileManager.RegisterTargetTiles(tile.Stats.GridPos);
+                }
+
+                if (tile.Unit != null)
+                {
+                    // ユニットアニメーション
+                    if (tile.Unit.Animation) tile.Unit.Animation.PlayOnce(AnimationName.Clicked);
+                    // ユニット詳細情報の表示
+                    _unitDetailController.Open(tile.Unit.Stats);
+                }
+                else
+                {
+                    // ユニット詳細情報の非表示
+                    _unitDetailController.Close();
                 }
             }
 
@@ -56,16 +67,18 @@ public class MapInputHandler : MonoBehaviour
             // }
 
             // 接触対象がタイルまたはユニットの場合
-            if (hitObject.CompareTag("Tile") || hitObject.CompareTag("Unit"))
-            {
-                // ユニット詳細情報の表示/非表示処理
-                _tileManager.GetSelectedTileUnitDetail();
-            }
+            // if (hitObject.CompareTag("Tile") || hitObject.CompareTag("Unit"))
+            // {
+            //     // ユニット詳細情報の表示/非表示処理
+            //     _tileManager.GetSelectedTileUnitDetail();
+            // }
 
             // Debug.Log("<color=blue>Ray判定あり & タイルではない</color>");
         }
         else
         {
+            _unitDetailController.Close();
+
             // TODO: ここでこの処理で良いのか検討
             if (GameManager.Instance.currentPhase == GameManager.Phase.INIT ||
                 GameManager.Instance.currentPhase == GameManager.Phase.PREPARATION)

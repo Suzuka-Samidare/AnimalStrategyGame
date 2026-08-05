@@ -39,8 +39,16 @@ public class TileManager : MonoBehaviour, IInitializable
     }
     [SerializeField, Tooltip("ターゲット指定中タイル")]
     public List<Tile> targetTiles { get; private set; } = new List<Tile>();
-    [Tooltip("最後にチェックした場所")]
-    public Vector3 EnemyMapLastViewedPosition {get; private set; }
+    [SerializeField, Tooltip("最後にチェックした場所")]
+    private Vector3 _enemyMapLastViewedPosition;
+    public Vector3 EnemyMapLastViewedPosition {
+        get => _enemyMapLastViewedPosition;
+        private set
+        {
+            if (_enemyMapLastViewedPosition == value) return;
+            _enemyMapLastViewedPosition = value;
+        }
+    }
 
     [Header("Refs")]
     private MapManager _mapManager;
@@ -65,11 +73,8 @@ public class TileManager : MonoBehaviour, IInitializable
     public async UniTask Initialize()
     {
         ResolveDependencies();
-        EnemyMapLastViewedPosition = new Vector3(
-            _mapManager.enemyMapData[4, 4].Stats.GlobalPos.x,
-            1,
-            _mapManager.enemyMapData[4, 4].Stats.GlobalPos.z
-        );
+        targetTile = _mapManager.enemyMapData[4, 4];
+        EnemyMapLastViewedPosition = new Vector3(targetTile.Stats.GlobalPos.x, 1, targetTile.Stats.GlobalPos.z);
         await UniTask.CompletedTask;
     }
 
@@ -197,41 +202,5 @@ public class TileManager : MonoBehaviour, IInitializable
         }
 
         UnitSpawnManager.Instance.DespawnUnit(selectedTile);
-    }
-
-    /// <summary>
-    /// 選択中のマス上にあるユニットのマップIDを取得
-    /// </summary>
-    public MapId GetSelectedTileMapId()
-    {
-        if (selectedTile.Unit != null)
-        {
-            return selectedTile.Unit.Stats.profile.id;
-        }
-        else
-        {
-            return MapId.Empty;
-        }
-    }
-
-    /// <summary>
-    /// （簡易情報表示用）選択中ユニットから表示に必要な情報を取得する
-    /// </summary>
-    public void GetSelectedTileUnitDetail()
-    {
-        UnitBase unit = selectedTile.Unit;
-        if (unit != null)
-        {
-            UnitDetailController.Instance.Open(
-                unit.Stats.profile.unitName,
-                unit.Stats.profile.maxHp,
-                unit.Stats.hp,
-                unit.Stats.profile.id == MapId.Calling
-            );
-        }
-        else
-        {
-            UnitDetailController.Instance.Close();
-        }
     }
 }

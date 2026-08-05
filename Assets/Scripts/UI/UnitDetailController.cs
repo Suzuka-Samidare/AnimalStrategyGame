@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -32,13 +29,14 @@ public class UnitDetailController : VisibilityController
         _visibility = GetComponent<VisibilityController>();
     }
 
-    public void Open(string unitName, float maxHp, float currenthp, bool isCalling)
+    public void Open(UnitStatsBase stats)
     {
-        _nameText.text = unitName;
-        _isCallingBadge.SetVisible(isCalling);
-        _hpSlider.maxValue = maxHp;
-        _hpSlider.value = currenthp;
-        _hpText.text = $"{currenthp} / {maxHp}";
+        UnitProfile profile = stats.profile;
+        _nameText.text = profile.unitName;
+        _isCallingBadge.SetVisible(profile.unitType == UnitType.Calling);
+        _hpSlider.maxValue = profile.maxHp;
+        _hpSlider.value = stats.hp;
+        _hpText.text = $"{stats.hp} / {profile.maxHp}";
 
         _visibility.Show();
     }
@@ -47,13 +45,4 @@ public class UnitDetailController : VisibilityController
     {
         _visibility.Hide();
     }
-
-    // public void UpdateDetail(string unitName, int maxHp, int currenthp, bool isCalling)
-    // {
-    //     _nameText.text = unitName;
-    //     _isCallingBadge.SetVisible(isCalling);
-    //     _hpSlider.maxValue = maxHp;
-    //     _hpSlider.value = currenthp;
-    //     _hpText.text = $"{currenthp} / {maxHp}";
-    // }
 }

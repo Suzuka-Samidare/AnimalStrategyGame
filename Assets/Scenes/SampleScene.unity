@@ -7317,6 +7317,7 @@ GameObject:
   - component: {fileID: 1019155750}
   - component: {fileID: 1019155752}
   - component: {fileID: 1019155751}
+  - component: {fileID: 1019155753}
   - component: {fileID: 1019155749}
   m_Layer: 5
   m_Name: SubmitButton
@@ -7501,6 +7502,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _targetMap: 0
+--- !u!114 &1019155753
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1019155742}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4620525a661db0043bd19831d145f642, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _targetTileType: 0
 --- !u!1 &1024894723
 GameObject:
   m_ObjectHideFlags: 0
@@ -9268,6 +9282,7 @@ GameObject:
   - component: {fileID: 1314780379}
   - component: {fileID: 1314780381}
   - component: {fileID: 1314780380}
+  - component: {fileID: 1314780382}
   - component: {fileID: 1314780378}
   m_Layer: 5
   m_Name: AttackButton
@@ -9441,6 +9456,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _targetMap: 1
+--- !u!114 &1314780382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1314780371}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4620525a661db0043bd19831d145f642, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _targetTileType: 1
 --- !u!1001 &1323355571
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11166,6 +11194,7 @@ GameObject:
   - component: {fileID: 1586720357}
   - component: {fileID: 1586720356}
   - component: {fileID: 1586720358}
+  - component: {fileID: 1586720359}
   m_Layer: 5
   m_Name: CancelButton
   m_TagString: Untagged
@@ -11325,6 +11354,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _targetMap: 0
+--- !u!114 &1586720359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1586720347}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4620525a661db0043bd19831d145f642, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _targetTileType: 0
 --- !u!1 &1596142686
 GameObject:
   m_ObjectHideFlags: 0
@@ -14043,6 +14085,7 @@ MonoBehaviour:
   _selectedTile: {fileID: 0}
   PlayerMapLastViewedPosition: {x: 4, y: 1, z: 5}
   _targetTile: {fileID: 0}
+  _enemyMapLastViewedPosition: {x: 0, y: 0, z: 0}
 --- !u!1 &2103718873
 GameObject:
   m_ObjectHideFlags: 0
