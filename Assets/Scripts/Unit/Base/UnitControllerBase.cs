@@ -23,8 +23,6 @@ public abstract class UnitControllerBase : MonoBehaviour
     /// </summary>
     public void UpdateVisibility()
     {
-        Debug.Log(stats.IsVisible);
-
         if (stats.Owner == Owner.Player || stats.IsVisible)
         {
             transform.position = _visiblePos;

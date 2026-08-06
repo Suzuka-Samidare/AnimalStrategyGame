@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class MapManager : MonoBehaviour, IInitializable
 {
-    public static MapManager Instance;
+    public static MapManager Instance { get; private set; }
 
     [Header("Ref")]
     [Tooltip("プレイヤーマップオブジェクト"), SerializeField]
@@ -372,6 +372,27 @@ public class MapManager : MonoBehaviour, IInitializable
 
     //     return callUnits;
     // }
+
+    /// <summary>
+    /// マップ全体を1回だけ走査し、ユニットが存在するタイルをリアルタイムに列挙する
+    /// </summary>
+    public IEnumerable<Tile> EnumerateTilesWithUnit(Owner owner)
+    {
+        Tile[,] mapData = owner == Owner.Player ? playerMapData : enemyMapData;
+
+        for (int y = 0; y < mapHeight; y++)
+        {
+            for (int x = 0; x < mapWidth; x++)
+            {
+                Tile tile = mapData[x, y];
+                if (tile?.Unit != null)
+                {
+                    // リストに追加せず、見つかったその場で一時停止して呼び出し側にタイルを渡す
+                    yield return tile; 
+                }
+            }
+        }
+    }
 
     /// <summary>
     /// 攻撃物がターゲットに着弾するまでに通過するタイルの取得（メタタイルを含む）

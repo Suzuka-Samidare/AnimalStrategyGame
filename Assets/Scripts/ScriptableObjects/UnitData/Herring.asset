@@ -34,5 +34,5 @@ MonoBehaviour:
       min: 0
       max: 1
     ignoreAccuracy: 0
-    accuracy: 1
+    accuracy: 0.6
     accuracyDecay: 0.075
