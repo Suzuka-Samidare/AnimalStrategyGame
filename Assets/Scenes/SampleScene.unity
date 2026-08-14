@@ -6992,7 +6992,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 40.22}
+  m_SizeDelta: {x: 0, y: 51.9704}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &995726594
 MonoBehaviour:
@@ -7014,10 +7014,11 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Dialog Message
+  m_text: "\u3060\u3044\u3042\u308D\u3050 \u3081\u3063\u305B\u30FC\u3058"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 5b7e22ab5c1e30b40a14ac614bb10bba, type: 2}
+  m_sharedMaterial: {fileID: 6288310726777232088, guid: 5b7e22ab5c1e30b40a14ac614bb10bba,
+    type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
