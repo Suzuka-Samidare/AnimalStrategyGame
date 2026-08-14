@@ -178,7 +178,7 @@ public class AttackManager : MonoBehaviour
     /// <summary>
     /// 攻撃に対する防衛判定
     /// </summary>
-    public bool GetHerringDefenceResult(
+    private bool GetHerringDefenceResult(
         TimelineCommand command,
         List<Tile> trajectoryTiles,
         out Tile interceptingUnitTile,
