@@ -4,7 +4,7 @@ public abstract class AttackerStatsBase : UnitStatsBase
 {
     [Tooltip("攻撃ステータス")]
     public AttackProfile attackProfile;
-    [Tooltip("攻撃")]
+    [SerializeField, Tooltip("攻撃")]
     private bool _isAttackScheduled;
     public bool IsAttackScheduled
     {
