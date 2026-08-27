@@ -585,9 +585,10 @@ GameObject:
   - component: {fileID: 4992758198669102562}
   - component: {fileID: 1148682066818756815}
   - component: {fileID: 8317233869622344689}
-  - component: {fileID: -9122793858026104962}
-  - component: {fileID: 9214626993424992754}
-  - component: {fileID: -1358550314565206570}
+  - component: {fileID: 3920446382365587756}
+  - component: {fileID: 65130967785910284}
+  - component: {fileID: 8787207891495739471}
+  - component: {fileID: 8638573436027338725}
   m_Layer: 0
   m_Name: Colobus
   m_TagString: Unit
@@ -667,7 +668,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &-9122793858026104962
+--- !u!114 &3920446382365587756
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -676,23 +677,39 @@ MonoBehaviour:
   m_GameObject: {fileID: 6182162820492919152}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2117726ca5f76341ad20d5b32151b19, type: 3}
+  m_Script: {fileID: 11500000, guid: f4172872da6395a4baeb89024f572d4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _uuid: 
+--- !u!114 &65130967785910284
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6182162820492919152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a14349f7fd0621a4d929c2b7507095e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   profile:
     id: 0
+    unitType: 0
     unitName: 
     maxHp: 0
-    canAttack: 0
+  Owner: 0
+  _isFaint: 0
+  _hp: 0
+  _isVisible: 0
+  attackProfile:
     power: 0
     energy: 0
-    atkType: 0
-    atkRange:
+    delay: 0
+    style: 1
+    range:
       min: 0
-      max: 0
-  hp: 0
---- !u!114 &9214626993424992754
+      max: 5
+--- !u!114 &8787207891495739471
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -701,14 +718,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 6182162820492919152}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 180db269c8b50424aa0f1cb05e437877, type: 3}
+  m_Script: {fileID: 11500000, guid: 4a688128351ff6d4391e4a022cc151b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentAnimation:
-    m_value: 
-  isBusyAnimating: 0
-  isPause: 0
---- !u!114 &-1358550314565206570
+--- !u!114 &8638573436027338725
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -717,7 +730,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6182162820492919152}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 88a4fe2ee3193364991a0b9542994a2d, type: 3}
+  m_Script: {fileID: 11500000, guid: 338d742c4b0810c47994d7baeebe82c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &7853299950699460719

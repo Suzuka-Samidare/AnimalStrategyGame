@@ -27,4 +27,4 @@ MonoBehaviour:
     id: 99
     unitType: 0
     unitName: Headquarter
-    maxHp: 10
+    maxHp: 1

@@ -10,29 +10,29 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ec6c5cc1255daf74fad2cbb1b15c1c3d, type: 3}
-  m_Name: Squid
+  m_Name: Colobus
   m_EditorClassIdentifier: 
-  prefab: {fileID: 7511180232019162148, guid: 818c5a1ba0d9810439f11299463f2294, type: 3}
+  prefab: {fileID: 6182162820492919152, guid: 84b7c8441f160174fa5c6f94cf397f0a, type: 3}
   callingPrefab: {fileID: 7977106843427714197, guid: f62d4831da787274cba79bba3a15b301,
     type: 3}
   initPos: {x: 0, y: 0.5, z: 0}
-  cost: 10
+  cost: 20
   callTime: 3
   profile:
-    id: 8
-    unitType: 8
-    unitName: Squid
-    maxHp: 20
+    id: 2
+    unitType: 2
+    unitName: Colobus
+    maxHp: 40
   callingProfile:
     id: 99
     unitType: 0
-    unitName: Squid
+    unitName: Colobus
     maxHp: 1
   attackProfile:
-    power: 35
-    energy: 4
-    delay: 2
+    power: 8
+    energy: 20
+    delay: 10
     style: 1
     range:
       min: 0
-      max: 1
+      max: 2
