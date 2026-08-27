@@ -43,6 +43,13 @@ public abstract class UnitAnimationBase : MonoBehaviour
 
         try
         {
+            // 元の再生中クリップ情報を取得しておく（取得失敗時を考慮して、デフォルトはIdle）
+            string previousClip = AnimationName.IdleA;
+            AnimatorClipInfo[] clipInfo = _animator.GetCurrentAnimatorClipInfo(0);
+            if (clipInfo.Length > 0)
+            {
+                previousClip = clipInfo[0].clip.name;
+            }
             // アニメーションを再生
             _animator.Play(stateName, 0, 0f);
             //  1フレーム待機（Animatorの更新を待たないと、前のステート情報が取れてしまう）
@@ -54,7 +61,7 @@ public abstract class UnitAnimationBase : MonoBehaviour
                 return stateInfo.IsName(stateName) && stateInfo.normalizedTime >= 1.0f;
             }, cancellationToken: this.GetCancellationTokenOnDestroy());
             // 元のアニメーションに戻す
-            _animator.Play(AnimationName.IdleA);
+            _animator.Play(previousClip);
         }
         finally
         {
