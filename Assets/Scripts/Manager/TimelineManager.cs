@@ -245,17 +245,52 @@ public class TimelineManager : MonoBehaviour, IInitializable
     }
 
     /// <summary>
-    /// コマンドの有効性をチェックし、有効なコマンド以外を除外する。
+    /// 共用タイムライン内のコマンド有効性をチェックし、有効なコマンド以外を除外する。（ACTIONフェーズ用）
     /// </summary>
-    public void CheckCommandValidity()
+    public void CheckSharedTimelineCommandValidity()
     {
         for (int i = _timeline.Count - 1; i > 0; i--)
         {
             if (_timeline[i].AttackerUnit.Stats.IsFaint)
             {
-                RemoveCommand(i);
+                RemoveSharedTimelineCommand(i);
             }
         }
+    }
+
+    /// <summary>
+    /// コマンドの有効性をチェックし、有効なコマンド以外を除外する。
+    /// </summary>
+    public void CheckPlayerTimelineCommandValidity()
+    {
+        int commandIndex = -1;
+        for (int i = 0; i < _playerTimeline.Count; i++)
+        {
+            Debug.Log($"{_playerTimeline[i].AttackerUnit.Stats.profile.unitName} : {_playerTimeline[i].AttackerUnit.gameObject.activeSelf}");
+
+            if (_playerTimeline[i].AttackerUnit.gameObject.activeSelf == false)
+            {
+                commandIndex = i;
+                // RemovePlayerTimelineCommand(i);
+            }
+        }
+
+        if (commandIndex > -1)
+        { 
+            RemovePlayerTimelineCommand(commandIndex);
+        }
+        else
+        {
+            new Exception("コマンドの除外に失敗しました。");
+        }
+    }
+
+    /// <summary>
+    /// プレイヤータイムラインにある最初のColobusの攻撃コマンドを取得する（なければnull）
+    /// </summary>
+    public TimelineCommand TryGetPlayerColobusAttackCommand()
+    {
+        return _playerTimeline.Find(cmd => cmd.AttackerUnit.Stats.profile.unitType == UnitType.Colobus);
     }
 
     /// <summary>
@@ -270,7 +305,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
                 // 迎撃プロセスの実行
                 await _attackManager.ProcessInkInterceptAttempt(command);
                 // タイムラインのコマンド有効性チェック
-                CheckCommandValidity();
+                CheckSharedTimelineCommandValidity();
                 // 攻撃予約済みフラグを解除する
                 command.AttackerUnit.DisableAttackSchedule();
                 break;
@@ -278,9 +313,9 @@ public class TimelineManager : MonoBehaviour, IInitializable
     }
 
     /// <summary>
-    /// コマンドを除外する
+    /// 共有タイムラインのコマンドを除外する
     /// </summary>
-    private void RemoveCommand(int index)
+    private void RemoveSharedTimelineCommand(int index)
     {
         // 指定コマンドをキューから除外
         _timeline.RemoveAt(index);
@@ -288,6 +323,19 @@ public class TimelineManager : MonoBehaviour, IInitializable
         _timeline.Sort(CompareCommands);
         // タイムラインUIの更新
         _timelinePresenter.UpdateTimeline(_timeline);
+    }
+
+    /// <summary>
+    /// プレイヤータイムライン内のコマンドを除外する
+    /// </summary>
+    private void RemovePlayerTimelineCommand(int index)
+    {
+        // 指定コマンドをキューから除外
+        _playerTimeline.RemoveAt(index);
+        // 時間の小さい順にする
+        _playerTimeline.Sort(CompareCommands);
+        // タイムラインUIの更新
+        _timelinePresenter.UpdateTimeline(_playerTimeline);
     }
 
     /// <summary>
