@@ -5,6 +5,7 @@ public enum ProjectileType
 {
     Ink,
     HerringSchool,
+    Drone
 }
 
 public class FactionProjectilePool : MonoBehaviour
