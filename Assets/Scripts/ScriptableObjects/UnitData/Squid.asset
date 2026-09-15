@@ -36,3 +36,6 @@ MonoBehaviour:
     range:
       min: 0
       max: 1
+  projectileProfile:
+    projectileType: 0
+    maxHp: 5

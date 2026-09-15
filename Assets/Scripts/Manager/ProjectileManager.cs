@@ -30,6 +30,6 @@ public class ProjectileManager : MonoBehaviour
 
     public void DespawnProjectile(ProjectlieBase projectile)
     {
-        _pool.Despawn(projectile.Type, projectile);
+        _pool.Despawn(projectile.projectileType, projectile);
     }
 }

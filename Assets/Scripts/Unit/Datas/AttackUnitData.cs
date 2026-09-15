@@ -1,6 +1,13 @@
 using System;
 using UnityEngine;
 
+public enum ProjectileType
+{
+    Ink,
+    HerringSchool,
+    Drone
+}
+
 [Serializable]
 public struct AttackProfile
 {
@@ -11,8 +18,16 @@ public struct AttackProfile
     [Tooltip("範囲攻撃の距離")] public AttackRange range;
 }
 
+[Serializable]
+public struct ProjectileProfile
+{
+    [Tooltip("発射物タイプ")] public ProjectileType projectileType;
+    [Tooltip("最大耐久値")] public float maxHp;
+}
+
 [CreateAssetMenu(fileName = "AttackUnitData", menuName = "ScriptableObjects/AttackUnitData")]
 public class AttackUnitData : UnitData
 {
     [Tooltip("攻撃ステータス")] public AttackProfile attackProfile;
+    [Tooltip("基本ステータス")] public ProjectileProfile projectileProfile;
 }
