@@ -39,7 +39,7 @@ public class UnitSpawnManager : MonoBehaviour
         FactionUnitPool targetPool = (tile.Stats.owner == Owner.Player) ? playerPool : enemyPool;
         // スポーン処理
         Vector3 tilePosition = tile.transform.position;
-        Vector3 unitPosition  = tilePosition + unitData.initPos;
+        Vector3 unitPosition  = tilePosition + unitData.profile.InitPos;
         Quaternion unitRotation = tile.Stats.owner == Owner.Enemy ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
         UnitBase unit = targetPool.Spawn(
             unitData.profile.unitType,
@@ -66,7 +66,7 @@ public class UnitSpawnManager : MonoBehaviour
         FactionUnitPool targetPool = (tile.Stats.owner == Owner.Player) ? playerPool : enemyPool;
         // スポーン処理
         Vector3 tilePosition = tile.transform.position;
-        Vector3 unitPosition = tilePosition + unitData.initPos;
+        Vector3 unitPosition = tilePosition + unitData.profile.InitPos;
         Quaternion unitRotation = tile.Stats.owner == Owner.Enemy ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
         UnitBase unit = targetPool.Spawn(
             unitData.callingProfile.unitType,

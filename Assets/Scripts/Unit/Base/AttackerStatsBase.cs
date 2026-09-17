@@ -2,9 +2,9 @@ using UnityEngine;
 
 public abstract class AttackerStatsBase : UnitStatsBase
 {
-    [Tooltip("攻撃ステータス")]
-    public AttackProfile attackProfile;
-    [SerializeField, Tooltip("攻撃")]
+    [Tooltip("攻撃ステータス")] public AttackProfile attackProfile;
+    [Tooltip("基本ステータス")] public ProjectileProfile projectileProfile;
+    [SerializeField, Tooltip("攻撃予約済みフラグ")]
     private bool _isAttackScheduled;
     public bool IsAttackScheduled
     {
@@ -24,6 +24,7 @@ public abstract class AttackerStatsBase : UnitStatsBase
         if (unitData is AttackUnitData attackUnitData)
         {
             attackProfile = attackUnitData.attackProfile;
+            projectileProfile = attackUnitData.projectileProfile;
         }
         else
         {

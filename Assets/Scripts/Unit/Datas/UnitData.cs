@@ -39,6 +39,7 @@ public struct UnitProfile
     [Tooltip("ユニットID")] public UnitType unitType;
     [Tooltip("ユニット名")] public string unitName;
     [Tooltip("最大耐久値")] public float maxHp;
+    [Tooltip("本体オブジェクトの位置設定")] public Vector3 InitPos;
 }
 
 
@@ -49,7 +50,6 @@ public class UnitData : ScriptableObject
     [Header("外見設定")]
     [Tooltip("本体オブジェクト")] public GameObject prefab;
     [Tooltip("呼出待ちオブジェクト")] public GameObject callingPrefab;
-    [Tooltip("本体オブジェクトの位置設定")] public Vector3 initPos;
 
     [Header("呼出設定")]
     [Tooltip("コスト")] public int cost;

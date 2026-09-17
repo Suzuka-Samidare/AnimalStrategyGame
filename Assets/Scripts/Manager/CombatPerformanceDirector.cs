@@ -1,6 +1,8 @@
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 using TimelineCommand = TimelineManager.TimelineCommand;
+using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class CombatPerformanceDirector : MonoBehaviour
 {
@@ -10,10 +12,14 @@ public class CombatPerformanceDirector : MonoBehaviour
     [SerializeField]
     private float _peakHeight = 3f;
 
+    [Header("ドローン設定")]
+    [SerializeField] private float _dronePeakHeight = 2f;
+
     [Header("Refs")]
     private MapManager _mapManager;
     private ParticleManager _particleManager;
     private ProjectileManager _projectileManager;
+    private CameraMovement _cameraMovement;
 
     private void Start()
     {
@@ -25,6 +31,7 @@ public class CombatPerformanceDirector : MonoBehaviour
         _mapManager = MapManager.Instance;
         _particleManager = ParticleManager.Instance;
         _projectileManager = ProjectileManager.Instance;
+        _cameraMovement = CameraMovement.Instance;
     }
 
     /// <summary>
@@ -67,6 +74,7 @@ public class CombatPerformanceDirector : MonoBehaviour
     /// </summary>
     public async UniTask AttackInkSuccess(TimelineCommand command)
     {
+        // TODO: ここでIsVisibleすべきでない
         bool isVisibleAttacker = command.AttackerTile.Unit.Stats.IsVisible;
         if (!isVisibleAttacker) command.AttackerTile.Unit.SetVisible(true);
 
@@ -195,6 +203,117 @@ public class CombatPerformanceDirector : MonoBehaviour
         await UniTask.WhenAll(inkTask, interceptorTask);
 
         if (!isVisibleAttacker) command.AttackerTile.Unit.SetVisible(false);
+    }
+
+    /// <summary>
+    /// Colobusの輸送演出
+    /// </summary>
+    public async UniTask AirdropColobus(List<TimelineCommand> commands, Tile[] arrivalTiles)
+    {
+        // ガード処理＆Colobusユニットの参照リストを用意
+        List<ColobusUnit> colobusUnits = new List<ColobusUnit>(commands.Count);
+        foreach (var command in commands)
+        {  
+            if (command.AttackerUnit is not ColobusUnit colobus)
+            {
+                throw new System.InvalidOperationException("攻撃演出を実行できません：登録されているユニットはSquidではありません。");
+            }
+            colobusUnits.Add(colobus);
+        }
+
+        // ユニット参照関連の変数
+        TimelineCommand masterCmd = commands[0];
+        ColobusUnit masterColobus = colobusUnits[0];
+
+        // 数値関連の変数
+        float playerMapFrontlinePosZ = _mapManager.GetPlayerTile(new Vector2Int(0, _mapManager.TotalMapHeight - 1), true).Stats.GlobalPos.z;
+        float enemyMapFrontlinePosZ = _mapManager.GetEnemyTile(new Vector2Int(0, _mapManager.TotalMapHeight - 1), true).Stats.GlobalPos.z;
+        float attackerMapFrontlinePosZ = masterCmd.Owner == Owner.Player ? playerMapFrontlinePosZ : enemyMapFrontlinePosZ;
+        float defenderMapFrontlinePosZ = masterCmd.Owner == Owner.Player ? enemyMapFrontlinePosZ : playerMapFrontlinePosZ;
+        Vector3 masterColobusGlobalPos = masterColobus.transform.position;
+        Vector3 targetGlobalPos = masterCmd.TargetTile.Stats.GlobalPos + new Vector3(0f, _groundHeight, 0f);
+        MovementPath ascentDronePath = new ()
+        {
+            start = masterColobusGlobalPos + Vector3.up,
+            end = masterColobusGlobalPos + Vector3.up + new Vector3(0f, _dronePeakHeight, 0f)
+        };
+        MovementPath outgoingDronePath = new ()
+        {
+            start = ascentDronePath.end,
+            end = new Vector3(masterColobusGlobalPos.x, _dronePeakHeight + 1f, attackerMapFrontlinePosZ)
+        };
+        MovementPath incomingDronePath = new ()
+        {
+            start = new Vector3(targetGlobalPos.x, _dronePeakHeight + 1f, defenderMapFrontlinePosZ),
+            end = targetGlobalPos + Vector3.up + new Vector3(0f, _dronePeakHeight, 0f)
+        };
+        MovementPath leaveDronePath = new ()
+        {
+            start = incomingDronePath.end,
+            end = targetGlobalPos + new Vector3(0f, 5f, 0f)
+        };
+        // ドローン参照関連の変数
+        var drone = _projectileManager.SpawnProjectile(
+            ProjectileType.Drone,
+            masterColobusGlobalPos + new Vector3(0f, 10f, 0f),
+            transform.rotation
+        );
+        var droneLinearMover = drone.GetComponent<LinearMover>();
+
+        // colobus用非同期タスク管理用リスト
+        UniTask[] colobusTasks = new UniTask[colobusUnits.Count];
+
+        // ドローン登場
+        await _cameraMovement.MoveToAsync(masterColobusGlobalPos);
+        await droneLinearMover.MoveToAsync(drone.transform.position, ascentDronePath.start);
+        // 各ユニットをマスターに集結
+        for (int i = 0; i < colobusUnits.Count; i++)
+        {   
+            ColobusUnit colobus = colobusUnits[i];
+            colobusTasks[i] = colobus.LinearMover.MoveToAsync(colobus.transform.position, masterCmd.AttackerUnit.transform.position);
+        }
+        await UniTask.WhenAll(colobusTasks);
+        // ユニットのドローン追従設定有効化
+        foreach (var colobus in colobusUnits)
+        {
+            colobus.PositionFollower.SetTarget(drone.transform);
+        }
+        await _cameraMovement.MoveToAsync(drone.transform.position);
+        // ドローン浮上
+        await droneLinearMover.MoveToAsync(ascentDronePath.start, ascentDronePath.end);
+        // ドローンの味方マップ内移動
+        await droneLinearMover.MoveToAsync(outgoingDronePath.start, outgoingDronePath.end);
+        // 敵マップ上での演出に移行準備
+        drone.transform.position = incomingDronePath.start;
+        for (int i = 0; i < colobusUnits.Count; i++)
+        {   
+            ColobusUnit colobus = colobusUnits[i];
+            colobusTasks[i] = colobus.PositionFollower.WaitArrivalAsync();
+        }
+        await UniTask.WhenAll(colobusTasks);
+        // ドローンの敵マップ内移動
+        _cameraMovement.Follow(drone.transform, () => Vector3.Distance(drone.transform.position, targetGlobalPos) < 0.1f);
+        await droneLinearMover.MoveToAsync(incomingDronePath.start, incomingDronePath.end);
+
+        // ユニットのドローン追従設定解除 & 各自着地
+        for (int i = 0; i < colobusUnits.Count; i++)
+        {   
+            ColobusUnit colobus = colobusUnits[i];
+            Tile arrivalTile = arrivalTiles[i];
+            colobus.PositionFollower.ClearTarget();
+            colobusTasks[i] = colobus.LinearMover.MoveToAsync(colobus.transform.position, arrivalTile.Stats.GlobalPos + colobus.Stats.profile.InitPos);
+        }
+        await UniTask.WhenAll(colobusTasks);
+        // ドローン退場
+        await _cameraMovement.MoveToAsync(masterColobus.transform.position);
+        await droneLinearMover.MoveToAsync(leaveDronePath.start, leaveDronePath.end);
+        _projectileManager.DespawnProjectile(drone);
+
+        // 一時的な位置リセット動作
+        foreach (var command in commands)
+        {
+            command.AttackerUnit.transform.position = command.AttackerTile.Stats.GlobalPos + command.AttackerUnit.Stats.profile.InitPos;
+        }
     }
 
     /// <summary>

@@ -7,8 +7,8 @@ public abstract class UnitControllerBase : MonoBehaviour
     protected UnitAnimationBase unitAnimation;
 
     [Header("位置情報")]
-    [Tooltip("可視状態時の座標設定")] private Vector3 _visiblePos;
-    [Tooltip("不可視状態時の座標設定")] private Vector3 _invisiblePos;
+    [Tooltip("可視状態時の座標設定"), SerializeField] private Vector3 _visiblePos;
+    [Tooltip("不可視状態時の座標設定"), SerializeField] private Vector3 _invisiblePos;
 
     public virtual void Initialize(UnitBase unitBase)
     {
