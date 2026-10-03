@@ -7,6 +7,7 @@ public abstract class UnitStatsBase : MonoBehaviour
     [Header("静的ステータス")]
     [Tooltip("UID")] private string _uuid;
     [Tooltip("基本ステータス")] public UnitProfile profile;
+    [Tooltip("直接交戦ステータス")] public CombatProfile combatProfile;
     [Tooltip("オーナー情報")] public Owner Owner;
     
 
@@ -40,6 +41,17 @@ public abstract class UnitStatsBase : MonoBehaviour
             _isVisible = value;
         }
     }
+    [Tooltip("交戦中フラグ"), SerializeField]
+    private bool _isEngaged;
+    public bool IsEngaged
+    {
+        get => _isEngaged;
+        set
+        {
+            if (_isEngaged == value) return;
+            _isEngaged = value;
+        }
+    }
 
     protected virtual void Awake()
     {
@@ -50,6 +62,7 @@ public abstract class UnitStatsBase : MonoBehaviour
     {
         // 基本ステータスの初期化
         this.profile = unitData.profile;
+        this.combatProfile = unitData.combatProfile;
         hp = profile.maxHp;
         IsFaint = false;
     }
@@ -66,7 +79,7 @@ public abstract class UnitStatsBase : MonoBehaviour
     /// <summary>
     /// ダメージ反映
     /// </summary>
-    public void ApplyDamageAsync(float power, Tile tile)
+    public void ApplyDamage(float power)
     {
         // HP更新
         UpdateHp(-power);

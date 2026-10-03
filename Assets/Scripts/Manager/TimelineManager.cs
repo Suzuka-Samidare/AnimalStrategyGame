@@ -19,6 +19,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
         public List<Tile> AffectedTiles; 
         public float Damage;        // ダメージ量
         public float Time; // 経過時間 + 適用必要時間
+        public bool IsActionCompleted;
 
         public TimelineCommand(
             Owner owner,
@@ -26,7 +27,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
             Tile attackerTile,
             Tile targetTile,
             List<Tile> affectedTiles,
-            float elapsedTime
+            float time
         ){
             Owner = owner;
             AttackerUnit = attackerUnit;
@@ -35,7 +36,8 @@ public class TimelineManager : MonoBehaviour, IInitializable
             TargetTile = targetTile;
             AffectedTiles = affectedTiles;
             Damage = attackerUnit.Stats.attackProfile.power;
-            Time = elapsedTime + attackerUnit.Stats.attackProfile.delay;
+            Time = time;
+            IsActionCompleted = false;
         }
     }
 
@@ -87,19 +89,68 @@ public class TimelineManager : MonoBehaviour, IInitializable
     /// <summary>
     /// タイムラインのコマンド呼び出し
     /// </summary>
+    // public async UniTask ProcessTimeline()
+    // {
+    //     _timelinePresenter.UpdateTimeline(_timeline);
+
+    //     while (_timeline.Count > 0)
+    //     {
+    //         Debug.Log("++++++++++++++++++++++++++++++++++++++++++++++");
+    //         // 先頭コマンドの実行
+    //         await ExecuteCommandAsync(_timeline[0]);
+    //         // コマンドをタイムラインから除外
+    //         _timeline.RemoveAt(0);
+    //         _timelinePresenter.UpdateTimeline(_timeline);
+
+            // // マップデータ処理完了待ち
+            // await UniTask.WaitUntil(() => _mapManager.isDirty == false);
+            // // 双方どちらかの本部ユニット数が0の場合は、ゲームオーバー状態であることを伝達する
+            // if (_mapManager.PlayerHqCount < 1 || _mapManager.EnemyHqCount < 1)
+            // {
+            //     OnGameOverConditionMet.Invoke();
+            //     break;
+            // }
+    //     }
+
+    //     // 各タイムラインの中身を完全クリアにする
+    //     _timeline.Clear();
+    //     _playerTimeline.Clear();
+    //     _enemyTimeline.Clear();
+    // }
+
     public async UniTask ProcessTimeline()
     {
+        // TODO: SortAndCombineTimelinesの最後に実行すべきか考える
         _timelinePresenter.UpdateTimeline(_timeline);
+        // コマンドの器を用意する
+        List<TimelineCommand> executeCommands = new List<TimelineCommand>();
 
         while (_timeline.Count > 0)
         {
             Debug.Log("++++++++++++++++++++++++++++++++++++++++++++++");
-            // 先頭コマンドの実行
-            await ExecuteCommandAsync(_timeline[0]);
-            // コマンドをタイムラインから除外
-            _timeline.RemoveAt(0);
-            _timelinePresenter.UpdateTimeline(_timeline);
-
+            // 実行コマンド群のクリア処理
+            executeCommands.Clear();
+            // 先頭の1コマンドを追加する
+            var firstCommand = _timeline[0];
+            executeCommands.Add(firstCommand);
+            // 先頭のコマンドがColobusだった場合
+            if (firstCommand.AttackerUnit is ColobusUnit)
+            {
+                // 他のColobusコマンドを探して実行コマンドとして追加
+                for (int i = 1; i < _timeline.Count; i++)
+                {
+                    if (_timeline[i].AttackerUnit is ColobusUnit) executeCommands.Add(_timeline[i]);
+                }
+            }
+            // コマンド処理の実行
+            await _attackManager.ExecuteMultipleCommandsAsync(executeCommands);
+            // 実行済フラグを付けてタイムラインからコマンドを除外
+            foreach (var cmd in executeCommands)
+            {
+                cmd.IsActionCompleted = true;
+            }
+            // 実行済コマンド及び、戦闘により有効性を失ったコマンドをタイムライン上から除外
+            RemoveSharedTimelineCommand(cmd => cmd.IsActionCompleted || cmd.AttackerUnit.Stats.IsFaint);
             // マップデータ処理完了待ち
             await UniTask.WaitUntil(() => _mapManager.isDirty == false);
             // 双方どちらかの本部ユニット数が0の場合は、ゲームオーバー状態であることを伝達する
@@ -167,22 +218,39 @@ public class TimelineManager : MonoBehaviour, IInitializable
     /// </summary>
     public TimelineCommand CreatePlayerCommand()
     {
+        // 事前チェック
         if (_tileManager.selectedTile.Unit == null ||
             _tileManager.selectedTile.Unit is not AttackerUnitBase attackerUnit)
         {
             throw new InvalidOperationException("コマンドを登録できません：有効な攻撃ユニットが設置されていません。");
         }
 
-        float elapsedTime = OnRequestPhaseElapsedTime.Invoke();
-
+        // Colobusの攻撃を登録時、既に他Colobusによるコマンドが登録されている場合は、情報を参照して同様の内容で登録する
+        if (_tileManager.selectedTile.Unit is ColobusUnit)
+        {
+            var registeredColobusCommand = TryGetPlayerColobusAttackCommand();
+            if (registeredColobusCommand != null)
+            {
+                return new TimelineCommand(
+                    Owner.Player,
+                    attackerUnit,
+                    _tileManager.selectedTile,
+                    _tileManager.targetTile,
+                    new List<Tile>(registeredColobusCommand.AffectedTiles),
+                    registeredColobusCommand.Time
+                );   
+            }
+        }
+        // そうでない場合は、普通のコマンド登録を行う
+        float time = OnRequestPhaseElapsedTime.Invoke() + attackerUnit.Stats.attackProfile.delay;
         return new TimelineCommand(
             Owner.Player,
             attackerUnit,
             _tileManager.selectedTile,
             _tileManager.targetTile,
             new List<Tile>(_tileManager.targetTiles),
-            elapsedTime
-        );
+            time
+        );    
     }
 
     /// <summary>
@@ -193,12 +261,30 @@ public class TimelineManager : MonoBehaviour, IInitializable
         Tile selectedTile = _mapManager.enemyMapData[0, 0];
         Tile targetTile = _mapManager.playerMapData[4, 4];
 
+        // 事前チェック
         if (selectedTile.Unit == null ||
             selectedTile.Unit is not AttackerUnitBase attackerUnit)
         {
             throw new InvalidOperationException("コマンドを登録できません：有効な攻撃ユニットが設置されていません。");
         }
 
+        // Colobusの攻撃を登録時、既に他Colobusによるコマンドが登録されている場合は、情報を参照して同様の内容で登録する
+        if (selectedTile.Unit is ColobusUnit)
+        {
+            var registeredColobusCommand = TryGetEnemyColobusAttackCommand();
+            if (registeredColobusCommand != null)
+            {
+                return new TimelineCommand(
+                    Owner.Enemy,
+                    attackerUnit,
+                    selectedTile,
+                    targetTile,
+                    new List<Tile>(registeredColobusCommand.AffectedTiles),
+                    registeredColobusCommand.Time
+                );   
+            }
+        }
+        // そうでない場合は、普通のコマンド登録を行う
         List<Tile> affectedTiles = new List<Tile>();
         List<Vector2Int> affectedPositions = attackerUnit.Controller.GetTargetTilePositions(targetTile.Stats.GridPos);
         foreach (Vector2Int pos in affectedPositions)
@@ -209,9 +295,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
             // 配列（リスト）に保存
             affectedTiles.Add(tile);
         }
-
-        float elapsedTime = UnityEngine.Random.Range(1.0f, 60.0f);
-
+        float elapsedTime = UnityEngine.Random.Range(1.0f, 60.0f) + attackerUnit.Stats.attackProfile.delay;
         return new TimelineCommand(
             Owner.Enemy,
             attackerUnit,
@@ -245,49 +329,87 @@ public class TimelineManager : MonoBehaviour, IInitializable
     }
 
     /// <summary>
+    /// 共用タイムライン内のコマンド有効性をチェックし、有効なコマンド以外を除外する。（ACTIONフェーズ用）
+    /// </summary>
+    // public void CheckSharedTimelineCommandValidity()
+    // {
+    //     for (int i = _timeline.Count - 1; i > 0; i--)
+    //     {
+    //         if (_timeline[i].AttackerUnit.Stats.IsFaint)
+    //         {
+    //             RemoveSharedTimelineCommand(i);
+    //         }
+    //     }
+    // }
+
+    /// <summary>
     /// コマンドの有効性をチェックし、有効なコマンド以外を除外する。
     /// </summary>
-    public void CheckCommandValidity()
+    public void CheckPlayerTimelineCommandValidity()
     {
-        for (int i = _timeline.Count - 1; i > 0; i--)
+        int commandIndex = -1;
+        for (int i = 0; i < _playerTimeline.Count; i++)
         {
-            if (_timeline[i].AttackerUnit.Stats.IsFaint)
+            Debug.Log($"{_playerTimeline[i].AttackerUnit.Stats.profile.unitName} : {_playerTimeline[i].AttackerUnit.gameObject.activeSelf}");
+
+            if (_playerTimeline[i].AttackerUnit.gameObject.activeSelf == false)
             {
-                RemoveCommand(i);
+                commandIndex = i;
+                // RemovePlayerTimelineCommand(i);
             }
         }
-    }
 
-    /// <summary>
-    /// コマンドの実行
-    /// </summary>
-    private async UniTask ExecuteCommandAsync(TimelineCommand command)
-    {
-        // TODO: コマンド内容に応じて条件分岐させたい
-        switch (command.AttackerUnit.Stats.profile.unitType)
+        if (commandIndex > -1)
+        { 
+            RemovePlayerTimelineCommand(commandIndex);
+        }
+        else
         {
-            case UnitType.Squid:
-                // 迎撃プロセスの実行
-                await _attackManager.ProcessInkInterceptAttempt(command);
-                // タイムラインのコマンド有効性チェック
-                CheckCommandValidity();
-                // 攻撃予約済みフラグを解除する
-                command.AttackerUnit.DisableAttackSchedule();
-                break;
+            new Exception("コマンドの除外に失敗しました。");
         }
     }
 
     /// <summary>
-    /// コマンドを除外する
+    /// プレイヤータイムラインにある最初のColobusの攻撃コマンドを取得する（なければnull）
     /// </summary>
-    private void RemoveCommand(int index)
+    public TimelineCommand TryGetPlayerColobusAttackCommand()
     {
-        // 指定コマンドをキューから除外
-        _timeline.RemoveAt(index);
+        return _playerTimeline.Find(cmd => cmd.AttackerUnit.Stats.profile.unitType == UnitType.Colobus);
+    }
+
+    /// <summary>
+    /// 敵タイムラインにある最初のColobusの攻撃コマンドを取得する（なければnull）
+    /// </summary>
+    public TimelineCommand TryGetEnemyColobusAttackCommand()
+    {
+        return _enemyTimeline.Find(cmd => cmd.AttackerUnit.Stats.profile.unitType == UnitType.Colobus);
+    }
+
+    /// <summary>
+    /// 共有タイムラインのコマンドを除外する
+    /// </summary>
+    public void RemoveSharedTimelineCommand(Predicate<TimelineCommand> match)
+    {
+        if (match == null) throw new ArgumentNullException(nameof(match), "削除条件 (match) が指定されていません。");
+        // 条件に該当するコマンドをキューから除外
+        _timeline.RemoveAll(match);
         // 時間の小さい順にする
         _timeline.Sort(CompareCommands);
         // タイムラインUIの更新
         _timelinePresenter.UpdateTimeline(_timeline);
+    }
+
+    /// <summary>
+    /// プレイヤータイムライン内のコマンドを除外する
+    /// </summary>
+    private void RemovePlayerTimelineCommand(int index)
+    {
+        // 指定コマンドをキューから除外
+        _playerTimeline.RemoveAt(index);
+        // 時間の小さい順にする
+        _playerTimeline.Sort(CompareCommands);
+        // タイムラインUIの更新
+        _timelinePresenter.UpdateTimeline(_playerTimeline);
     }
 
     /// <summary>

@@ -15,7 +15,6 @@ MonoBehaviour:
   prefab: {fileID: 7511180232019162148, guid: 818c5a1ba0d9810439f11299463f2294, type: 3}
   callingPrefab: {fileID: 7977106843427714197, guid: f62d4831da787274cba79bba3a15b301,
     type: 3}
-  initPos: {x: 0, y: 0.5, z: 0}
   cost: 10
   callTime: 3
   profile:
@@ -23,16 +22,25 @@ MonoBehaviour:
     unitType: 8
     unitName: Squid
     maxHp: 20
+    InitPos: {x: 0, y: 0.5, z: 0}
   callingProfile:
     id: 99
     unitType: 0
     unitName: Squid
     maxHp: 1
+    InitPos: {x: 0, y: 0, z: 0}
+  combatProfile:
+    CanDirectCombat: 0
+    EngagementRange: 0
+    RecastTime: 0
   attackProfile:
     power: 35
     energy: 4
     delay: 2
     style: 1
-    range:
+    gridRange:
       min: 0
       max: 1
+  projectileProfile:
+    projectileType: 0
+    maxHp: 5

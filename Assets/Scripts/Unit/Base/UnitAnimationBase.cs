@@ -3,6 +3,9 @@ using UnityEngine;
 
 public abstract class UnitAnimationBase : MonoBehaviour
 {
+    [Header("アニメーション設定")]
+    [SerializeField] private string defaultStateName = AnimationName.IdleA;
+
     protected bool isAnimating = false;
     protected bool isPause = false;
 

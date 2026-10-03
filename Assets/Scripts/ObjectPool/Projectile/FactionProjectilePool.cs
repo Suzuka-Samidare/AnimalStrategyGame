@@ -1,12 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ProjectileType
-{
-    Ink,
-    HerringSchool,
-}
-
 public class FactionProjectilePool : MonoBehaviour
 {
     [System.Serializable]
@@ -47,6 +41,7 @@ public class FactionProjectilePool : MonoBehaviour
         if (_poolDictionary.TryGetValue(type, out var pool))
         {
             ProjectlieBase projectile = pool.Get();
+            projectile.Setup(type);
             projectile.transform.SetPositionAndRotation(position, rotation);
             return projectile;
         }
