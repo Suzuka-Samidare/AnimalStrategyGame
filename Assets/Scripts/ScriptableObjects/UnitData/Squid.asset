@@ -29,12 +29,16 @@ MonoBehaviour:
     unitName: Squid
     maxHp: 1
     InitPos: {x: 0, y: 0, z: 0}
+  combatProfile:
+    CanDirectCombat: 0
+    EngagementRange: 0
+    RecastTime: 0
   attackProfile:
     power: 35
     energy: 4
     delay: 2
     style: 1
-    range:
+    gridRange:
       min: 0
       max: 1
   projectileProfile:

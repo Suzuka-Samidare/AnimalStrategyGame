@@ -309,10 +309,21 @@ public class CombatPerformanceDirector : MonoBehaviour
         await droneLinearMover.MoveToAsync(leaveDronePath.start, leaveDronePath.end);
         _projectileManager.DespawnProjectile(drone);
 
-        // 一時的な位置リセット動作
+        // カメラを交戦マップの中心に移動
+        await CameraMovement.Instance.MoveToAsync(commands[0].TargetTile.Stats.GlobalPos + Vector3.up);
+    }
+
+    public async UniTask ResetUnitPosition(List<TimelineCommand> commands)
+    {
+        // 攻撃側ユニットのリセット
         foreach (var command in commands)
         {
-            command.AttackerUnit.transform.position = command.AttackerTile.Stats.GlobalPos + command.AttackerUnit.Stats.profile.InitPos;
+            command.AttackerTile.ResetUnitPosition();
+        }
+        // 防衛側ユニットのリセット
+        foreach (var tile in commands[0].AffectedTiles)
+        {
+            if (tile.IsExistUnit) tile.ResetUnitPosition();
         }
     }
 

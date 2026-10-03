@@ -690,6 +690,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _combatPerformanceDirector: {fileID: 1709443362}
+  _directCombatManager: {fileID: 748922067}
+  _isSuccess: 0
+  _detailCount: 0
+  _fatalIndex: 0
 --- !u!4 &66366370
 Transform:
   m_ObjectHideFlags: 0
@@ -4702,6 +4706,55 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 742700944}
   m_CullTransparentMesh: 1
+--- !u!1 &748922065
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 748922066}
+  - component: {fileID: 748922067}
+  m_Layer: 0
+  m_Name: DirectCombatManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &748922066
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 748922065}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1556905234}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &748922067
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 748922065}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72b1e0943aa7b384b969c1484e9797e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _timeLimit: 30
+  _maxAttackerCapacity: 3
+  _maxDefencerCapacity: 24
+  _hasFaintedUnits: 0
+  _infomationController: {fileID: 1437298010}
 --- !u!1 &791128554
 GameObject:
   m_ObjectHideFlags: 0
@@ -5360,6 +5413,11 @@ MonoBehaviour:
     MaxSize: 10
   - Type: 0
     Prefab: {fileID: -1463504445097435376, guid: f62d4831da787274cba79bba3a15b301,
+      type: 3}
+    DefaultCapacity: 5
+    MaxSize: 10
+  - Type: 2
+    Prefab: {fileID: 3920446382365587756, guid: 84b7c8441f160174fa5c6f94cf397f0a,
       type: 3}
     DefaultCapacity: 5
     MaxSize: 10
@@ -7960,6 +8018,7 @@ MonoBehaviour:
   _hqData: {fileID: 11400000, guid: 85b9680584d3ef14181b1e10f8fead8f, type: 2}
   _herringData: {fileID: 11400000, guid: cb96ac56a39962f4fb28a3d403690125, type: 2}
   _squidData: {fileID: 11400000, guid: f7cf31ab1e9fcb244a6a90eac4e4f3a3, type: 2}
+  _colobusData: {fileID: 11400000, guid: b38d86599b778714cb805ff2e1c62e5b, type: 2}
 --- !u!4 &1180778353
 Transform:
   m_ObjectHideFlags: 0
@@ -10130,9 +10189,9 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1437298008}
   m_Enabled: 1
-  m_Alpha: 0
-  m_Interactable: 0
-  m_BlocksRaycasts: 0
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 1
 --- !u!1 &1438209485
 GameObject:
@@ -11053,6 +11112,7 @@ Transform:
   - {fileID: 1525800336}
   - {fileID: 1216893514}
   - {fileID: 565098208}
+  - {fileID: 748922066}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1580047836
@@ -12675,6 +12735,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _groundHeight: 0.5
   _peakHeight: 3
+  _dronePeakHeight: 2
 --- !u!1 &1765001348
 GameObject:
   m_ObjectHideFlags: 0

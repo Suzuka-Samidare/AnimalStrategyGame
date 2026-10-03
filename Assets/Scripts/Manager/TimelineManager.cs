@@ -149,8 +149,8 @@ public class TimelineManager : MonoBehaviour, IInitializable
             {
                 cmd.IsActionCompleted = true;
             }
-            // 実行済コマンドをタイムライン上から除外
-            RemoveSharedTimelineCommand(cmd => cmd.IsActionCompleted);
+            // 実行済コマンド及び、戦闘により有効性を失ったコマンドをタイムライン上から除外
+            RemoveSharedTimelineCommand(cmd => cmd.IsActionCompleted || cmd.AttackerUnit.Stats.IsFaint);
             // マップデータ処理完了待ち
             await UniTask.WaitUntil(() => _mapManager.isDirty == false);
             // 双方どちらかの本部ユニット数が0の場合は、ゲームオーバー状態であることを伝達する
@@ -388,7 +388,7 @@ public class TimelineManager : MonoBehaviour, IInitializable
     /// <summary>
     /// 共有タイムラインのコマンドを除外する
     /// </summary>
-    private void RemoveSharedTimelineCommand(Predicate<TimelineCommand> match)
+    public void RemoveSharedTimelineCommand(Predicate<TimelineCommand> match)
     {
         if (match == null) throw new ArgumentNullException(nameof(match), "削除条件 (match) が指定されていません。");
         // 条件に該当するコマンドをキューから除外

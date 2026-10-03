@@ -3,7 +3,7 @@ using UnityEngine;
 public abstract class AttackerStatsBase : UnitStatsBase
 {
     [Tooltip("攻撃ステータス")] public AttackProfile attackProfile;
-    [Tooltip("基本ステータス")] public ProjectileProfile projectileProfile;
+    [Tooltip("発射物ステータス")] public ProjectileProfile projectileProfile;
     [SerializeField, Tooltip("攻撃予約済みフラグ")]
     private bool _isAttackScheduled;
     public bool IsAttackScheduled

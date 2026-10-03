@@ -1,4 +1,7 @@
 // ジェネリクスを持たない、ただの抽象クラスを作る
+using UnityEngine;
+using System.Collections.Generic;
+
 public abstract class AttackerUnitBase : UnitBase
 {
     // アタッカー共通のステータスとコントローラーの窓口を用意
@@ -16,6 +19,7 @@ public abstract class AttackerUnitBase : UnitBase
     {
         if (!Stats.IsAttackScheduled) return;
         Stats.IsAttackScheduled = false;
+        Animation.Play(AnimationName.IdleA);
     }
 }
 

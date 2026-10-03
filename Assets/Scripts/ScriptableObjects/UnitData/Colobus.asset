@@ -29,12 +29,16 @@ MonoBehaviour:
     unitName: Colobus
     maxHp: 1
     InitPos: {x: 0, y: 0, z: 0}
+  combatProfile:
+    CanDirectCombat: 1
+    EngagementRange: 1.5
+    RecastTime: 1.5
   attackProfile:
     power: 8
     energy: 20
     delay: 10
     style: 1
-    range:
+    gridRange:
       min: 0
       max: 2
   projectileProfile:

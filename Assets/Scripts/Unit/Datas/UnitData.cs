@@ -26,7 +26,7 @@ public enum AttackType
 }
 
 [Serializable]
-public struct AttackRange
+public struct GridRange
 {
     public int min;
     public int max;
@@ -40,6 +40,14 @@ public struct UnitProfile
     [Tooltip("ユニット名")] public string unitName;
     [Tooltip("最大耐久値")] public float maxHp;
     [Tooltip("本体オブジェクトの位置設定")] public Vector3 InitPos;
+}
+
+[Serializable]
+public struct CombatProfile
+{
+    [Tooltip("直接交戦が可能なユニットか")] public bool CanDirectCombat;
+    [Tooltip("有効交戦距離")] public float EngagementRange;
+    [Tooltip("リキャスト時間（second）")] public float RecastTime;
 }
 
 
@@ -58,6 +66,7 @@ public class UnitData : ScriptableObject
     [Header("ステータス関連")]
     [Tooltip("基本ステータス")] public UnitProfile profile;
     [Tooltip("呼出中ステータス")] public UnitProfile callingProfile;
+    [Tooltip("直接交戦ステータス")] public CombatProfile combatProfile;
 
     protected virtual void Reset()
     {

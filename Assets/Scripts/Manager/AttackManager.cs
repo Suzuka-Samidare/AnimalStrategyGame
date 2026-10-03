@@ -61,6 +61,7 @@ public class AttackManager : MonoBehaviour
     [SerializeField] private CombatPerformanceDirector _combatPerformanceDirector;
     private MapManager _mapManager;
     private ParticleManager _particleManager;
+    [SerializeField] private DirectCombatManager _directCombatManager;
 
     [Header("Debug")]
     [SerializeField] private bool _isSuccess;
@@ -133,7 +134,7 @@ public class AttackManager : MonoBehaviour
                 else
                 {
                     // 内部的なダメージの反映（見た目に反映されないAPI通信に近い更新）
-                    ApplyDamage(firstCommand);
+                    ApplyAreaDamage(firstCommand);
                     // インク攻撃が着弾する演出
                     await _combatPerformanceDirector.AttackInkSuccess(firstCommand);
                     // TODO: AttackHitEffectsをAttackInkSuccessに統合する
@@ -152,34 +153,35 @@ public class AttackManager : MonoBehaviour
                 }
                 else
                 {
+                    foreach (var tile in commands[0].AffectedTiles)
+                    {  
+                        if (tile.IsExistUnit) tile.Unit.SetVisible(true);
+                    }
                     // ユニットの移動演出
                     await _combatPerformanceDirector.AirdropColobus(commands, arrivalTiles);
-                    // var sallyTasks = new UniTask[commands.Count];
-                    // for (int i = 0; i < commands.Count; i++)
-                    // {   
-                    //     sallyTasks[i] = _combatPerformanceDirector.AirdropColobus(commands[i], i == 0);
-                    // }
-                    // await UniTask.WhenAll(sallyTasks);
+                    await _directCombatManager.StartCombatAsync(commands);
+                    await _combatPerformanceDirector.ResetUnitPosition(commands);
                 }
                 break;
         }
-        // // タイムラインのコマンド有効性チェック
-        // CheckSharedTimelineCommandValidity();
-        // // 攻撃予約済みフラグを解除する
-        // command.AttackerUnit.DisableAttackSchedule();
+        // 攻撃予約済みフラグを解除する
+        foreach (var cmd in commands)
+        {
+            cmd.AttackerUnit.DisableAttackSchedule();
+        }
     }
 
     /// <summary>
     /// 影響タイル（ユニット）へのダメージ反映
     /// </summary>
-    public void ApplyDamage(TimelineCommand command)
+    public void ApplyAreaDamage(TimelineCommand command)
     {
         foreach (Tile tile in command.AffectedTiles)
         {
             if (tile.IsExistUnit)
             {
-                tile.Unit.Stats.ApplyDamageAsync(command.Damage, tile);
-                // UniTask damageTask = tile.UnitBase.Controller.ApplyDamageAsync(command.Damage, tile);
+                tile.Unit.Stats.ApplyDamage(command.Damage);
+                // UniTask damageTask = tile.UnitBase.Controller.ApplyDamage(command.Damage, tile);
                 // // あとで一括待機するためにリストに入れておく
                 // applyTask.Add(damageTask);
             }
@@ -280,7 +282,7 @@ public class AttackManager : MonoBehaviour
         else
         {
             // 内部的なダメージの反映（見た目に反映されないAPI通信に近い更新）
-            ApplyDamage(command);
+            ApplyAreaDamage(command);
             // インク攻撃が着弾する演出
             await _combatPerformanceDirector.AttackInkSuccess(command);
             // TODO: AttackHitEffectsをAttackInkSuccessに統合する
@@ -412,7 +414,7 @@ public class AttackManager : MonoBehaviour
         {
             // 気絶している場合は、アニメーション
             if (tile.Unit != null && tile.Unit.Stats.IsFaint) {
-                UniTask faint = tile.Unit.OnFaint(tile);
+                UniTask faint = tile.OnFaintUnit();
                 animationTasks.Add(faint);
             }
         }
