@@ -19,7 +19,10 @@ public abstract class AttackerUnitBase : UnitBase
     {
         if (!Stats.IsAttackScheduled) return;
         Stats.IsAttackScheduled = false;
-        Animation.Play(AnimationName.IdleA);
+        if (gameObject.activeSelf)
+        {
+            Animation.Play(AnimationName.IdleA);
+        }
     }
 }
 
