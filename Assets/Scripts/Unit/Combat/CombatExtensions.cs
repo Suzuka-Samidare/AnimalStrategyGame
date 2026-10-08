@@ -47,6 +47,7 @@ public static class CombatExtensions
             {
                 await myTile.OnFaintUnit();
             }
+            throw;
         }
     }
 
