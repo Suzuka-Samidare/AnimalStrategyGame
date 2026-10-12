@@ -3,6 +3,9 @@ using UnityEngine;
 
 public abstract class UnitAnimationBase : MonoBehaviour
 {
+    [Header("アニメーション設定")]
+    [SerializeField] private AnimationName defaultStateName = AnimationName.IdleA;
+
     protected bool isAnimating = false;
     protected bool isPause = false;
 
@@ -11,6 +14,12 @@ public abstract class UnitAnimationBase : MonoBehaviour
     protected virtual void Awake()
     {
         _animator = GetComponent<Animator>();
+    }
+
+    private void OnEnable()
+    {
+        if (_animator == null) return;
+        Play(defaultStateName);
     }
 
     public virtual void Play(AnimationName stateName)

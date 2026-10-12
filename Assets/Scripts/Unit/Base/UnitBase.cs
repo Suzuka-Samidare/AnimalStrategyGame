@@ -43,16 +43,24 @@ public abstract class UnitBase : MonoBehaviour
     }
 
     /// <summary>
-    /// 気絶処理（Destroy）
+    /// 直接交戦状態の更新
     /// </summary>
-    public async UniTask OnFaint(Tile tile)
+    public void SetEngage(bool value)
     {
-        // もし気絶アニメーションがあれば、再生する
-        if (Animation)
-        {
-            await Animation.PlayOnceAsync(AnimationName.Death);
-        }
-        // デスポーン処理
-        UnitSpawnManager.Instance.DespawnUnit(tile);
+        Stats.IsEngaged = value;
     }
+
+    // /// <summary>
+    // /// 気絶処理（Destroy）
+    // /// </summary>
+    // public async UniTask OnFaint(Tile tile)
+    // {
+    //     // もし気絶アニメーションがあれば、再生する
+    //     if (Animation)
+    //     {
+    //         await Animation.PlayOnceAsync(AnimationName.Death);
+    //     }
+    //     // デスポーン処理
+    //     UnitSpawnManager.Instance.DespawnUnit(tile);
+    // }
 }

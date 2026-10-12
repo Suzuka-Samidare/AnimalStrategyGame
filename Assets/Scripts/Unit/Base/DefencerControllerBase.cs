@@ -6,6 +6,23 @@ public abstract class DefencerControllerBase : UnitControllerBase
     protected DefencerStatsBase defencerStats => stats as DefencerStatsBase;
     protected DefenceProfile defenceProfile => defencerStats.defenceProfile;
 
+    // ICombatable用
+    // private Timer _recastTimer = new Timer();
+    // private LinearMover _linearMover;
+
+    // public UnitAnimationBase UnitAnimation => unitAnimation;
+    // public UnitStatsBase Stats => defencerStats;
+    // public LinearMover LinearMover => _linearMover;
+    // public Timer RecastTimer => _recastTimer;
+    // public bool IsAttackReady { get; set; } = true;
+    // public bool IsAttacking { get; set; } = false;
+
+    // private void Awake()
+    // {
+    //     Action onAttackReady = () => IsAttackReady = true;
+    //     _recastTimer.OnTimerComplete += onAttackReady;
+    // }
+
     /// <summary>
     /// 防衛座標リストの取得
     /// </summary>

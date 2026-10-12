@@ -5,20 +5,25 @@ using UnityEngine;
 public class UnitRemove : MonoBehaviour, IButtonAction
 {
     [Header("Refs")]
+    private GameManager _gameManager;
     private TileManager _tileManager;
     private UnitSpawnManager _unitSpawnManager;
+    private TimelineManager _timelineManager;
 
     private void Start()
     {
+        _gameManager = GameManager.Instance;
         _tileManager = TileManager.Instance;
         _unitSpawnManager = UnitSpawnManager.Instance;
+        _timelineManager = TimelineManager.Instance;
     }
 
     public void Execute() {
         try
         {
-            GameManager.Instance.IsLoading = true;
+            _gameManager.IsLoading = true;
             _unitSpawnManager.DespawnUnit(_tileManager.selectedTile);
+            _timelineManager.CheckPlayerTimelineCommandValidity();
         }
         catch (Exception ex)
         {
@@ -28,7 +33,7 @@ public class UnitRemove : MonoBehaviour, IButtonAction
         }
         finally
         {
-            GameManager.Instance.IsLoading = false;
+            _gameManager.IsLoading = false;
             // Debug.Log("タイル更新処理終了（後片付け完了）");
         }
     }

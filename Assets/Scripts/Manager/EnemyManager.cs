@@ -13,6 +13,8 @@ public class EnemyManager : MonoBehaviour, IInitializable
     private UnitData _herringData;
     [SerializeField, Tooltip("Squidデータ")]
     private UnitData _squidData;
+    [SerializeField, Tooltip("Colobusデータ")]
+    private UnitData _colobusData;
 
     [Header("Refs")]
     private UnitSpawnManager _unitSpawnManager;
@@ -43,9 +45,10 @@ public class EnemyManager : MonoBehaviour, IInitializable
     {
         ResolveDependencies();
 
-        // _unitSpawnManager.SpawnUnit(_mapManager.enemyMapData[3, 9], _herringData);
-        // _unitSpawnManager.SpawnUnit(_mapManager.enemyMapData[5, 4], _herringData);
+        _unitSpawnManager.SpawnUnit(_mapManager.enemyMapData[3, 9], _herringData);
+        _unitSpawnManager.SpawnUnit(_mapManager.enemyMapData[5, 4], _herringData);
         _unitSpawnManager.SpawnUnit(_mapManager.enemyMapData[0, 0], _squidData);
+        _unitSpawnManager.SpawnUnit(_mapManager.enemyMapData[0, 1], _colobusData);
 
         SpawnUnitRandomTiles(_hqData, _mapManager.maxHqCount);
         // SpawnUnitRandomTiles(_herringData, 30);

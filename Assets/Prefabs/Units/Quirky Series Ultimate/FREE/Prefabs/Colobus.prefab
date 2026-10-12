@@ -589,6 +589,8 @@ GameObject:
   - component: {fileID: 65130967785910284}
   - component: {fileID: 8787207891495739471}
   - component: {fileID: 8638573436027338725}
+  - component: {fileID: -6823951831937677686}
+  - component: {fileID: 5801017977965970693}
   m_Layer: 0
   m_Name: Colobus
   m_TagString: Unit
@@ -709,6 +711,7 @@ MonoBehaviour:
     range:
       min: 0
       max: 5
+  _isAttackScheduled: 0
 --- !u!114 &8787207891495739471
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -733,6 +736,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 338d742c4b0810c47994d7baeebe82c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &-6823951831937677686
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6182162820492919152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 714e6e9252657cc40bf1bd1be412b6f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _speed: 7
+--- !u!114 &5801017977965970693
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6182162820492919152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89efe9c735cbfd742bf1d099a7445bbf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _target: {fileID: 0}
+  _offset: {x: 0, y: -1, z: 0}
+  _smoothTime: 0.05
 --- !u!1 &7853299950699460719
 GameObject:
   m_ObjectHideFlags: 0

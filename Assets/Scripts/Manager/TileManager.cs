@@ -37,7 +37,7 @@ public class TileManager : MonoBehaviour, IInitializable
             EnemyMapLastViewedPosition = new Vector3(_targetTile.Stats.GlobalPos.x, 1f, _targetTile.Stats.GlobalPos.z);
         }
     }
-    [SerializeField, Tooltip("ターゲット指定中タイル")]
+    [SerializeField, Tooltip("ターゲット範囲表示タイル")]
     public List<Tile> targetTiles { get; private set; } = new List<Tile>();
     [SerializeField, Tooltip("最後にチェックした場所")]
     private Vector3 _enemyMapLastViewedPosition;
@@ -101,7 +101,7 @@ public class TileManager : MonoBehaviour, IInitializable
     /// <summary>
     /// 指定座標のタイルを中心に、自軍ユニット攻撃範囲を照らし合わせてターゲットタイルとして一括登録する
     /// </summary>
-    public void RegisterTargetTiles(Vector2Int targetPos)
+    public void SetTargetTiles(Vector2Int targetPos)
     {
         if (selectedTile == null ||
             selectedTile.Unit is not AttackerUnitBase attackerUnit)
@@ -202,5 +202,34 @@ public class TileManager : MonoBehaviour, IInitializable
         }
 
         UnitSpawnManager.Instance.DespawnUnit(selectedTile);
+    }
+
+    /// <summary>
+    /// リストから指定数のランダムなタイルを抽出する
+    /// </summary>
+    public Tile[] GetRandomEnptyTiles(List<Tile> sourceTiles, int count)
+    {
+        if (sourceTiles == null || sourceTiles.Count == 0 || count <= 0) return Array.Empty<Tile>();
+
+        // 抽出数が元のリスト数より多い場合は全員取得
+        int extractCount = Mathf.Min(count, sourceTiles.Count);
+        Tile[] resultTiles = new Tile[extractCount];
+
+        // 元のリストを崩さないよう、インデックスの参照用配列（またはコピー）でスワップ操作を行う
+        List<Tile> tempTiles = new List<Tile>(sourceTiles);
+
+        for (int i = 0; i < extractCount; i++)
+        {
+            int randomIndex = UnityEngine.Random.Range(i, tempTiles.Count);
+
+            // 要素のスワップ
+            Tile temp = tempTiles[i];
+            tempTiles[i] = tempTiles[randomIndex];
+            tempTiles[randomIndex] = temp;
+
+            resultTiles[i] = tempTiles[i];
+        }
+
+        return resultTiles;
     }
 }

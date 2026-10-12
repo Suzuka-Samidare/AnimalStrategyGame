@@ -14,10 +14,22 @@ public class Tile : MonoBehaviour
     [Header("ユニット関連")]
     [SerializeField, Tooltip("現在配置されているユニット")]
     private UnitBase _unit;
-    public UnitBase Unit => _unit;
-    [Tooltip("ユニットの有無")]
+    public UnitBase Unit
+    {
+        get => _unit;
+        set
+        {
+            if (_unit == value) return;
+            _unit = value;
+
+            _isExistUnit = _unit != null;
+        }
+    }
+    // public UnitBase Unit => _unit;
+    // [Tooltip("ユニットの有無")]
+    [SerializeField]
+    private bool _isExistUnit;
     public bool IsExistUnit => Unit != null;
-    // public bool IsExistUnit => unitObject != null;
 
     private void Awake()
     {
@@ -29,10 +41,39 @@ public class Tile : MonoBehaviour
     public void SetOwner(Owner owner) => Stats.owner = owner;
     public void SetTargeted(bool isTargeted) => Stats.isTargeted = isTargeted;
     public void SetSelected(bool isSelected) => Stats.isSelected = isSelected;
-    public void SetUnit(UnitBase unit) => _unit = unit;
-    public void ClearUnit() => _unit = null;
+    public void SetUnit(UnitBase unit) => Unit = unit;
+    public void ClearUnit() => Unit = null;
 
-    
+    /// <summary>
+    /// タイル上ユニットの位置リセット
+    /// </summary>
+    public void ResetUnitPosition()
+    {
+        if (Unit is null) return;
+
+        Vector3 position = transform.position + Unit.Stats.profile.InitPos;
+        Quaternion rotation = Stats.owner == Owner.Player ? Quaternion.identity : Quaternion.Euler(0f, 180f, 0f);
+        Unit.transform.SetPositionAndRotation(position, rotation);
+    }
+
+    /// <summary>
+    /// タイル上ユニットの気絶処理（Destroy）
+    /// </summary>
+    public async UniTask OnFaintUnit()
+    {
+        // ガード区
+        if (Unit is null || !Unit.Stats.IsFaint) return;
+
+        // もし気絶アニメーションがあれば、再生する
+        if (Unit.Animation)
+        {
+            await Unit.Animation.PlayOnceAsync(AnimationName.Death);
+        }
+        // デスポーン処理
+        UnitSpawnManager.Instance.DespawnUnit(this);
+    }
+
+
 
     // ====後で除外する===================================================
     // [Tooltip("ユニットオブジェクト"), SerializeField]
