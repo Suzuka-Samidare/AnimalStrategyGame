@@ -1,7 +1,30 @@
+using System;
 using UnityEngine;
 
-public class ColobusController : AttackerControllerBase
+public class ColobusController : AttackerControllerBase, ICombatable
 {
+    [SerializeField] private Timer _recastTimer = new Timer();
+    [SerializeField] private LinearMover _linearMover;
+
+    // ICombatable用
+    public UnitAnimationBase UnitAnimation => unitAnimation;
+    public UnitStatsBase Stats => attackerStats;
+    public LinearMover LinearMover => _linearMover;
+    public Timer RecastTimer => _recastTimer;
+    public bool IsAttackReady { get; set; } = true;
+    public bool IsAttacking { get; set; } = false;
+
+    private void Awake()
+    {
+        Action onAttackReady = () => IsAttackReady = true;
+        _recastTimer.OnTimerComplete += onAttackReady;
+    }
+
+    private void Start()
+    {
+        _linearMover = GetComponent<LinearMover>();
+    }
+
     // private float _attackDistance => attackProfile.attackDistance;
     // private LinearMover _linearMover;
 

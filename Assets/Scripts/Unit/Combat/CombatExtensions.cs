@@ -1,6 +1,6 @@
-using System;
+// using System;
 using System.Collections.Generic;
-using System.Threading;
+// using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -21,40 +21,40 @@ public interface ICombatable
 
 public static class CombatExtensions
 {
-    /// <summary>
-    /// 交戦処理の開始｛条件：トークンがキャンセルされるまで）
-    /// </summary>
-    public static async UniTask RunCombatLoopAsync(this ICombatable self, Tile myTile, List<Tile> enemyUnitTiles, CancellationToken ct)
-    {
-        try
-        {
-            while (!ct.IsCancellationRequested)
-            {
-                if (self.Stats != null && self.Stats.IsFaint)
-                {
-                    Debug.Log($"[{self.Stats.name}] 気絶したため個別の交戦ループを終了します。");
-                    await myTile.OnFaintUnit();
-                    return;
-                }
-                await self.ExecuteCombatAsync(enemyUnitTiles);
-                await UniTask.Yield(PlayerLoopTiming.Update, ct);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // CancellationTokenによるループ中断で処理できなかった気絶処理を必要に応じて実行
-            if (self.Stats != null && self.Stats.IsFaint)
-            {
-                await myTile.OnFaintUnit();
-            }
-            throw;
-        }
-    }
+    // /// <summary>
+    // /// 交戦処理の開始｛条件：トークンがキャンセルされるまで）
+    // /// </summary>
+    // public static async UniTask RunCombatLoopAsync(this ICombatable self, Tile myTile, List<Tile> enemyUnitTiles, CancellationToken ct)
+    // {
+    //     try
+    //     {
+    //         while (!ct.IsCancellationRequested)
+    //         {
+    //             if (self.Stats != null && self.Stats.IsFaint)
+    //             {
+    //                 Debug.Log($"[{self.Stats.name}] 気絶したため個別の交戦ループを終了します。");
+    //                 await myTile.OnFaintUnit();
+    //                 return;
+    //             }
+    //             await self.ExecuteCombatAsync(enemyUnitTiles);
+    //             await UniTask.Yield(PlayerLoopTiming.Update, ct);
+    //         }
+    //     }
+    //     catch (OperationCanceledException)
+    //     {
+    //         // CancellationTokenによるループ中断で処理できなかった気絶処理を必要に応じて実行
+    //         if (self.Stats != null && self.Stats.IsFaint)
+    //         {
+    //             await myTile.OnFaintUnit();
+    //         }
+    //         throw;
+    //     }
+    // }
 
     /// <summary>
-    /// 直接交戦処理の実行（CanDirectCombatが有効なユニットのみ）
+    /// 直接交戦処理の実行（直接交戦において攻撃が有効なユニットのみ）
     /// </summary>
-    private static async UniTask ExecuteCombatAsync(this ICombatable self, List<Tile> enemyUnitTiles)
+    public static async UniTask ExecuteCombatAsync(this ICombatable self, List<Tile> enemyUnitTiles)
     { 
         if (!self.Stats.combatProfile.CanDirectCombat) return;
         // {
@@ -98,7 +98,7 @@ public static class CombatExtensions
         }
         else
         {
-            if (isEnemyInFront || !isFacingNearestEnemy || self.Stats is DefencerStatsBase _) return;
+            if (isEnemyInFront || !isFacingNearestEnemy || !self.Stats.combatProfile.CanMove) return;
             self.LinearMover.MoveInDirection(offset);
         }
     }
@@ -114,15 +114,10 @@ public static class CombatExtensions
     }
 
     /// <summary>
-    /// リストから一番近い敵ユニットを取得する（CanDirectCombatが有効なユニットのみ）
+    /// リストから一番近い敵ユニットを取得する
     /// </summary>
     private static UnitBase GetNearestEnemyUnit(this ICombatable self, List<Tile> enemyUnitTiles)
-    {
-        if (!self.Stats.combatProfile.CanDirectCombat)
-        {
-            throw new InvalidOperationException($"[ExecuteCombat] {self.Stats.name} is not allowed to engage in direct combat.");
-        }
-        
+    {   
         UnitBase nearestUnit = null;
         float minSqrDistance = float.MaxValue;
         // リストにあるユニットとの距離を計算
@@ -140,34 +135,15 @@ public static class CombatExtensions
                 nearestUnit = tile.Unit;
             }
         }
-        // for (int i = 0; i < enemyUnitTiles.Count; i++)
-        // {
-        //     UnitBase enemyUnit = enemyUnitTiles[i].Unit;
-        //     // 既に気絶しているユニットだった場合は次の処理へ
-        //     if (enemyUnit.Stats.IsFaint) continue;
-        //     // ベクトルの差分から 2乗距離 を計算（平方根計算を排除して高速化）
-        //     Vector3 offset = enemyUnit.transform.position - self.transform.position;
-        //     float sqrDistance = offset.sqrMagnitude;
-        //     // 最小距離の更新
-        //     if (sqrDistance < minSqrDistance)
-        //     {
-        //         minSqrDistance = sqrDistance;
-        //         nearestUnit = enemyUnit;
-        //     }
-        // }
+
         return nearestUnit;
     }
 
     /// <summary>
-    /// 距離を監視して攻撃条件を満たしているか判定するメソッド（CanDirectCombatが有効なユニットのみ）
+    /// 距離を監視して攻撃条件を満たしているか判定するメソッド
     /// </summary>
     private static bool IsTargetInCombatRange(this ICombatable self, Vector3 targetPosition, out bool isEnemyInFront)
     {
-        if (!self.Stats.combatProfile.CanDirectCombat)
-        {
-            throw new InvalidOperationException($"[ExecuteCombat] {self.Stats.name} is not allowed to engage in direct combat.");
-        }
-
         Vector3 myGlobalPosition = self.transform.position;
         float engagementRange = self.Stats.combatProfile.EngagementRange;
         float sqrEngagementRange = engagementRange * engagementRange;

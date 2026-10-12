@@ -4753,7 +4753,8 @@ MonoBehaviour:
   _timeLimit: 30
   _maxAttackerCapacity: 3
   _maxDefencerCapacity: 24
-  _hasFaintedUnits: 0
+  attackerUnitTiles: []
+  defenderUnitTiles: []
   _infomationController: {fileID: 1437298010}
 --- !u!1 &791128554
 GameObject:
@@ -12549,7 +12550,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1691179298
 RectTransform:
   m_ObjectHideFlags: 0
@@ -12676,7 +12677,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4769bf1cbfb97d4790512f21b2293ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _unitData: {fileID: 0}
+  _unitData: {fileID: 11400000, guid: 8c6816015ae3b5446b23f527cd2400d1, type: 2}
 --- !u!114 &1691179305
 MonoBehaviour:
   m_ObjectHideFlags: 0

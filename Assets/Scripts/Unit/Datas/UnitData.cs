@@ -45,7 +45,8 @@ public struct UnitProfile
 [Serializable]
 public struct CombatProfile
 {
-    [Tooltip("直接交戦が可能なユニットか")] public bool CanDirectCombat;
+    [Tooltip("直接交戦が可能")] public bool CanDirectCombat;
+    [Tooltip("直接交戦中に移動が可能")] public bool CanMove;
     [Tooltip("有効交戦距離")] public float EngagementRange;
     [Tooltip("リキャスト時間（second）")] public float RecastTime;
 }

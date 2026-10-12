@@ -31,6 +31,7 @@ MonoBehaviour:
     InitPos: {x: 0, y: 0, z: 0}
   combatProfile:
     CanDirectCombat: 1
+    CanMove: 1
     EngagementRange: 1.5
     RecastTime: 1.5
   attackProfile:

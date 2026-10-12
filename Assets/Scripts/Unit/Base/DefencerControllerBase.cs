@@ -1,28 +1,27 @@
-using System;
 using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-public abstract class DefencerControllerBase : UnitControllerBase, ICombatable
+public abstract class DefencerControllerBase : UnitControllerBase
 {
     protected DefencerStatsBase defencerStats => stats as DefencerStatsBase;
     protected DefenceProfile defenceProfile => defencerStats.defenceProfile;
-    private Timer _recastTimer = new Timer();
-    private LinearMover _linearMover;
 
     // ICombatable用
-    public UnitAnimationBase UnitAnimation => unitAnimation;
-    public UnitStatsBase Stats => defencerStats;
-    public LinearMover LinearMover => _linearMover;
-    public Timer RecastTimer => _recastTimer;
-    public bool IsAttackReady { get; set; } = true;
-    public bool IsAttacking { get; set; } = false;
+    // private Timer _recastTimer = new Timer();
+    // private LinearMover _linearMover;
 
-    private void Awake()
-    {
-        Action onAttackReady = () => IsAttackReady = true;
-        _recastTimer.OnTimerComplete += onAttackReady;
-    }
+    // public UnitAnimationBase UnitAnimation => unitAnimation;
+    // public UnitStatsBase Stats => defencerStats;
+    // public LinearMover LinearMover => _linearMover;
+    // public Timer RecastTimer => _recastTimer;
+    // public bool IsAttackReady { get; set; } = true;
+    // public bool IsAttacking { get; set; } = false;
+
+    // private void Awake()
+    // {
+    //     Action onAttackReady = () => IsAttackReady = true;
+    //     _recastTimer.OnTimerComplete += onAttackReady;
+    // }
 
     /// <summary>
     /// 防衛座標リストの取得

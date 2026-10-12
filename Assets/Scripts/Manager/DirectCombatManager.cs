@@ -54,20 +54,28 @@ public class DirectCombatManager : MonoBehaviour
         // 交戦タスクリスト
         var combatTasks = new List<UniTask>();
 
-        // 双方の交戦可能ユニットのループ処理を実行
+        // 双方のループ処理を実行
         foreach (var tile in attackerUnitTiles)
         {
-            if (tile.IsExistUnit && tile.Unit.Controller is ICombatable combatableUnit)
+            if (tile.IsExistUnit)
             {
-                combatTasks.Add(combatableUnit.RunCombatLoopAsync(tile, defenderUnitTiles, combatToken));
+                combatTasks.Add(tile.Unit.Controller.RunDirectCombatLoopAsync(tile, defenderUnitTiles, combatToken));
             }
+            // if (tile.IsExistUnit && tile.Unit.Controller is ICombatable combatableUnit)
+            // {
+            //     combatTasks.Add(combatableUnit.RunCombatLoopAsync(tile, defenderUnitTiles, combatToken));
+            // }
         }
         foreach (var tile in defenderUnitTiles)
         {
-            if (tile.IsExistUnit && tile.Unit.Controller is ICombatable combatableUnit)
+            if (tile.IsExistUnit)
             {
-                combatTasks.Add(combatableUnit.RunCombatLoopAsync(tile, attackerUnitTiles, combatToken));
+                combatTasks.Add(tile.Unit.Controller.RunDirectCombatLoopAsync(tile, attackerUnitTiles, combatToken));
             }
+            // if (tile.IsExistUnit && tile.Unit.Controller is ICombatable combatableUnit)
+            // {
+            //     combatTasks.Add(combatableUnit.RunDirectCombatLoopAsync(tile, attackerUnitTiles, combatToken));
+            // }
         }
 
         // 全滅判定をバックグラウンドで監視するタスクを追加
