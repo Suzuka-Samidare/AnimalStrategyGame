@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b147109f747402647932bf1c9d5bb06f, type: 3}
+  m_Name: Taipan
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 4807929556901506227, guid: 5b5c678f31981e34f9122b87217da1ac, type: 3}
+  callingPrefab: {fileID: 7977106843427714197, guid: f62d4831da787274cba79bba3a15b301,
+    type: 3}
+  cost: 10
+  callTime: 3
+  profile:
+    id: 9
+    unitType: 9
+    unitName: Taipan
+    maxHp: 70
+    InitPos: {x: 0, y: 0.5, z: 0}
+  callingProfile:
+    id: 99
+    unitType: 0
+    unitName: Taipan
+    maxHp: 10
+    InitPos: {x: 0, y: 0, z: 0}
+  combatProfile:
+    CanDirectCombat: 0
+    CanMove: 1
+    EngagementRange: 2.5
+    RecastTime: 1.5
+  defenceProfile:
+    power: 8
+    style: 0
+    range:
+      min: 0
+      max: 0
+    ignoreAccuracy: 0
+    accuracy: 0
+    accuracyDecay: 0

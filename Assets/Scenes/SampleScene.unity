@@ -8578,6 +8578,11 @@ MonoBehaviour:
       type: 3}
     DefaultCapacity: 5
     MaxSize: 10
+  - Type: 9
+    Prefab: {fileID: 3264320041496274844, guid: 5b5c678f31981e34f9122b87217da1ac,
+      type: 3}
+    DefaultCapacity: 5
+    MaxSize: 10
 --- !u!1 &1225274902
 GameObject:
   m_ObjectHideFlags: 0
