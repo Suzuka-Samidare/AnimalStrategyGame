@@ -1,5 +1,1 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class TaipanAnimation : MonoBehaviour {}
+public class TaipanAnimation : UnitAnimationBase {}
