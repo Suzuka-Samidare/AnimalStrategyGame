@@ -30,12 +30,12 @@ MonoBehaviour:
     maxHp: 10
     InitPos: {x: 0, y: 0, z: 0}
   combatProfile:
-    CanDirectCombat: 0
-    CanMove: 1
+    CanDirectCombat: 1
+    CanMove: 0
     EngagementRange: 2.5
     RecastTime: 1.5
   defenceProfile:
-    power: 8
+    power: 6
     style: 0
     range:
       min: 0

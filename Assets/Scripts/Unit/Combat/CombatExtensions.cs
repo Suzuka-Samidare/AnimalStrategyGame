@@ -1,6 +1,4 @@
-// using System;
 using System.Collections.Generic;
-// using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -55,12 +53,7 @@ public static class CombatExtensions
     /// 直接交戦処理の実行（直接交戦において攻撃が有効なユニットのみ）
     /// </summary>
     public static async UniTask ExecuteCombatAsync(this ICombatable self, List<Tile> enemyUnitTiles)
-    { 
-        if (!self.Stats.combatProfile.CanDirectCombat) return;
-        // {
-        //     throw new InvalidOperationException($"[ExecuteCombat] {self.Stats.name} is not allowed to engage in direct combat.");
-        // }
-
+    {
         // リキャストタイマーを経過時間分進める
         self.RecastTimer.UpdateTick(Time.deltaTime);
 

@@ -478,11 +478,11 @@ GameObject:
   - component: {fileID: 8999338503545881367}
   - component: {fileID: 3961114142717461643}
   - component: {fileID: 3701583169001772672}
+  - component: {fileID: 3264320041496274844}
   - component: {fileID: 135409812571954448}
   - component: {fileID: 528794509692187695}
   - component: {fileID: 296492211580721942}
   - component: {fileID: 5164197969795116583}
-  - component: {fileID: 3264320041496274844}
   m_Layer: 0
   m_Name: Taipan
   m_TagString: Unit
@@ -562,6 +562,18 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &3264320041496274844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4807929556901506227}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1141c540f80dde144b090d8abff6442c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &135409812571954448
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -614,7 +626,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _visiblePos: {x: 0, y: 0, z: 0}
   _invisiblePos: {x: 0, y: 0, z: 0}
-  _linearMover: {fileID: 0}
 --- !u!114 &296492211580721942
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -640,18 +651,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _facingThresholdDot: 0.99
---- !u!114 &3264320041496274844
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4807929556901506227}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1141c540f80dde144b090d8abff6442c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &5062559287153234616
 GameObject:
   m_ObjectHideFlags: 0
