@@ -194,8 +194,8 @@ public class GameManager : MonoBehaviour, IInitializable
 
         // アナウンスパネルクローズ処理
         await _uiManager.BannerView.PlayCloseAnimationAsync();
-        // サイドバーメニューの切り替え
-        _uiManager.SwitchMenu(phase);
+        // フェーズ変更処理
+        SwitchPhase(phase);
         // 各種UIの表示
         _uiManager.Sidebar.Show();
         _uiManager.Timeline.Show();
@@ -264,8 +264,6 @@ public class GameManager : MonoBehaviour, IInitializable
         };
         Func<UniTask> closedEvents = async () =>
         {
-            // フェーズステータス更新
-            SwitchPhase(Phase.ACTION);
             if (_timelineManager.TimelineCount > 0)
             {
                 await _timelineManager.ProcessTimeline();
@@ -290,16 +288,14 @@ public class GameManager : MonoBehaviour, IInitializable
 
     private async void EnterGameOver()
     {
-        // UIの非表示
-        _uiManager.Sidebar.Hide();
-        _uiManager.SidebarWrapper.Hide();
-        _uiManager.Timeline.Hide();
-
-        Func<UniTask> openingEvents = () => UniTask.CompletedTask;
+        Func<UniTask> openingEvents = () =>
+        {
+            // サイドバーのオーバレイのみ表示
+            _uiManager.SidebarWrapper.Hide();
+            return UniTask.CompletedTask;
+        };
         Func<UniTask> closedEvents = () =>
         {
-            // フェーズステータス更新
-            SwitchPhase(Phase.GAMEOVER);
             // 画面全体のオーバーレイ表示
             _uiManager.Overlay.Show();
             _uiManager.Sidebar.Show();
