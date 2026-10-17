@@ -13265,6 +13265,7 @@ MonoBehaviour:
   BannerView: {fileID: 1669184089}
   Timeline: {fileID: 361514105}
   Overlay: {fileID: 1403509048}
+  UnitDetailPanel: {fileID: 1300630773}
   Sidebar: {fileID: 2074698645}
   SidebarWrapper: {fileID: 1519644761}
   Turn: {fileID: 503125979}
