@@ -137,7 +137,6 @@ public class GameManager : MonoBehaviour, IInitializable
                 {
                     // アクションイベントの後片付け
                     _mapManager.OnHqCountChanged -= ValidateAndShowDialog;
-                    _uiManager.Timeline.Show();
                     _uiManager.Overlay.Hide();
                     EnterPreparationPhase();
                 },
@@ -175,11 +174,16 @@ public class GameManager : MonoBehaviour, IInitializable
         // 操作制限有効化
         IsInputLocked = true;
 
+        // サイドバーの非表示
+        _uiManager.Sidebar.Hide();
+        // タイムラインの非表示
+        _uiManager.Timeline.Hide();
+        // 少し間を置く
         await UniTask.Delay(TimeSpan.FromSeconds(0.7f));
 
         // アナウンスパネルオープン処理
         _uiManager.BannerView.PlayOpenAnimationAsync(phase.ToString()).Forget();
-        // パネルなイベント処理の実行
+        // オープンイベント処理の実行
         if (openingEvents == null) throw new Exception("フェーズ処理が未登録です。");
         // イベント処理の実行完了と2秒のディレイを待つ
         UniTask eventTask = openingEvents.Invoke();
@@ -188,7 +192,13 @@ public class GameManager : MonoBehaviour, IInitializable
 
         // アナウンスパネルクローズ処理
         await _uiManager.BannerView.PlayCloseAnimationAsync();
-        // パネルなイベント処理の実行
+        // サイドバーメニューの切り替え
+        _uiManager.SwitchMenu(phase);
+        // サイドバーの表示
+        _uiManager.Sidebar.Show();
+        // タイムラインの表示
+        _uiManager.Timeline.Show();
+        // クローズイベント処理の実行
         if (closedEvents == null) throw new Exception("フェーズ処理が未登録です。");
         await closedEvents.Invoke();
 
@@ -208,10 +218,6 @@ public class GameManager : MonoBehaviour, IInitializable
         {
             // インフォメーションの表示
             _infomationController.Open(initMessage);
-            // メニューの初期化
-            _uiManager.SwitchMenu(Phase.INIT);
-            // サイドバーの表示
-            _uiManager.Sidebar.Show();
             // 準備時間終了後の処理を登録
             _phaseTimer.OnTimerComplete += EnterActionPhase;
             return UniTask.CompletedTask;
@@ -226,16 +232,14 @@ public class GameManager : MonoBehaviour, IInitializable
             // ターン数の加算とUI更新
             Turn++;
             _uiManager.UpdateTurn(Turn);
-            // ステータスのリジェネ開始
-            _playerManager.StartRegen();
             return UniTask.CompletedTask;
         };
         Func<UniTask> closedEvents = () =>
         {
-            // フェーズステータス更新
-            SwitchPhase(Phase.PREPARATION);
             // タイマー開始
             _phaseTimer.Start(_timeLimit);
+            // ステータスのリジェネ開始
+            _playerManager.StartRegen();
             // 呼出中ユニットのタイマーを再開
             SetCallUnitTimersPaused(false);
             return UniTask.CompletedTask;
