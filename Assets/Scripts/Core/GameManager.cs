@@ -42,6 +42,7 @@ public class GameManager : MonoBehaviour, IInitializable
     private DialogController _dialogController;
     private InfomationController _infomationController;
     private PlayerManager _playerManager;
+    private UnitDetailController _unitDetailController;
 
     [SerializeField]
     private List<Tile> CallingTiles;
@@ -98,6 +99,7 @@ public class GameManager : MonoBehaviour, IInitializable
         _dialogController = DialogController.Instance;
         _infomationController = InfomationController.Instance;
         _playerManager = PlayerManager.Instance;
+        _unitDetailController = UnitDetailController.Instance;
     }
 
     private void NotifyGameOver()
@@ -174,16 +176,15 @@ public class GameManager : MonoBehaviour, IInitializable
         // 操作制限有効化
         IsInputLocked = true;
 
-        // サイドバーの非表示
+        // 各種UIの非表示
         _uiManager.Sidebar.Hide();
-        // タイムラインの非表示
         _uiManager.Timeline.Hide();
+        _unitDetailController.Close();
         // 少し間を置く
         await UniTask.Delay(TimeSpan.FromSeconds(0.7f));
 
         // アナウンスパネルオープン処理
         _uiManager.BannerView.PlayOpenAnimationAsync(phase.ToString()).Forget();
-        
         // オープンイベント処理の実行
         if (openingEvents == null) throw new Exception("フェーズ処理が未登録です。");
         // イベント処理の実行完了と2秒のディレイを待つ
@@ -195,9 +196,8 @@ public class GameManager : MonoBehaviour, IInitializable
         await _uiManager.BannerView.PlayCloseAnimationAsync();
         // フェーズ変更処理
         SwitchPhase(phase);
-        // サイドバーの表示
+        // 各種UIの表示
         _uiManager.Sidebar.Show();
-        // タイムラインの表示
         _uiManager.Timeline.Show();
         // クローズイベント処理の実行
         if (closedEvents == null) throw new Exception("フェーズ処理が未登録です。");

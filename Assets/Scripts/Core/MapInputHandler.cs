@@ -15,16 +15,16 @@ public class MapInputHandler : MonoBehaviour
         _unitDetailController = UnitDetailController.Instance;
     }
 
-    private void OnEnable() => InputHandler.OnSelect += HandleSelection;
-    private void OnDisable() => InputHandler.OnSelect -= HandleSelection;
+    private void OnEnable() => InputHandler.OnSelect += ProcessRaycastDetection;
+    private void OnDisable() => InputHandler.OnSelect -= ProcessRaycastDetection;
 
-    private void HandleSelection(Vector2 screenPos)
+    private void ProcessRaycastDetection(Vector2 screenPos)
     {
         // Raycastでゲームオブジェクト接触判定
         Ray ray = Camera.main.ScreenPointToRay(screenPos);
         RaycastHit hit;
 
-        var currentPhase = _gameManager.currentPhase;
+        Phase currentPhase = _gameManager.currentPhase;
 
         // 接触したオブジェクトが無い場合、タイル選択状態を解除
         if (Physics.Raycast(ray, out hit))
@@ -47,30 +47,7 @@ public class MapInputHandler : MonoBehaviour
             if (hitObject.CompareTag("Tile"))
             {
                 Tile tile = hitObject.GetComponent<Tile>();
-
-                if (tile.Stats.owner == Owner.Player)
-                {
-                    // タイルを選択中オブジェクトとして設定
-                    _tileManager.SetSelectedTile(tile);
-                }
-                else
-                {
-                    _tileManager.SetTargetTile(tile);
-                    _tileManager.SetTargetTiles(tile.Stats.GridPos);
-                }
-
-                if (tile.Unit != null)
-                {
-                    // ユニットアニメーション
-                    if (tile.Unit.Animation) tile.Unit.Animation.PlayOnce(AnimationName.Clicked);
-                    // ユニット詳細情報の表示
-                    _unitDetailController.Open(tile.Unit.Stats);
-                }
-                else
-                {
-                    // ユニット詳細情報の非表示
-                    _unitDetailController.Close();
-                }
+                HandleTileContact(tile);
             }
 
             // Debug.Log("<color=blue>Ray判定あり & タイルではない</color>");
@@ -93,56 +70,35 @@ public class MapInputHandler : MonoBehaviour
         }
     }
 
-    // void Update()
-    // {
-    //     if (Input.GetMouseButtonUp(0) && !CameraMovement.Instance.isDragging)
-    //     {
-    //         HandleClick();
-    //     }
-    // }
+    private void HandleTileContact(Tile tile)
+    {
+        // プレイヤー側のタイルの場合
+        if (tile.Stats.owner == Owner.Player)
+        {
+            _tileManager.SetSelectedTile(tile);
 
-    // void HandleClick()
-    // {
-    //     // UI要素を選択またはフォーカスしている場合は処理を進行しない
-    //     if (EventSystem.current.IsPointerOverGameObject()) return;
+            if (tile.Unit != null)
+            {
+                _unitDetailController.Open(tile.Unit.Stats);
+                if (tile.Unit.Animation)
+                {
+                    tile.Unit.Animation.PlayOnce(AnimationName.Clicked);
+                }
+            }
+        }
+        // 敵側のタイルの場合
+        else
+        {
+            _tileManager.SetTargetTile(tile);
+            _tileManager.SetTargetTiles(tile.Stats.GridPos);
 
-    //     // Raycastでゲームオブジェクト接触判定
-    //     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-    //     RaycastHit hit;
+            if (tile.Unit != null && tile.Unit.Stats.IsVisible)
+            {
+                _unitDetailController.Open(tile.Unit.Stats);
+            }
+        }
 
-    //     // 接触したオブジェクトが無い場合、タイル選択状態を解除
-    //     if (Physics.Raycast(ray, out hit))
-    //     {
-    //         GameObject hitObject = hit.collider.gameObject;
-
-    //         // 接触対象がタイルの場合
-    //         if (hitObject.CompareTag("Tile"))
-    //         {
-    //             _tileManager.SetSelectedTile(hitObject);
-    //             UnitAnimation unitAnimation = hit.collider.GetComponentInChildren<UnitAnimation>();
-    //             if (unitAnimation) {
-    //                 unitAnimation.PlayOnce(AnimationName.Clicked);
-    //             }
-    //         }
-
-    //         // 接触対象がユニットの場合
-    //         if (hitObject.CompareTag("Unit"))
-    //         {
-    //             _tileManager.SetSelectedTile(hitObject.transform.parent.gameObject);
-    //         }
-
-    //         // 接触対象がタイルまたはユニットの場合
-    //         if (hitObject.CompareTag("Tile") || hitObject.CompareTag("Unit"))
-    //         {
-    //             _tileManager.GetSelectedTileUnitDetail();
-    //         }
-
-    //         // Debug.Log("Ray判定あり & タイルではない");
-    //     }
-    //     else
-    //     {
-    //         // Debug.Log("Ray判定なし");
-    //         _tileManager.ClearSelectedTile();
-    //     }
-    // }
+        // ユニットがいない場合は詳細情報の非表示（共通処理）
+        if (tile.Unit == null) _unitDetailController.Close();
+    }
 }
