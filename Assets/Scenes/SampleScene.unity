@@ -6567,6 +6567,7 @@ MonoBehaviour:
   _hpSlider: {fileID: 670631476}
   _hpText: {fileID: 1032361106}
   _isPendingBadge: {fileID: 1986680938}
+  _faceIcon: {fileID: 126206758}
 --- !u!114 &1008112275
 MonoBehaviour:
   m_ObjectHideFlags: 0

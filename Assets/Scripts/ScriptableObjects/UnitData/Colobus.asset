@@ -23,12 +23,14 @@ MonoBehaviour:
     unitName: Colobus
     maxHp: 40
     InitPos: {x: 0, y: 0.5, z: 0}
+    FaceIcon: {fileID: 21300000, guid: 42477abed296ebc4fa07d021283850aa, type: 3}
   callingProfile:
     id: 99
     unitType: 0
     unitName: Colobus
     maxHp: 1
     InitPos: {x: 0, y: 0, z: 0}
+    FaceIcon: {fileID: 0}
   combatProfile:
     CanDirectCombat: 1
     CanMove: 1

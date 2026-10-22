@@ -40,6 +40,7 @@ public struct UnitProfile
     [Tooltip("ユニット名")] public string unitName;
     [Tooltip("最大耐久値")] public float maxHp;
     [Tooltip("本体オブジェクトの位置設定")] public Vector3 InitPos;
+    [Tooltip("顔写真")] public Sprite FaceIcon;
 }
 
 [Serializable]
