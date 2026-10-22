@@ -33,7 +33,8 @@ public class GameManager : MonoBehaviour, IInitializable
     public bool IsGameOver;
 
     // 準備フェーズ共通メッセージ
-    private string initMessage => "Please place the remaining " + (_mapManager.maxHqCount - _mapManager.PlayerHqCount) + " headquarters units.";
+    // private string initMessage => "Please place the remaining " + (_mapManager.maxHqCount - _mapManager.PlayerHqCount) + " headquarters units.";
+    private string initMessage => "本部ユニットを残り" + (_mapManager.maxHqCount - _mapManager.PlayerHqCount) + "体配置してください。";
 
     [Header("Refs")]
     private MapManager _mapManager;
@@ -63,7 +64,7 @@ public class GameManager : MonoBehaviour, IInitializable
         if (_phaseTimer.IsRunning)
         {
             _phaseTimer.UpdateTick(Time.deltaTime);
-            _uiManager.UpdateElapsedTime(_phaseTimer.RemainingTimeStr);
+            _uiManager.UpdateRemainingTime(Mathf.FloorToInt(_phaseTimer.RemainingTime).ToString());
         }
     }
 
@@ -130,6 +131,7 @@ public class GameManager : MonoBehaviour, IInitializable
         if (playerHqCount == _mapManager.maxHqCount)
         {
             _uiManager.Overlay.Show();
+            _uiManager.BottomLayoutGroup.Hide();
             _infomationController.Close();
             _dialogController.Open(
                 isConfirm: true,
@@ -141,6 +143,7 @@ public class GameManager : MonoBehaviour, IInitializable
                     _mapManager.OnHqCountChanged -= ValidateAndShowDialog;
                     _uiManager.Overlay.Hide();
                     EnterPreparationPhase();
+                    _uiManager.BottomLayoutGroup.Show();
                 },
                 onCancel: () =>
                 {
@@ -177,8 +180,7 @@ public class GameManager : MonoBehaviour, IInitializable
         IsInputLocked = true;
 
         // 各種UIの非表示
-        _uiManager.Sidebar.Hide();
-        _uiManager.Timeline.Hide();
+        _uiManager.MainView.Hide();
         _unitDetailController.Close();
         // 少し間を置く
         await UniTask.Delay(TimeSpan.FromSeconds(0.7f));
@@ -197,8 +199,7 @@ public class GameManager : MonoBehaviour, IInitializable
         // フェーズ変更処理
         SwitchPhase(phase);
         // 各種UIの表示
-        _uiManager.Sidebar.Show();
-        _uiManager.Timeline.Show();
+        _uiManager.MainView.Show();
         // クローズイベント処理の実行
         if (closedEvents == null) throw new Exception("フェーズ処理が未登録です。");
         await closedEvents.Invoke();
@@ -290,15 +291,12 @@ public class GameManager : MonoBehaviour, IInitializable
     {
         Func<UniTask> openingEvents = () =>
         {
-            // サイドバーのオーバレイのみ表示
-            _uiManager.SidebarWrapper.Hide();
             return UniTask.CompletedTask;
         };
         Func<UniTask> closedEvents = () =>
         {
             // 画面全体のオーバーレイ表示
             _uiManager.Overlay.Show();
-            _uiManager.Sidebar.Show();
             // ダイアログ表示
             _dialogController.Open(
                 isConfirm: true,

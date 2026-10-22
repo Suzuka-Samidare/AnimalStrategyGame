@@ -9,7 +9,7 @@ public class PlayerManager : MonoBehaviour
     public static PlayerManager Instance;
 
     [Header("オブジェクト関連")]
-    public TextMeshProUGUI _fpText;
+    public TextMeshProUGUI _apText;
     public TextMeshProUGUI _energyText;
 
     [Header("アニマルポイント関連")]
@@ -110,13 +110,13 @@ public class PlayerManager : MonoBehaviour
 
     private void UpdateAnimalPointText()
     {
-        if (_fpText != null)
+        if (_apText != null)
         {
-            _fpText.text = animalPoint.ToString();
+            _apText.text = animalPoint.ToString();
         }
         else
         {
-            Debug.Log("Textパーツが参照されていません");
+            Debug.LogError("Textパーツが参照されていません");
         }
     }
 
@@ -128,7 +128,7 @@ public class PlayerManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("Textパーツが参照されていません");
+            Debug.LogError("Textパーツが参照されていません");
         }
     }
 }

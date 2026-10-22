@@ -10,16 +10,19 @@ public class UIManager : MonoBehaviour
     public BannerView BannerView;
 
     [Header("MainView")]
+    public VisibilityController MainView;
     public VisibilityController Timeline;
     public VisibilityController Overlay;
+    public VisibilityController BottomLayoutGroup;
 
     // インスペクターから各パネルを登録
-    [Header("Sidebar")]
-    public VisibilityController Sidebar;
-    public VisibilityController SidebarWrapper;
-    public GameObject Turn;
-    public GameObject Phase;
-    public GameObject ElapsedTime;
+    [Header("Text")]
+    public TextMeshProUGUI TurnText;
+    public TextMeshProUGUI PhaseText;
+    public TextMeshProUGUI RemainingTimeText;
+
+    [Header("BottomMenu")]
+    [SerializeField] private VisibilityController _menuBg;
     [SerializeField] private VisibilityController _initMenu;
     [SerializeField] private VisibilityController _preparationMenu;
     [SerializeField] private VisibilityController _commandMenu;
@@ -32,31 +35,30 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        SidebarWrapper.Show();
+        Timeline.Show();
+        BottomLayoutGroup.Show();
     }
 
     public void UpdateTurn(int turn)
     {
-        TextMeshProUGUI turnText = Turn.GetComponentInChildren<TextMeshProUGUI>();
-        turnText.text = $"Turn {turn}";
+        TurnText.text = $"Turn {turn}";
     }
 
     public void UpdatePhase(string phase)
     {
-        TextMeshProUGUI phaseText = Phase.GetComponentInChildren<TextMeshProUGUI>();
-        phaseText.text = phase;
+        PhaseText.text = phase;
     }
 
-    public void UpdateElapsedTime(string text)
+    public void UpdateRemainingTime(string text)
     {
-        TextMeshProUGUI elapsedTimeText = ElapsedTime.GetComponentInChildren<TextMeshProUGUI>();
-        elapsedTimeText.text = text;
+        RemainingTimeText.text = text;
     }
 
     public void SwitchMenu(Phase phase)
     {
-        _initMenu.SetVisible(phase == GameManager.Phase.INIT);
-        _preparationMenu.SetVisible(phase == GameManager.Phase.PREPARATION);
-        _commandMenu.SetVisible(phase == GameManager.Phase.COMMAND);
+        _menuBg.SetVisible(phase == Phase.INIT || phase == Phase.PREPARATION || phase == Phase.COMMAND);
+        _initMenu.SetVisible(phase == Phase.INIT);
+        _preparationMenu.SetVisible(phase == Phase.PREPARATION);
+        _commandMenu.SetVisible(phase == Phase.COMMAND);
     }
 }
