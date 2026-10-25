@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Squid
   m_EditorClassIdentifier: 
   prefab: {fileID: 7511180232019162148, guid: 818c5a1ba0d9810439f11299463f2294, type: 3}
-  callingPrefab: {fileID: 7977106843427714197, guid: f62d4831da787274cba79bba3a15b301,
+  callingPrefab: {fileID: 3018779110587228235, guid: 8d358435a5581b0418a9a889824ea231,
     type: 3}
   cost: 10
   callTime: 3
