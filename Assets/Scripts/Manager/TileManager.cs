@@ -91,6 +91,52 @@ public class TileManager : MonoBehaviour, IInitializable
     }
 
     /// <summary>
+    /// タイルを選択状態に設定する
+    /// </summary>
+    public void SetSelectedTile(Tile tile)
+    {
+        // 以前に選択されていたマスがあれば、ハイライトを解除するなどの処理
+        if (selectedTile)
+        {    
+            DeactivateSelectedFlag();
+        }
+        // 選択中タイルの更新
+        selectedTile = tile;
+        // 新しく選択されたマスをハイライトする
+        ActivateSelectedFlag();
+    }
+
+    /// <summary>
+    /// 選択中のマスを解除する
+    /// </summary>
+    public void ClearSelectedTile()
+    {
+        if (selectedTile == null) return;
+        // 以前に選択されていたマスがあれば、ハイライトを解除するなどの処理
+        DeactivateSelectedFlag();
+        selectedTile = null;
+    }
+
+    /// <summary>
+    /// 選択中のマスを解除する
+    /// </summary>
+    public void ActivateSelectedFlag()
+    {
+        if (selectedTile == null) return;
+        selectedTile.SetSelected(true);
+    }
+
+    /// <summary>
+    /// 選択中のマスを解除する
+    /// </summary>
+    public void DeactivateSelectedFlag()
+    {
+        if (selectedTile == null) return;
+        selectedTile.SetSelected(false);
+    }
+
+
+    /// <summary>
     /// ターゲットの中心となっているタイルの登録
     /// </summary>
     public void SetTargetTile(Tile tile)
@@ -139,69 +185,27 @@ public class TileManager : MonoBehaviour, IInitializable
     }
 
     /// <summary>
-    /// ターゲットとして登録されているタイル群のターゲットフラグを有効化する
+    /// ターゲットとして登録されているタイル群のターゲットフラグを有効化する（ターゲットタイルの変更はされない）
     /// </summary>
     public void ActivateTargetFlags()
     {
         foreach (Tile tile in targetTiles)
         {
             if (tile == null) continue;
-
             tile.SetTargeted(true);
         }
     } 
 
     /// <summary>
-    /// ターゲットとして登録されているタイル群のターゲットフラグを無効化する
+    /// ターゲットとして登録されているタイル群のターゲットフラグを無効化する（ターゲットタイルの変更はされない）
     /// </summary>
     public void DeactivateTargetFlags()
     {
         foreach (Tile tile in targetTiles)
         {
             if (tile == null) continue;
-            
             tile.SetTargeted(false);
         }
-    }
-
-    /// <summary>
-    /// タイルを選択状態に設定する
-    /// </summary>
-    public void SetSelectedTile(Tile tile)
-    {
-        // 以前に選択されていたマスがあれば、ハイライトを解除するなどの処理
-        if (selectedTile)
-        {    
-            selectedTile.SetSelected(false);
-        }
-        // 選択中タイルの更新
-        selectedTile = tile;
-        // 新しく選択されたマスをハイライトするなどの処理
-        selectedTile.SetSelected(true);
-    }
-
-    /// <summary>
-    /// 選択中のマスを解除する
-    /// </summary>
-    public void ClearSelectedTile()
-    {
-        // 以前に選択されていたマスがあれば、ハイライトを解除するなどの処理
-        selectedTile.SetSelected(false);
-        selectedTile = null;
-    }
-
-    /// <summary>
-    /// 選択中のマス上にあるユニットを消す
-    /// </summary>
-    public void ClearSelectedTileOnUnit()
-    {
-        if (selectedTile.IsExistUnit)
-        {
-            Debug.Log("削除するユニットが存在しません");
-            return;
-        }
-
-        UnitSpawnManager.Instance.DespawnUnit(selectedTile);
     }
 
     /// <summary>

@@ -13,7 +13,15 @@ public class TileStats : MonoBehaviour
             if (_isSelected == value) return;
             _isSelected = value;
 
-            if (_tileView != null) _tileView.RefreshVisual();
+            if (_tileView == null) return;
+            if (value == true)
+            {
+                _tileView.StartSelectedBlink();
+            }
+            else
+            {
+                _tileView.StopBlink();
+            }
         }
     }
     [SerializeField, Tooltip("ターゲット状態の有無")]
@@ -26,7 +34,15 @@ public class TileStats : MonoBehaviour
             if (_isTargeted == value) return;
             _isTargeted = value;
 
-            if (_tileView != null) _tileView.RefreshVisual();
+            if (_tileView == null) return;
+            if (value == true)
+            {
+                _tileView.StartTargetBlink();
+            }
+            else
+            {
+                _tileView.StopBlink();
+            }
         }
     }
     [Tooltip("タイルの陣地種別")]

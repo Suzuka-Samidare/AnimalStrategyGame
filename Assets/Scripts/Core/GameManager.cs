@@ -21,8 +21,8 @@ public class GameManager : MonoBehaviour, IInitializable
     public int Turn = 0;
     [Tooltip("フェーズタイマー")]
     private Timer _phaseTimer = new Timer();
-    [Tooltip("ターンの制限時間")]
-    private float _timeLimit = 60.0f;
+    [Tooltip("ターンの制限時間"), SerializeField]
+    private float _timeLimit;
 
     [Header("操作管理")]
     [Tooltip("操作可否")]
@@ -33,7 +33,6 @@ public class GameManager : MonoBehaviour, IInitializable
     public bool IsGameOver;
 
     // 準備フェーズ共通メッセージ
-    // private string initMessage => "Please place the remaining " + (_mapManager.maxHqCount - _mapManager.PlayerHqCount) + " headquarters units.";
     private string initMessage => "本部ユニットを残り" + (_mapManager.maxHqCount - _mapManager.PlayerHqCount) + "体配置してください。";
 
     [Header("Refs")]
@@ -44,6 +43,7 @@ public class GameManager : MonoBehaviour, IInitializable
     private InfomationController _infomationController;
     private PlayerManager _playerManager;
     private UnitDetailController _unitDetailController;
+    private TileManager _tileManager;
 
     [SerializeField]
     private List<Tile> CallingTiles;
@@ -101,6 +101,7 @@ public class GameManager : MonoBehaviour, IInitializable
         _infomationController = InfomationController.Instance;
         _playerManager = PlayerManager.Instance;
         _unitDetailController = UnitDetailController.Instance;
+        _tileManager = TileManager.Instance;
     }
 
     private void NotifyGameOver()
@@ -135,8 +136,8 @@ public class GameManager : MonoBehaviour, IInitializable
             _infomationController.Close();
             _dialogController.Open(
                 isConfirm: true,
-                title: "Confirm",
-                message: "Setup OK?",
+                title: "確認",
+                message: "この位置で戦いを始めますか？",
                 onConfirm: () =>
                 {
                     // アクションイベントの後片付け
@@ -157,9 +158,6 @@ public class GameManager : MonoBehaviour, IInitializable
 
     private void SetCallUnitTimersPaused(bool isPaused)
     {
-        // List<Tile> CallingTiles = _mapManager.GetCallingTiles(Owner.Player);
-        // CallingTiles.AddRange(_mapManager.GetCallingTiles(Owner.Enemy));
-
         List<Tile> CallingTiles = _mapManager.GetCallingTiles(Owner.Player);
         CallingTiles.AddRange(_mapManager.GetCallingTiles(Owner.Enemy));
 
@@ -182,6 +180,8 @@ public class GameManager : MonoBehaviour, IInitializable
         // 各種UIの非表示
         _uiManager.MainView.Hide();
         _unitDetailController.Close();
+        // オープニングイベント処理の実行
+        UniTask eventTask = openingEvents.Invoke();
         // 少し間を置く
         await UniTask.Delay(TimeSpan.FromSeconds(0.7f));
 
@@ -190,7 +190,6 @@ public class GameManager : MonoBehaviour, IInitializable
         // オープンイベント処理の実行
         if (openingEvents == null) throw new Exception("フェーズ処理が未登録です。");
         // イベント処理の実行完了と2秒のディレイを待つ
-        UniTask eventTask = openingEvents.Invoke();
         UniTask delayTask = UniTask.Delay(TimeSpan.FromSeconds(2.0f));
         await UniTask.WhenAll(eventTask, delayTask);
 
@@ -231,6 +230,8 @@ public class GameManager : MonoBehaviour, IInitializable
     {
         Func<UniTask> openingEvents = () =>
         {
+            // 選択中タイルの状態フラグを無効化し、タイル明滅をなくす
+            _tileManager.DeactivateSelectedFlag();
             // ターン数の加算とUI更新
             Turn++;
             _uiManager.UpdateTurn(Turn);
@@ -244,6 +245,8 @@ public class GameManager : MonoBehaviour, IInitializable
             _playerManager.StartRegen();
             // 呼出中ユニットのタイマーを再開
             SetCallUnitTimersPaused(false);
+            // 選択中フラグを有効化し、タイルを明滅させる。
+            _tileManager.ActivateSelectedFlag();
             return UniTask.CompletedTask;
         };
         await EnterPhase(Phase.PREPARATION, openingEvents, closedEvents);
@@ -261,6 +264,9 @@ public class GameManager : MonoBehaviour, IInitializable
             _phaseTimer.Reset();
             // タイムラインの集計
             _timelineManager.SortAndCombineTimelines();
+            // 各タイルの状態フラグを無効化し、タイル明滅をなくす
+            _tileManager.DeactivateSelectedFlag();
+            _tileManager.DeactivateTargetFlags();
             return UniTask.CompletedTask;
         };
         Func<UniTask> closedEvents = async () =>
@@ -272,11 +278,11 @@ public class GameManager : MonoBehaviour, IInitializable
                     EnterGameOver();
                     return;
                 };
-                _infomationController.Open("All attacks processed.");
+                _infomationController.Open("このターンにおける全て攻撃が完了しました。");
             }
             else
             {
-                _infomationController.Open("No pending attacks.");
+                _infomationController.Open("このターンで実行される攻撃はありませんでした。");
             }
 
             await UniTask.Delay(2000);
@@ -299,17 +305,13 @@ public class GameManager : MonoBehaviour, IInitializable
             _uiManager.Overlay.Show();
             // ダイアログ表示
             _dialogController.Open(
-                isConfirm: true,
+                isConfirm: false,
                 title: "Thank you for playing!",
                 message: "Retry?",
                 onConfirm: () =>
                 {
                     string currentSceneName = SceneManager.GetActiveScene().name;
                     SceneManager.LoadScene(currentSceneName);
-                },
-                onCancel: () =>
-                {
-                    Debug.Log("CANCEL");
                 }
             );
             return UniTask.CompletedTask;
