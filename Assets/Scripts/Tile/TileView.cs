@@ -1,6 +1,7 @@
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
-using Phase = GameManager.Phase;
 
 public class TileView : MonoBehaviour
 {
@@ -27,7 +28,6 @@ public class TileView : MonoBehaviour
     [SerializeField, Tooltip("現在の上面カラー")]
     private Color currentTopColor;
 
-
     [Header("Refs")]
     private Renderer objectRenderer;
     private MaterialPropertyBlock propBlock;
@@ -36,6 +36,9 @@ public class TileView : MonoBehaviour
     private static readonly int TopColorId = Shader.PropertyToID("_TopColor");
     private GameManager _gameManager;
     private TileStats _tileStats;
+
+    [Header("Token")]
+    private CancellationTokenSource cts;
 
     private void Awake()
     {
@@ -52,27 +55,6 @@ public class TileView : MonoBehaviour
         InitializeTileColor();
     }
 
-    private void Update()
-    {
-        if (_tileStats.isSelected && _gameManager.currentPhase == Phase.INIT)
-        {
-            Blink(blinkAllyColor);
-            return;
-        }
-
-        if (_tileStats.isSelected && _gameManager.currentPhase == Phase.PREPARATION)
-        {
-            Blink(blinkAllyColor);
-            return;
-        }
-
-        if (_tileStats.isTargeted && _gameManager.currentPhase == Phase.COMMAND)
-        {
-            Blink(blinkEnemyColor);
-            return;
-        }
-    }
-
     private void OnValidate()
     {
         if (!isAutoStripedColor) return;
@@ -81,6 +63,14 @@ public class TileView : MonoBehaviour
         stripedColor.a = 1f;
     }
 
+    private void OnDestroy()
+    {
+        CancelAndDisposeCts();
+    }
+
+    /// <summary>
+    /// 選択中のマスを解除する
+    /// </summary>
     private void InitializeTileColor()
     {
         if ((_tileStats.GridPos.x + _tileStats.GridPos.y) % 2 == 0)
@@ -98,50 +88,85 @@ public class TileView : MonoBehaviour
         ApplyColors();
     }
 
-    public void RefreshVisual()
+    /// <summary>
+    /// セレクト状態の点滅（プレイヤー側のタイルでのみ使用）
+    /// </summary>
+    public void StartSelectedBlink()
     {
-        if (_tileStats.isSelected) return;
+        Blink(blinkAllyColor).Forget();
+    }
 
-        // if (_tileStats.owner == TileStats.Owner.Enemy && !_tileStats.isRevealed)
-        // {
-        //     currentBaseColor = invisibleColor;
-        //     currentTopColor = invisibleColor;
-        // }
-        // else
-        // {
-        //     currentBaseColor = baseColor;
-        //     currentTopColor = baseColor;
-        // }
+    /// <summary>
+    /// ターゲット状態の点滅（敵側のタイルでのみ使用）
+    /// </summary>
+    public void StartTargetBlink()
+    {
+        Blink(blinkEnemyColor).Forget();
+    }
 
+    /// <summary>
+    /// 点滅表示の解除（共通）
+    /// </summary>
+    public void StopBlink()
+    {
+        CancelAndDisposeCts();
+        ResetColors();
+    }
+
+    /// <summary>
+    /// 元のタイル色に戻す
+    /// </summary>
+    private void ResetColors()
+    {
         currentBaseColor = baseColor;
         currentTopColor = baseColor;
         ApplyColors();
     }
 
-    private void Blink(Color blinkColor)
+    /// <summary>
+    /// 点滅表示処理
+    /// </summary>
+    private async UniTaskVoid Blink(Color blinkColor)
     {
-        float time = Mathf.PingPong(Time.time, 1.0f);
+        // キャンセルトークンの再準備
+        if (cts != null)
+        {
+            cts.Cancel();
+            cts.Dispose();
+        }
+        cts = new CancellationTokenSource();
+        var token = cts.Token;
 
-        // Color normalColor;
-        // if (_tileStats.owner == TileStats.Owner.Enemy && !_tileStats.isRevealed)
-        // {
-        //     normalColor = invisibleColor;
-        // }
-        // else
-        // {
-        //     normalColor = baseColor;
-        // }  
-
-        currentTopColor = Color.Lerp(baseColor, blinkColor, time);
-
-        ApplyColors();
+        try
+        {
+            while (true)
+            {
+                float time = Mathf.PingPong(Time.time, 1.0f);
+                currentTopColor = Color.Lerp(baseColor, blinkColor, time);
+                ApplyColors();
+                await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken: token);
+            }
+        }
+        catch (OperationCanceledException) {}
     }
 
+    /// <summary>
+    /// マテリアル色の更新
+    /// </summary>
     private void ApplyColors()
     {
         // objectRenderer.GetPropertyBlock(propBlock);
         propBlock.SetColor(BaseColorId, currentBaseColor);
         propBlock.SetColor(TopColorId, currentTopColor);
         objectRenderer.SetPropertyBlock(propBlock);
+    }
+
+    /// <summary>
+    /// キャンセルトークン処分処理
+    /// </summary>
+    private void CancelAndDisposeCts()
+    {
+        if (cts == null) return;
+        cts.Cancel();
     }
 }

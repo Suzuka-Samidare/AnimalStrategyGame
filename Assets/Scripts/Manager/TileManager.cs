@@ -139,7 +139,7 @@ public class TileManager : MonoBehaviour, IInitializable
     }
 
     /// <summary>
-    /// ターゲットとして登録されているタイル群のターゲットフラグを有効化する
+    /// ターゲットとして登録されているタイル群のターゲットフラグを有効化する（ターゲットタイルの変更はされない）
     /// </summary>
     public void ActivateTargetFlags()
     {
@@ -152,7 +152,7 @@ public class TileManager : MonoBehaviour, IInitializable
     } 
 
     /// <summary>
-    /// ターゲットとして登録されているタイル群のターゲットフラグを無効化する
+    /// ターゲットとして登録されているタイル群のターゲットフラグを無効化する（ターゲットタイルの変更はされない）
     /// </summary>
     public void DeactivateTargetFlags()
     {
