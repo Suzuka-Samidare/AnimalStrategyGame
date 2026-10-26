@@ -30,7 +30,7 @@ MonoBehaviour:
     unitName: Headquarter
     maxHp: 1
     InitPos: {x: 0, y: 0, z: 0}
-    FaceIcon: {fileID: 0}
+    FaceIcon: {fileID: 21300000, guid: 54b2b65d774eae54797ffcadd7d96a47, type: 3}
   combatProfile:
     CanDirectCombat: 0
     CanMove: 0
