@@ -56,8 +56,8 @@ public class DialogController : MonoBehaviour
         // 例: レイアウトコンポーネントの調整など...
         
         // 4. UIリスナーの登録（共通処理）
-        _okButton.onClick.RemoveAllListeners();
-        _cancelButton.onClick.RemoveAllListeners();
+        _okButton.onClick.RemoveListener(OnConfirmButtonClicked);
+        _cancelButton.onClick.RemoveListener(OnCancelButtonClicked);
         
         _okButton.onClick.AddListener(OnConfirmButtonClicked);
         _cancelButton.onClick.AddListener(OnCancelButtonClicked);

@@ -48,6 +48,7 @@ public class MapInputHandler : MonoBehaviour
             {
                 Tile tile = hitObject.GetComponent<Tile>();
                 HandleTileContact(tile);
+                SoundManager.Instance.PlaySE(SESoundID.TileSelect);
             }
 
             // Debug.Log("<color=blue>Ray判定あり & タイルではない</color>");

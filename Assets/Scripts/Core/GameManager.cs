@@ -151,8 +151,9 @@ public class GameManager : MonoBehaviour, IInitializable
                 onCancel: () =>
                 {
                     UnitSpawnManager.Instance.DespawnAllUnit();
-                    _infomationController.Open(initMessage);
                     _uiManager.Overlay.Hide();
+                    _uiManager.BottomLayoutGroup.Show();
+                    _infomationController.Open(initMessage);
                 }
             ); 
         }
@@ -238,7 +239,7 @@ public class GameManager : MonoBehaviour, IInitializable
             // INITフェーズ時に条件満たした際に実行する処理の登録
             _mapManager.OnHqCountChanged += ValidateAndShowDialog;
             // BGMの再生
-            _soundManager.PlayBgm();
+            _soundManager.PlayBGM();
             return UniTask.CompletedTask;
         };
         Func<UniTask> closedEvents = () =>
@@ -299,9 +300,10 @@ public class GameManager : MonoBehaviour, IInitializable
             _soundManager.RequestSectionChangeBgm(Phase.ACTION);
             return UniTask.CompletedTask;
         };
-        Func<UniTask> closedEvents = async () =>
+        Func<UniTask> closedEvents = () =>
         {
             ProcessActionPhase();
+            return UniTask.CompletedTask;
             // if (_timelineManager.TimelineCount > 0)
             // {
             //     await _timelineManager.ProcessTimeline();
