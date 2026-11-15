@@ -81,6 +81,7 @@ public class MapInputHandler : MonoBehaviour
             if (tile.Unit != null)
             {
                 _unitDetailController.Open(tile.Unit.Stats);
+                SoundManager.Instance.PlayVoiceChatter(tile.Unit.Stats.profile.unitType);
                 if (tile.Unit.Animation)
                 {
                     tile.Unit.Animation.PlayOnce(AnimationName.Clicked);

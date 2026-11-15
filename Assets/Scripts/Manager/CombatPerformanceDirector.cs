@@ -100,6 +100,7 @@ public class CombatPerformanceDirector : MonoBehaviour
             ParabolicMover parabolicMover = ink.GetComponent<ParabolicMover>();
 
             await CameraMovement.Instance.MoveToAsync(squid.transform.position);
+            SoundManager.Instance.PlayVoice(VoiceID.SquisAttack);
             await squid.Animation.PlayOnceAsync(AnimationName.Attack);
             await parabolicMover.AscendAsync(ascentPath);
             CameraMovement.Instance.Follow(
@@ -163,6 +164,7 @@ public class CombatPerformanceDirector : MonoBehaviour
         float delayBeforeLaunch = totalTimeToIntercept - herringSchoolDuration;
 
         await CameraMovement.Instance.MoveToAsync(squid.transform.position);
+        SoundManager.Instance.PlayVoice(VoiceID.SquisAttack);
         await squid.Animation.PlayOnceAsync(AnimationName.Attack);
 
         // 6. 二つの移動処理を並列で実行

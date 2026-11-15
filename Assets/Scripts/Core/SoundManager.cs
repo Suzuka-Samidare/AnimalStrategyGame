@@ -8,7 +8,16 @@ public enum SESoundID
     TileSelect,
     ButtonApprove,
     ButtonCancel,
-    Bomb,
+    SquidInkBomb,
+}
+
+public enum VoiceID
+{
+    ColobusChatter,
+    TaipanChatter,
+    SquisAttack,
+    SquidChatter,
+    HerringChatter,
 }
 
 public class SoundManager : MonoBehaviour
@@ -31,6 +40,13 @@ public class SoundManager : MonoBehaviour
         public AudioClip clip;
     }
 
+    [Serializable]
+    private struct VoiceInfo
+    {
+        public VoiceID id;
+        public AudioClip clip;
+    }
+
     [Header("BGM情報")]
     [SerializeField] private AudioClip _mainBgm;
     [SerializeField] private List<BgmLoopInfo> _loopInfoList = new List<BgmLoopInfo>(4);
@@ -49,9 +65,14 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private List<SEInfo> _seInfoList = new List<SEInfo>();
     private Dictionary<SESoundID, AudioClip> _seInfoDict;
 
+    [Header("ボイス情報")]
+    [SerializeField] private List<VoiceInfo> _voiceInfoList = new List<VoiceInfo>();
+    private Dictionary<VoiceID, AudioClip> _voiceInfoDict;
+
     [Header("Refs")]
     [SerializeField] private AudioSource _bgmAudioSource;
     [SerializeField] private AudioSource _seAudioSource;
+    [SerializeField] private AudioSource _voiceAudioSource;
 
     private void Awake()
     {
@@ -81,6 +102,12 @@ public class SoundManager : MonoBehaviour
         foreach (var info in _seInfoList)
         {
             _seInfoDict[info.id] = info.clip;
+        }
+        // ボイスリストから参照可能なボイス辞書を作成
+        _voiceInfoDict = new Dictionary<VoiceID, AudioClip>(_voiceInfoList.Count);
+        foreach (var info in _voiceInfoList)
+        {
+            _voiceInfoDict[info.id] = info.clip;
         }
     }
 
@@ -124,13 +151,6 @@ public class SoundManager : MonoBehaviour
         _bgmAudioSource.Stop();
     }
 
-    public void PlaySE(SESoundID id)
-    {
-        if (_seInfoDict.TryGetValue(id, out var clip))
-        Debug.Log("PLAY SE");
-        _seAudioSource.PlayOneShot(clip);
-    }
-
     /// <summary>
     /// Bgmセクションの変更をリクエストする
     /// </summary>
@@ -144,15 +164,6 @@ public class SoundManager : MonoBehaviour
 
         // すでに同じセクションへの変更要求、または初期化前なら無視
         if (_currentBgmLoopInfo.section == nextSection && _bgmAudioSource.isPlaying) return;
-
-        // // 初回再生時（まだ音が鳴っていない場合）は即座に開始
-        // if (!_bgmAudioSource.isPlaying)
-        // {
-        //     _currentBgmLoopInfo = nextInfo;
-        //     audioSource.Play();
-        //     audioSource.timeSamples = nextInfo.loopStartSample;
-        //     return;
-        // }
 
         int currentSample = _bgmAudioSource.timeSamples;
 
@@ -175,5 +186,39 @@ public class SoundManager : MonoBehaviour
         // 変更先情報とリクエストフラグをセット
         _pendingNextBgmLoopInfo = nextInfo;
         _isSectionChangeRequested = true;
+    }
+
+    /// <summary>
+    /// SEの再生（鳴らす音源を指定）
+    /// </summary>
+    public void PlaySE(SESoundID id)
+    {
+        if (_seInfoDict.TryGetValue(id, out var clip))
+        {
+            Debug.Log("PLAY SE");
+            _seAudioSource.PlayOneShot(clip);
+        }
+    }
+
+        /// <summary>
+    /// ボイスの再生（鳴らす音源を指定）
+    /// </summary>
+    public void PlayVoice(VoiceID id)
+    {
+        if (_voiceInfoDict.TryGetValue(id, out var clip))
+        {
+            Debug.Log("PLAY Voice");
+            _seAudioSource.PlayOneShot(clip);
+        }
+    }
+
+    /// <summary>
+    /// 動物の待機ボイスの再生
+    /// </summary>
+    public void PlayVoiceChatter(UnitType unitType)
+    {
+        if (unitType == UnitType.Colobus) PlayVoice(VoiceID.ColobusChatter);
+        if (unitType == UnitType.Taipan) PlayVoice(VoiceID.TaipanChatter);
+        if (unitType == UnitType.Squid) PlayVoice(VoiceID.SquidChatter);
     }
 }
