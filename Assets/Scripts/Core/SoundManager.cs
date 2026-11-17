@@ -15,7 +15,7 @@ public enum VoiceID
 {
     ColobusChatter,
     TaipanChatter,
-    SquisAttack,
+    SquidAttack,
     SquidChatter,
     HerringChatter,
 }
@@ -220,5 +220,6 @@ public class SoundManager : MonoBehaviour
         if (unitType == UnitType.Colobus) PlayVoice(VoiceID.ColobusChatter);
         if (unitType == UnitType.Taipan) PlayVoice(VoiceID.TaipanChatter);
         if (unitType == UnitType.Squid) PlayVoice(VoiceID.SquidChatter);
+        if (unitType == UnitType.Herring) PlayVoice(VoiceID.HerringChatter);
     }
 }
