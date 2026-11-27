@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using UnityEngine;
 using Guid = System.Guid;
 
@@ -8,6 +7,7 @@ public abstract class UnitStatsBase : MonoBehaviour
     [Tooltip("UID")] private string _uuid;
     [Tooltip("基本ステータス")] public UnitProfile profile;
     [Tooltip("直接交戦ステータス")] public CombatProfile combatProfile;
+    [Tooltip("ボイス設定")] public Sounds sounds;
     [Tooltip("オーナー情報")] public Owner Owner;
     
 
@@ -63,6 +63,7 @@ public abstract class UnitStatsBase : MonoBehaviour
         // 基本ステータスの初期化
         this.profile = unitData.profile;
         this.combatProfile = unitData.combatProfile;
+        this.sounds = unitData.sounds;
         hp = profile.maxHp;
         IsFaint = false;
     }

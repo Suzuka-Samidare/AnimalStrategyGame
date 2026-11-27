@@ -9,6 +9,8 @@ public enum SESoundID
     ButtonApprove,
     ButtonCancel,
     SquidInkBomb,
+    Attack1,
+    Attack2,
 }
 
 public enum VoiceID

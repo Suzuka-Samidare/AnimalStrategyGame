@@ -79,6 +79,7 @@ public static class CombatExtensions
 
             float power = GetProfilePower(self.Stats);
             // 攻撃
+            SoundManager.Instance.PlaySE(self.Stats.sounds.AttackSE);
             await self.UnitAnimation.PlayOnceAsync(AnimationName.Attack);
             nearestEnemy.Stats.ApplyDamage(power);
             ParticleManager.Instance.PerformFireExplosionAsync(nearestEnemyPosition + Vector3.up, Quaternion.identity).Forget();
