@@ -36,6 +36,9 @@ MonoBehaviour:
     CanMove: 1
     EngagementRange: 1.5
     RecastTime: 1.5
+  sounds:
+    <ChatterVoice>k__BackingField: 0
+    <AttackSE>k__BackingField: 4
   attackProfile:
     power: 8
     energy: 20

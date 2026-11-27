@@ -44,6 +44,7 @@ public class GameManager : MonoBehaviour, IInitializable
     private PlayerManager _playerManager;
     private UnitDetailController _unitDetailController;
     private TileManager _tileManager;
+    private SoundManager _soundManager;
 
     [SerializeField]
     private List<Tile> CallingTiles;
@@ -102,6 +103,7 @@ public class GameManager : MonoBehaviour, IInitializable
         _playerManager = PlayerManager.Instance;
         _unitDetailController = UnitDetailController.Instance;
         _tileManager = TileManager.Instance;
+        _soundManager = SoundManager.Instance;
     }
 
     private void NotifyGameOver()
@@ -149,8 +151,9 @@ public class GameManager : MonoBehaviour, IInitializable
                 onCancel: () =>
                 {
                     UnitSpawnManager.Instance.DespawnAllUnit();
-                    _infomationController.Open(initMessage);
                     _uiManager.Overlay.Hide();
+                    _uiManager.BottomLayoutGroup.Show();
+                    _infomationController.Open(initMessage);
                 }
             ); 
         }
@@ -170,6 +173,28 @@ public class GameManager : MonoBehaviour, IInitializable
             if (isPaused) callUnit.Controller.PauseTimer();
             else callUnit.Controller.ResumeTimer();
         }
+    }
+
+    private async void ProcessActionPhase()
+    {
+        if (_timelineManager.TimelineCount > 0)
+        {
+            await _timelineManager.ProcessTimeline();
+            if (IsGameOver) {
+                EnterGameOver();
+                return;
+            };
+            _infomationController.Open("このターンにおける全て攻撃が完了しました。");
+        }
+        else
+        {
+            _infomationController.Open("このターンで実行される攻撃はありませんでした。");
+        }
+
+        await UniTask.Delay(2000);
+        _infomationController.Close();
+        CameraMovement.Instance.MoveTo(TileManager.Instance.PlayerMapLastViewedPosition);
+        EnterPreparationPhase();
     }
 
     private async UniTask EnterPhase(Phase phase, Func<UniTask> openingEvents, Func<UniTask> closedEvents)
@@ -213,6 +238,8 @@ public class GameManager : MonoBehaviour, IInitializable
         {
             // INITフェーズ時に条件満たした際に実行する処理の登録
             _mapManager.OnHqCountChanged += ValidateAndShowDialog;
+            // BGMの再生
+            _soundManager.PlayBGM();
             return UniTask.CompletedTask;
         };
         Func<UniTask> closedEvents = () =>
@@ -235,6 +262,8 @@ public class GameManager : MonoBehaviour, IInitializable
             // ターン数の加算とUI更新
             Turn++;
             _uiManager.UpdateTurn(Turn);
+            // BGMのセクション変更をリクエスト
+            _soundManager.RequestSectionChangeBgm(Phase.PREPARATION);
             return UniTask.CompletedTask;
         };
         Func<UniTask> closedEvents = () =>
@@ -267,28 +296,32 @@ public class GameManager : MonoBehaviour, IInitializable
             // 各タイルの状態フラグを無効化し、タイル明滅をなくす
             _tileManager.DeactivateSelectedFlag();
             _tileManager.DeactivateTargetFlags();
+            // BGMのセクション変更をリクエスト
+            _soundManager.RequestSectionChangeBgm(Phase.ACTION);
             return UniTask.CompletedTask;
         };
-        Func<UniTask> closedEvents = async () =>
+        Func<UniTask> closedEvents = () =>
         {
-            if (_timelineManager.TimelineCount > 0)
-            {
-                await _timelineManager.ProcessTimeline();
-                if (IsGameOver) {
-                    EnterGameOver();
-                    return;
-                };
-                _infomationController.Open("このターンにおける全て攻撃が完了しました。");
-            }
-            else
-            {
-                _infomationController.Open("このターンで実行される攻撃はありませんでした。");
-            }
+            ProcessActionPhase();
+            return UniTask.CompletedTask;
+            // if (_timelineManager.TimelineCount > 0)
+            // {
+            //     await _timelineManager.ProcessTimeline();
+            //     if (IsGameOver) {
+            //         EnterGameOver();
+            //         return;
+            //     };
+            //     _infomationController.Open("このターンにおける全て攻撃が完了しました。");
+            // }
+            // else
+            // {
+            //     _infomationController.Open("このターンで実行される攻撃はありませんでした。");
+            // }
 
-            await UniTask.Delay(2000);
-            _infomationController.Close();
-            CameraMovement.Instance.MoveTo(TileManager.Instance.PlayerMapLastViewedPosition);
-            EnterPreparationPhase();
+            // await UniTask.Delay(2000);
+            // _infomationController.Close();
+            // CameraMovement.Instance.MoveTo(TileManager.Instance.PlayerMapLastViewedPosition);
+            // EnterPreparationPhase();
         };
         await EnterPhase(Phase.ACTION, openingEvents, closedEvents);
     }
@@ -297,6 +330,8 @@ public class GameManager : MonoBehaviour, IInitializable
     {
         Func<UniTask> openingEvents = () =>
         {
+            // BGMのセクション変更をリクエスト
+            _soundManager.RequestSectionChangeBgm(Phase.GAMEOVER);
             return UniTask.CompletedTask;
         };
         Func<UniTask> closedEvents = () =>

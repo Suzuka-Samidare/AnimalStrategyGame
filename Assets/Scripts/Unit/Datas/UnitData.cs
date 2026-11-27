@@ -52,6 +52,13 @@ public struct CombatProfile
     [Tooltip("リキャスト時間（second）")] public float RecastTime;
 }
 
+[Serializable]
+public struct Sounds
+{
+    [field: SerializeField, Tooltip("選択ボイス")] public VoiceID ChatterVoice { get; private set; }
+    [field: SerializeField, Tooltip("攻撃ボイス")] public SESoundID AttackSE { get; private set; }
+}
+
 
 // 右クリックメニューからアセットを作成するための属性
 [CreateAssetMenu(fileName = "UnitData", menuName = "ScriptableObjects/UnitData")]
@@ -69,6 +76,7 @@ public class UnitData : ScriptableObject
     [Tooltip("基本ステータス")] public UnitProfile profile;
     [Tooltip("呼出中ステータス")] public UnitProfile callingProfile;
     [Tooltip("直接交戦ステータス")] public CombatProfile combatProfile;
+    [Tooltip("ボイス設定")] public Sounds sounds;
 
     protected virtual void Reset()
     {

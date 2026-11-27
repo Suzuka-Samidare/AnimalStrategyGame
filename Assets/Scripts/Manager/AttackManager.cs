@@ -393,6 +393,7 @@ public class AttackManager : MonoBehaviour
     private async UniTask AttackHitEffects(TimelineCommand command)
     {
         List<UniTask> animationTasks = new List<UniTask>();
+        SoundManager.Instance.PlaySE(SESoundID.SquidInkBomb);
         foreach (Tile tile in command.AffectedTiles)
         {
             // 爆発のパーティクルを生成
